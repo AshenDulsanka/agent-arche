@@ -2,7 +2,7 @@
 name: UX Reviewer
 description: Reviews Svelte components and pages for UX quality, accessibility, interaction design, and usability — never modifies code.
 model: Claude Sonnet 4.6 (copilot)
-tools: [read, search]
+tools: [read, search, 'io.github.upstash/context7/*']
 user-invocable: false
 ---
 

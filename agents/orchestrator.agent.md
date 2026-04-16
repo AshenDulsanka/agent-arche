@@ -2,7 +2,7 @@
 name: Orchestrator
 description: Orchestrates complex tasks by breaking requests into phases and delegating to specialist subagents — never writes code or edits files directly.
 model: Claude Sonnet 4.6 (copilot)
-tools: [read, agent, vscode/memory, todo]
+tools: [vscode/memory, read, agent, 'io.github.upstash/context7/*', todo]
 user-invocable: true
 ---
 

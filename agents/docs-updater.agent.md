@@ -2,7 +2,7 @@
 name: Docs Updater
 description: Updates and creates project documentation — covers CHANGELOG, README, and the docs/ folder; never touches TypeScript, Svelte, or configuration source files.
 model: Claude Sonnet 4.6 (copilot)
-tools: [read, edit, search]
+tools: [read, edit, search, 'io.github.upstash/context7/*']
 user-invocable: false
 ---
 

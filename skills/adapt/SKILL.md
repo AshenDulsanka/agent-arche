@@ -1,6 +1,6 @@
 ---
 name: adapt
-description: "Adapts a UI for a different context, device, or format — mobile, tablet, desktop, print, or email. Use when the interface works in one context but needs to work well in another."
+description: Adapts a UI for a different context, device, or format — mobile, tablet, desktop, print, or email. Use when the interface works in one context but needs to work well in another.
 argument-hint: "[target context: mobile | tablet | desktop | print | email]"
 user-invocable: true
 ---

@@ -14,7 +14,7 @@ You are responsible for the user experience. Focus on usability, accessibility, 
 
 ## ALWAYS Use the Frontend Design Skill
 
-**Mandatory:** Before any UI work, read the `frontend-design` skill at `.github/skills/frontend-design/SKILL.md`. This skill contains the baseline principles, patterns, and anti-patterns for production-grade interfaces.
+**Mandatory:** Before any UI work, read the `design` skill at `.github/skills/design/SKILL.md`. This skill contains the baseline principles, patterns, and anti-patterns for production-grade interfaces.
 
 ## Design Skills — When to Load Which
 
@@ -27,35 +27,35 @@ The full design skill library is at `.github/skills/`. Load based on the task:
 ### Fixing or improving existing UI
 | Symptom | Skill to load |
 |---------|--------------|
-| Full quality review needed | `audit` (scores across 5 dimensions) |
+| Full quality review needed | `ui-audit` (scores across 5 dimensions) |
 | Expert design critique requested | `critique` (heuristics /40 + cognitive load + personas) |
 | Cramped / cluttered / unbalanced layout | `layout` |
 | Text feels off, hierarchy unclear | `typeset` |
-| Generic, flat, "cheap" look | `taste-skill` or `soft-skill` |
+| Generic, flat, "cheap" look | `taste` or `soft` |
 | Motion missing or feels wrong | `animate` |
 | Final pre-ship quality pass | `polish` |
 | Adapting for mobile / print / email | `adapt` |
-| Slow load times, janky animations | `optimize` |
+| Slow load times, janky animations | `ui-optimize` |
 
 ### Aesthetic direction
 | Goal | Skill |
 |------|-------|
-| Awwwards-tier, premium feel | `soft-skill` |
-| Swiss industrial, raw, mechanical | `brutalist-skill` |
-| Warm, editorial, minimal | `minimalist-skill` |
-| Bold redesign of something broken | `redesign-skill` |
-| Specific aesthetic dials (density, warmth, motion) | `taste-skill` |
-| Complete DESIGN.md for a project | `stitch-skill` |
+| Awwwards-tier, premium feel | `soft` |
+| Swiss industrial, raw, mechanical | `brutalist` |
+| Warm, editorial, minimal | `minimalist` |
+| Bold redesign of something broken | `redesign` |
+| Specific aesthetic dials (density, warmth, motion) | `taste` |
+| Complete DESIGN.md for a project | `stitch` |
 
 ### Utilities
-- **`output-skill`** — Load when generating large components to prevent truncation.
-- **`frontend-design`** — Baseline always loaded; Linear/Raycast/Stripe aesthetic standard.
+- **`output`** — Load when generating large components to prevent truncation.
+- **`design`** — Baseline always loaded; Linear/Raycast/Stripe aesthetic standard.
 
 design thinking and aesthetic direction for this project.
 
 ## Before Writing Anything
 
-1. **Read the frontend-design skill**: Check `.github/skills/frontend-design/SKILL.md` to understand the aesthetic direction and anti-Codex UI patterns.
+1. **Read the design skill**: Check `.github/skills/design/SKILL.md` to understand the aesthetic direction and anti-Codex UI patterns.
 2. **Check existing pages and components**: Read the most similar existing page (`+page.svelte`) to understand the layout patterns, spacing rhythm, and component structure already in use.
 3. **Use context7 for Svelte and Tailwind docs**: Run `context7/*` to get current Svelte 5 rune syntax and Tailwind v4 utility class documentation. APIs change — never assume.
 4. **Check `src/app.css`**: Understand the global base styles and any custom Tailwind theme tokens before adding new styles.
@@ -117,7 +117,7 @@ $effect(() => { /* side effect when state changes */ });
 - Do not use `export let` for props — use `$props()`.
 - Do not use `on:event` directive syntax — use `onevent` handlers.
 - Do not install UI libraries (Radix, shadcn, MUI, etc.) without explicit instruction.
-- **Do not violate the frontend-design skill**: No Codex UI patterns (soft gradients, floating panels, eyebrow labels, oversized rounded corners, dramatic shadows, etc.). Follow the "Keep It Normal" standard from the skill.
+- **Do not violate the design skill**: No Codex UI patterns (soft gradients, floating panels, eyebrow labels, oversized rounded corners, dramatic shadows, etc.). Follow the "Keep It Normal" standard from the skill.
 
 ## Output Format
 

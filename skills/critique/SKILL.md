@@ -1,7 +1,7 @@
 ---
 name: critique
-description: "Provides a deep dual-assessment design critique combining AI design review with manual pattern analysis. Use when the user wants expert design feedback, heuristic evaluation, or a thorough UX critique."
-argument-hint: "[target]"
+description: Provides a deep dual-assessment design critique combining AI design review with manual pattern analysis. Use when the user wants expert design feedback, heuristic evaluation, or a thorough UX critique.
+argument-hint: "[component, page, or screenshot to critique]"
 user-invocable: true
 ---
 

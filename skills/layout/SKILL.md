@@ -1,7 +1,7 @@
 ---
 name: layout
-description: "Diagnoses and fixes spatial problems — spacing, visual hierarchy, grid structure, and rhythmic flow. Use when the interface feels cramped, cluttered, unbalanced, or lacks visual hierarchy."
-argument-hint: "[target]"
+description: Diagnoses and fixes spatial problems — spacing, visual hierarchy, grid structure, and rhythmic flow. Use when the interface feels cramped, cluttered, unbalanced, or lacks visual hierarchy.
+argument-hint: "[component or page with layout issues]"
 user-invocable: true
 ---
 

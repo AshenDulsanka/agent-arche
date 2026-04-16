@@ -31,7 +31,7 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 | New UI feature | `shape` (brief first) → `impeccable` (build) |
 | UI quality review | `audit`, `critique` |
 | Visual / layout issues | `layout`, `typeset`, `polish`, `animate` |
-| Aesthetic direction | `taste-skill`, `soft-skill`, `minimalist-skill`, `brutalist-skill` |
+| Aesthetic direction | `taste`, `soft`, `minimalist`, `brutalist` |
 | Code quality | `coding-standards` |
 | Security | `security-auditor` agent handles OWASP Top 10 |
 | Architecture docs | `architecture` |

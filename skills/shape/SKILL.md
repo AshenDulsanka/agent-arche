@@ -1,6 +1,6 @@
 ---
 name: shape
-description: "Runs a structured discovery interview and produces a design brief before any code is written. Use when about to build something new — a component, page, feature, or UI system — to align on design intent before implementation."
+description: Runs a structured discovery interview and produces a design brief before any code is written. Use when about to build something new — a component, page, feature, or UI system — to align on design intent before implementation.
 argument-hint: "[what you're building]"
 user-invocable: true
 ---

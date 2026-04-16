@@ -43,7 +43,7 @@ feat/12-user-profile-page
 fix/5-auth-token-refresh
 fix/missing-error-boundary
 docs/architecture-overview
-chore/upgrade-sveltekit-2
+chore/upgrade-dependencies
 refactor/api-error-handling
 ```
 

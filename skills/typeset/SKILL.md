@@ -1,7 +1,7 @@
 ---
 name: typeset
-description: "Diagnoses and fixes typography — font choices, type hierarchy, readability, scale, and consistency. Use when text feels hard to read, the hierarchy is unclear, or fonts feel generic or clashing."
-argument-hint: "[target]"
+description: Diagnoses and fixes typography — font choices, type hierarchy, readability, scale, and consistency. Use when text feels hard to read, the hierarchy is unclear, or fonts feel generic or clashing.
+argument-hint: "[component or page with typography issues]"
 user-invocable: true
 ---
 

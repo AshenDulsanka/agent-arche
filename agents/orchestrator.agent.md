@@ -29,10 +29,13 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 | Task category | Skills to load |
 |---------------|---------------|
 | New UI feature | `shape` (brief first) → `impeccable` (build) |
-| UI quality review | `audit`, `critique` |
+| UI quality review | `ui-audit`, `critique` |
 | Visual / layout issues | `layout`, `typeset`, `polish`, `animate` |
+| UI performance | `ui-optimize` |
 | Aesthetic direction | `taste`, `soft`, `minimalist`, `brutalist` |
 | Code quality | `coding-standards` |
+| SEO | `seo` |
+| API design / routes | `api-design` |
 | Security | `security-auditor` agent handles OWASP Top 10 |
 | Architecture docs | `architecture` |
 | Git conventions | `commit-conventions`, `branch-conventions` |
@@ -52,6 +55,31 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 | **Docs-updater** | Update CHANGELOG, README, and docs/ | After implementation is verified |
 
 ## Execution Model
+
+### Step 0: Announce Pipeline (MANDATORY — always first output)
+
+Before any other output, print this block so the user can verify the plan before execution begins:
+
+---
+**Pipeline**
+Type: [request type]
+Pipeline: [full agent sequence — use → for sequential, + for parallel]
+Phases: [number]
+
+*Executing now. Reply "stop" to change the pipeline.*
+
+---
+
+**Examples by type:**
+
+- New feature → `Researcher → Planner → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater` (5 phases)
+- Bug fix → `Planner → Coder → Code-reviewer → Tester → Docs-updater` (4 phases)
+- UI change → `Designer → Code-reviewer + UX-reviewer → Docs-updater` (3 phases)
+- Security audit → `Security-auditor` (1 phase)
+
+Output this block for **every request**, including single-agent dispatches.
+
+---
 
 ### Step 1: Classify the Request
 
@@ -107,7 +135,13 @@ Present your execution plan:
 For each phase:
 1. **Parallel tasks**: spawn multiple subagents simultaneously
 2. **Wait** for all phase tasks to complete before advancing
-3. **Gate on quality**: if Code-reviewer or Security-auditor flags Critical or High issues, pause and report to the user before proceeding to tests/docs
+3. **Quality gate**: after Code-reviewer, Security-auditor, and UX-reviewer complete:
+   - If all pass → advance to Tester + Docs-updater
+   - If **Critical or High** issues found → **do not advance** — trigger fix loop:
+     - Code quality / security issues → send back to **Coder** with exact file paths and issue descriptions
+     - UX / accessibility issues → send back to **Designer** with exact component paths and issue descriptions
+     - After fixes, **re-run only the affected quality gate agents** (not the full pipeline)
+     - **Maximum 2 fix cycles** — if issues persist after 2 cycles, pause and report to user before proceeding
 
 ### Step 5: Report
 

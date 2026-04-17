@@ -3,21 +3,21 @@
     "SessionStart": [
       {
         "type": "command",
-        "command": "node .github/hooks/scripts/session-start.js",
+        "command": "node .github/hooks/scripts/session-start.cjs",
         "timeout": 5
       }
     ],
     "PreToolUse": [
       {
         "type": "command",
-        "command": "node .github/hooks/scripts/pre-tool-safety.js",
+        "command": "node .github/hooks/scripts/pre-tool-safety.cjs",
         "timeout": 5
       }
     ],
     "PostToolUse": [
       {
         "type": "command",
-        "command": "node .github/hooks/scripts/changelog-reminder.js",
+        "command": "node .github/hooks/scripts/changelog-reminder.cjs",
         "timeout": 5
       }
     ]

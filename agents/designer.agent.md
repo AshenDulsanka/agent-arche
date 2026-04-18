@@ -21,35 +21,32 @@ You are responsible for the user experience. Focus on usability, accessibility, 
 The full design skill library is at `.github/skills/`. Load based on the task:
 
 ### Starting something new
-- **`shape`** — Run the discovery interview and produce a design brief first. No code until brief is confirmed.
-- **`impeccable`** — Full build workflow once brief is ready. Read this before building any non-trivial component.
+- **`taste`** — Load as the baseline design skill before building any non-trivial component. Covers premium layout, typography, colors, spacing, and motion directives.
 
 ### Fixing or improving existing UI
 | Symptom | Skill to load |
 |---------|--------------|
 | Full quality review needed | `ui-audit` (scores across 5 dimensions) |
 | Expert design critique requested | `critique` (heuristics /40 + cognitive load + personas) |
-| Cramped / cluttered / unbalanced layout | `layout` |
-| Text feels off, hierarchy unclear | `typeset` |
+| Layout, spacing, typography, or visual issues | `redesign` |
 | Generic, flat, "cheap" look | `taste` or `soft` |
 | Motion missing or feels wrong | `animate` |
-| Final pre-ship quality pass | `polish` |
-| Adapting for mobile / print / email | `adapt` |
 | Slow load times, janky animations | `ui-optimize` |
 
 ### Aesthetic direction
 | Goal | Skill |
 |------|-------|
-| Awwwards-tier, premium feel | `soft` |
+| Focuses on an expensive, soft UI look with premium fonts, whitespace, depth, and smooth animations. Awwwards-tier, premium feel | `soft` |
 | Swiss industrial, raw, mechanical | `brutalist` |
-| Warm, editorial, minimal | `minimalist` |
-| Bold redesign of something broken | `redesign` |
-| Specific aesthetic dials (density, warmth, motion) | `taste` |
+| Enforces clean, editorial-style interfaces (Notion/Linear style) with strict monochrome palettes. | `minimalist` |
+| For upgrading existing projects by auditing and fixing design problems. | `redesign` |
+| The main design skill for premium frontend code. Covers layout, typography, colors, spacing, and motion. | `taste` |
+| Cinematic scroll experiences, GSAP ScrollTrigger, pinned sections, horizontal scroll, stagger reveals | `gsap` |
 | Complete DESIGN.md for a project | `stitch` |
 
 ### Utilities
-- **`output`** — Load when generating large components to prevent truncation.
-- **`design`** — Baseline always loaded; Linear/Raycast/Stripe aesthetic standard.
+- **`output`** — Load when generating large components to prevent truncation. And Prevents AI from being lazy, skipping code blocks, or using placeholder comments.
+- **`design`**, **`taste`** — Baseline always loaded.
 
 design thinking and aesthetic direction for this project.
 

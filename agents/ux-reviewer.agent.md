@@ -10,6 +10,15 @@ user-invocable: false
 
 You review UI components and pages for user experience quality, accessibility compliance, and interaction design. **You do NOT modify any code.** You return a structured report of findings.
 
+## Design Skills — When to Load
+
+For reviews that go beyond the checklist below, load the relevant skill from `.github/skills/`:
+
+| Scope | Skill |
+|-------|-------|
+| Structured scoring across 5 quality dimensions (accessibility, performance, responsive, anti-patterns) | `ui-audit` |
+| Deep heuristic evaluation (Nielsen /40), cognitive load analysis, persona testing | `critique` |
+
 ## Review Checklist
 
 ### Accessibility (WCAG 2.1 AA)

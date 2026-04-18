@@ -28,9 +28,10 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 
 | Task category | Skills to load |
 |---------------|---------------|
-| New UI feature | `shape` (brief first) → `impeccable` (build) |
+| New UI feature | `taste` (baseline) |
 | UI quality review | `ui-audit`, `critique` |
-| Visual / layout issues | `layout`, `typeset`, `polish`, `animate` |
+| Visual / layout / typography issues | `redesign`, `animate` |
+| Cinematic scroll / GSAP motion | `gsap` |
 | UI performance | `ui-optimize` |
 | Aesthetic direction | `taste`, `soft`, `minimalist`, `brutalist` |
 | Code quality | `coding-standards` |
@@ -38,7 +39,7 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 | API design / routes | `api-design` |
 | Security | `security-auditor` agent handles OWASP Top 10 |
 | Architecture docs | `architecture` |
-| Git conventions | `commit-conventions`, `branch-conventions` |
+| Git / PR conventions | `commit-conventions`, `branch-conventions`, `pr-standards` |
 
 ## Agent Roster
 

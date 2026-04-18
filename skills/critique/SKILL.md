@@ -9,7 +9,7 @@ Deliver expert-level design critique through structured heuristic evaluation and
 
 ## Mandatory Preparation
 
-1. Read `.github/skills/impeccable/SKILL.md` to load the full design quality reference system.
+1. Read `.github/skills/design/SKILL.md` to load the full design quality reference system and anti-pattern catalogue.
 2. Read `critique/reference/heuristics-scoring.md` for the 10-heuristic scoring rubric.
 3. Read `critique/reference/cognitive-load.md` for cognitive load analysis framework.
 4. Read `critique/reference/personas.md` for persona-based testing.

@@ -49,7 +49,7 @@ One paragraph describing the change and why it's needed.
 ## Implementation Steps
 1. [Step title]
    - What: description
-   - Files: src/path/to/file.ts, src/path/to/component.svelte
+   - Files: src/path/to/file.ts, src/path/to/Component.tsx
    - Notes: any constraint, gotcha, or pattern to follow
 
 2. [Step title]

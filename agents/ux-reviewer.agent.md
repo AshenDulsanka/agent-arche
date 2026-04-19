@@ -1,6 +1,6 @@
 ---
 name: UX Reviewer
-description: Reviews Svelte components and pages for UX quality, accessibility, interaction design, and usability — never modifies code.
+description: Reviews UI components and pages for UX quality, accessibility, interaction design, and usability — never modifies code.
 model: Claude Sonnet 4.6 (copilot)
 tools: [read, search, 'io.github.upstash/context7/*']
 user-invocable: false
@@ -75,7 +75,7 @@ For each finding:
 
 **Location:** Component or file name + line range if applicable
 **Issue:** What the problem is and why it matters to users
-**Recommendation:** Specific change to make (HTML attribute, element change, or Tailwind class)
+**Recommendation:** Specific change to make (HTML attribute, element change, styling update, or component adjustment)
 ```
 
 Severity levels: **Critical** (blocks key user actions or fails WCAG AA) | **High** (significant usability problem) | **Medium** (minor friction) | **Low** (polish)

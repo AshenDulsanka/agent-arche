@@ -1,6 +1,6 @@
 ---
 name: Code Reviewer
-description: Reviews source code against coding-standards/SKILL.md and returns a structured critical/major/minor issue report — never modifies code.
+description: Reviews source code against project coding standards and returns a structured critical/major/minor issue report — never modifies code.
 model: Claude Sonnet 4.6 (copilot)
 tools: [vscode, read, search, 'io.github.upstash/context7/*']
 user-invocable: false
@@ -16,14 +16,11 @@ The authoritative source for all rules is `.github/skills/coding-standards/SKILL
 
 ## Checklist
 
-### Svelte 5 Runes (Critical)
+### Framework Syntax (Critical)
 
-- [ ] No `$:` reactive declarations — use `$derived` or `$effect`
-- [ ] No `on:event` directives — use `onclick`, `oninput`, `onkeydown`, etc.
-- [ ] No `let:` slot bindings — use snippet syntax
-- [ ] Props use `$props()`: `const { name }: { name: string } = $props()`
-- [ ] No `export let` for component props
-- [ ] `$effect` is not used for values that should be `$derived`
+- [ ] Code uses the correct syntax for the project's framework version (check `.github/copilot-instructions.md`)
+- [ ] No deprecated or old-version syntax patterns
+- [ ] Component API (props, events, slots/children) matches the framework's current conventions
 
 ### TypeScript Strict (High)
 
@@ -35,31 +32,26 @@ The authoritative source for all rules is `.github/skills/coding-standards/SKILL
 
 ### Naming Conventions (Medium)
 
-- [ ] `.svelte` components: PascalCase (`NoteEditor.svelte`, `FloatingPill.svelte`)
-- [ ] `.ts` utilities: kebab-case (`sync-messages.ts`)
+- [ ] Component files: PascalCase (e.g., `UserCard.tsx`, `NoteEditor.vue`, `FloatingPill.svelte`)
+- [ ] Utility/module files: kebab-case (e.g., `sync-messages.ts`, `format-date.ts`)
 - [ ] Variables and functions: camelCase
 - [ ] Module-level constants: UPPER_SNAKE_CASE
-- [ ] TypeScript interfaces: PascalCase (`Note`, `Workspace`)
-
-### Svelte File Structure (Medium)
-
-- [ ] Order is `<script lang="ts">` → markup → `<style>`
-- [ ] No `<script>` block after the markup
+- [ ] TypeScript interfaces and types: PascalCase
 
 ### Import Ordering (Low)
 
 Each group separated by a blank line:
 1. External npm packages
-2. SvelteKit internals (`$app/navigation`, etc.)
-3. `$lib` aliases
+2. Framework internals (router, state management, etc.)
+3. Internal path aliases
 4. Relative imports
 
 ### Error Handling (High)
 
 - [ ] No empty `catch (_) {}` blocks
 - [ ] Every `catch` re-throws, logs, or returns a structured error
-- [ ] API route errors use `json({ error: string }, { status: N })`
-- [ ] SvelteKit load errors use `error(status, message)`
+- [ ] API route errors return appropriate HTTP status codes with a safe, structured error message
+- [ ] Framework-specific error utilities are used correctly (check project conventions)
 
 ### Function Quality (Medium)
 
@@ -69,10 +61,9 @@ Each group separated by a blank line:
 
 ### What Never to Do (Critical)
 
-- [ ] No React, Vue, Angular, or Radix UI imports
+- [ ] No hardcoded secret values, credentials, or environment-specific paths in source files
 - [ ] No `.js` files where `.ts` is appropriate
-- [ ] No hardcoded `NOTES_DATA_DIR` path strings
-- [ ] No `$:` or `on:event` Svelte 4 syntax
+- [ ] No framework syntax from the wrong version (check `.github/copilot-instructions.md` for versions)
 - [ ] No dead code, unused imports, or commented-out blocks
 
 ## Output Format

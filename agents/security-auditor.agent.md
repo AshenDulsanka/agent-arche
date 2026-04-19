@@ -54,7 +54,7 @@ Review only the files provided or referenced in the request.
 - Are session fixation attacks possible?
 
 ### A08 — Software and Data Integrity Failures
-- Is user-controlled content rendered as HTML without sanitisation (`{@html ...}` in Svelte)?
+- Is user-controlled content rendered as raw HTML without sanitisation (e.g., `innerHTML`, `dangerouslySetInnerHTML`, `{@html ...}`, `v-html`)?
 - If so, is it sanitised with DOMPurify or equivalent before rendering?
 - Are deserialized objects validated before use?
 

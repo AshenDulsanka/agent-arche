@@ -28,12 +28,12 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 
 | Task category | Skills to load |
 |---------------|---------------|
-| New UI feature | `taste` (baseline) |
+| New UI feature | `design` (baseline) |
 | UI quality review | `ui-audit`, `critique` |
 | Visual / layout / typography issues | `redesign`, `animate` |
 | Cinematic scroll / GSAP motion | `gsap` |
 | UI performance | `ui-optimize` |
-| Aesthetic direction | `taste`, `soft`, `minimalist`, `brutalist` |
+| Aesthetic direction | `design`, `soft`, `minimalist`, `brutalist` |
 | Code quality | `coding-standards` |
 | SEO | `seo` |
 | API design / routes | `api-design` |

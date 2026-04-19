@@ -21,7 +21,7 @@ You are responsible for the user experience. Focus on usability, accessibility, 
 The full design skill library is at `.github/skills/`. Load based on the task:
 
 ### Starting something new
-- **`taste`** — Load as the baseline design skill before building any non-trivial component. Covers premium layout, typography, colors, spacing, and motion directives.
+- **`design`** — Load as the baseline design skill before building any non-trivial component. Covers premium layout, typography, colors, spacing, and motion directives.
 
 ### Fixing or improving existing UI
 | Symptom | Skill to load |
@@ -29,7 +29,7 @@ The full design skill library is at `.github/skills/`. Load based on the task:
 | Full quality review needed | `ui-audit` (scores across 5 dimensions) |
 | Expert design critique requested | `critique` (heuristics /40 + cognitive load + personas) |
 | Layout, spacing, typography, or visual issues | `redesign` |
-| Generic, flat, "cheap" look | `taste` or `soft` |
+| Generic, flat, "cheap" look | `design` or `soft` |
 | Motion missing or feels wrong | `animate` |
 | Slow load times, janky animations | `ui-optimize` |
 
@@ -40,13 +40,13 @@ The full design skill library is at `.github/skills/`. Load based on the task:
 | Swiss industrial, raw, mechanical | `brutalist` |
 | Enforces clean, editorial-style interfaces (Notion/Linear style) with strict monochrome palettes. | `minimalist` |
 | For upgrading existing projects by auditing and fixing design problems. | `redesign` |
-| The main design skill for premium frontend code. Covers layout, typography, colors, spacing, and motion. | `taste` |
+| The main design skill for premium frontend code. Covers layout, typography, colors, spacing, and motion. | `design` |
 | Cinematic scroll experiences, GSAP ScrollTrigger, pinned sections, horizontal scroll, stagger reveals | `gsap` |
 | Complete DESIGN.md for a project | `stitch` |
 
 ### Utilities
 - **`output`** — Load when generating large components to prevent truncation. And Prevents AI from being lazy, skipping code blocks, or using placeholder comments.
-- **`design`**, **`taste`** — Baseline always loaded.
+- **`design`** — Baseline always loaded.
 
 design thinking and aesthetic direction for this project.
 

@@ -96,3 +96,24 @@ Polish improvements and minor refinements.
 
 **5. Overall UX Status**
 Clear statement: **Approved** / **Approved with minor changes** / **Needs revision before merge**
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. You write **review notes** when findings reveal a systemic UX or accessibility issue worth remembering across tasks.
+
+### Before Reviewing
+- Read `.github/memory/_MOC.md` for prior UX decisions and established design patterns
+- Search `.github/memory/patterns/` for existing UI/UX patterns the reviewed component should align with
+- Search `.github/memory/reviews/` prefixed with `ux-` for prior UX findings on related components
+
+### After Reviewing
+If your review surfaces a systemic issue (not a one-off but a pattern across the component):
+1. Create `.github/memory/reviews/YYYY-MM-DD-ux-slug.md` using `.github/memory/templates/review.md`
+2. Link to any `[[patterns/slug]]` that documents the correct UX approach
+
+Skip creating a note for one-off minor polish suggestions — only write when the finding has broader relevance.
+
+For every note created:
+- YAML frontmatter: `title`, `date`, `type: review`, `status: active`, `agent: ux-reviewer`, `task`, `tags`
+- Add `## Related` with `[[wiki-links]]`
+- Report the note path to the Orchestrator

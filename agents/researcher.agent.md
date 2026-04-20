@@ -77,3 +77,24 @@ Return a structured research report:
 ### Open Questions
 - [Anything that requires a product decision before implementation can begin]
 ```
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. You write **learning notes** for key findings and **decision notes** when recommending one approach over another.
+
+### Before Researching
+- Read `.github/memory/_MOC.md` to see what has already been researched
+- Search `.github/memory/learnings/` to avoid re-documenting known topics
+
+### After Researching
+For each significant finding:
+1. Create `.github/memory/learnings/slug.md` using `.github/memory/templates/learning.md`
+
+When recommending one approach over alternatives:
+1. Create `.github/memory/decisions/ADR-NNN-slug.md` using `.github/memory/templates/decision.md`
+   - Check existing ADRs for the next sequential number
+
+For every note created:
+- YAML frontmatter: `title`, `date`, `type`, `status: active`, `agent: researcher`, `task`, `tags`
+- Add `## Related` with `[[wiki-links]]` to connected notes
+- Report all created note paths to the Orchestrator

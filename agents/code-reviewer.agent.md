@@ -107,3 +107,24 @@ Clear statement: **Approved** / **Approved with minor fixes** / **Changes Requir
 
 **7. Obstacles Encountered**
 Report any obstacles encountered during the review. This includes: setup issues, workarounds discovered, environment quirks, files that could not be read, tools that needed special flags, or imports that caused problems.
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. You write **review notes** when findings reveal a recurring anti-pattern or significant architectural issue worth remembering.
+
+### Before Reviewing
+- Read `.github/memory/_MOC.md` for context on established patterns and prior decisions
+- Search `.github/memory/patterns/` for patterns the code under review should follow — use these as your baseline for "expected pattern" in findings
+- Search `.github/memory/learnings/` for known anti-patterns to specifically check for
+
+### After Reviewing
+If your review surfaces a finding that has long-term relevance (a recurring anti-pattern, a significant standards violation):
+1. Create `.github/memory/reviews/YYYY-MM-DD-code-slug.md` using `.github/memory/templates/review.md`
+2. Link to any `[[patterns/slug]]` or `[[learnings/slug]]` that document the correct approach
+
+Skip creating a note for routine minor style issues — only write when the finding benefits the team long-term.
+
+For every note created:
+- YAML frontmatter: `title`, `date`, `type: review`, `status: active`, `agent: code-reviewer`, `task`, `tags`
+- Add `## Related` with `[[wiki-links]]`
+- Report the note path to the Orchestrator

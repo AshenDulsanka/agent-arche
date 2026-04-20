@@ -9,7 +9,16 @@ orchestration files for my projects. agents, skills, hooks, prompts etc. also an
 npx agent-arche
 ```
 
-Run that command from your project root. It will create a `.github/` folder and install all agents, skills, hooks, instructions, and prompts into it. Commit the folder to your repo and you're done.
+Run that command from your project root. It will create a `.github/` folder and install all agents, skills, hooks, instructions, prompts, and the memory vault into it. Commit the folder to your repo and you're done.
+
+**Seed the memory vault** (do this once after install):
+```
+@Orchestrator use the analyze-codebase skill on this project
+```
+This walks through your codebase, interviews you about decisions and context, then populates `.github/memory/` with ADRs, patterns, learnings, and a feature index that all agents can read in future sessions.
+
+**Open the vault in Obsidian** (optional but recommended):
+Point Obsidian at `.github/memory/` as a vault to browse the knowledge graph — notes are color-coded (blue=decisions, green=patterns, yellow=learnings, purple=sessions, red=reviews) and linked with `[[wiki-links]]`.
 
 **Update to the latest version later:**
 ```bash
@@ -20,8 +29,10 @@ npx agent-arche update
 
 ## Manual Setup (alternative)
 
-- copy the agents, hooks, instructions, prompts and skills to the project root `.github` folder.
+- copy the agents, hooks, instructions, prompts, skills, **and memory** folders to the project root `.github` folder.
 - and for better agentic workflow add the `PULL_REQUEST_TEMPLATE.md`, `CONTRIBUTING.md`, `ISSUE_TEMPLATE` folder that is inside the **templates** folder for better PRs. you need to update them, just read the comments inside them.
+- open `.github/memory/` as a vault in Obsidian to browse the project knowledge graph — decisions, patterns, learnings, and sessions are linked with `[[wiki-links]]` and color-coded in graph view.
+- run the `analyze-codebase` skill to seed the memory vault with your project's context.
 
 ## Student Developer Pack issue
 
@@ -62,6 +73,7 @@ Skills are reference documents that agents load from `.github/skills/` before do
 
 | Skill | Purpose |
 |-------|---------|
+| `analyze-codebase` | Bootstraps the memory vault for a new project. Silently explores the codebase, interviews you in batches of 3–5 questions, then writes ADRs, patterns, learnings, and a feature index. Run this once when you first install agent-arche. |
 | `grill-me` | Interrogates the user about every aspect of a plan until reaching shared understanding. Walks down each branch of the design tree, resolving dependencies one by one. Used by the Planner before creating a PRD. |
 | `to-prd` | Synthesizes the current conversation context into a structured PRD (problem statement, user stories, implementation decisions, testing decisions) and submits it as a GitHub issue. |
 | `to-issues` | Breaks a PRD into independently-grabbable GitHub issues using vertical-slice tracer bullets. Each issue cuts through all layers end-to-end rather than slicing horizontally by layer. |
@@ -108,7 +120,7 @@ Hooks are scripts that run automatically at specific points during an agent sess
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| `session-start.cjs` | **SessionStart** | Injects 5 universal safety rules at the start of every session: no hardcoded secrets, validate all input, read skill files first, take reversible actions, commit atomically. |
+| `session-start.cjs` | **SessionStart** | Injects 6 universal safety rules at the start of every session: no hardcoded secrets, validate all input, read skill files first, take reversible actions, commit atomically, and maintain the memory vault. |
 | `pre-tool-safety.cjs` | **PreToolUse** | Warns before destructive operations — detects `rm -rf`, `git push --force`, `drop table`, `--no-verify` in shell commands, and scans file edits for hardcoded API keys, passwords, and tokens. |
 | `changelog-reminder.cjs` | **PostToolUse** | After any file edit to `src/`, checks if a CHANGELOG.md exists and reminds the agent to add an entry under `[Unreleased]`. |
 
@@ -135,6 +147,54 @@ Prompts are user-invocable commands that perform a single focused task. They're 
 | `create-issue.prompt.md` | Draft a GitHub issue with title, description, acceptance criteria, labels, and branch name. |
 | `pr-description.prompt.md` | Generate a PR description from staged changes — what changed, why, and how to test it. |
 | `security-review.prompt.md` | Security review covering all OWASP Top 10 categories against selected code. |
+
+---------------------------------------------
+
+## Memory
+
+Every project gets a persistent knowledge vault at `.github/memory/` — an Obsidian-compatible folder of Markdown notes that agents read and write automatically across every session.
+
+### How it works
+
+`session-start.cjs` injects a rule at the start of every session: **read `_MOC.md` before starting work, write notes for every significant decision, update `_MOC.md` when done.** This means agents accumulate project knowledge automatically — you never have to remind them what was decided last week.
+
+### First-time setup
+
+After installing, run the `analyze-codebase` skill to seed the vault:
+```
+@Orchestrator use the analyze-codebase skill on this project
+```
+The skill silently explores your codebase, interviews you in batches of 3–5 questions about decisions and context it couldn't find in code, then writes a full set of bootstrap notes.
+
+### Browsing the vault
+
+Open `.github/memory/` as a vault in Obsidian. Notes are linked with `[[wiki-links]]` and color-coded in graph view:
+- **Blue** — Decisions (ADRs)
+- **Green** — Patterns (reusable code approaches)
+- **Yellow** — Learnings (anti-patterns and lessons)
+- **Purple** — Sessions (per-session activity logs)
+- **Red** — Reviews (code/security/UX review findings)
+
+Start from `_MOC.md` — it's the master index that links everything.
+
+### Note types
+
+| Type | Folder | Written by | Contains |
+|------|--------|-----------|----------|
+| Session | `sessions/` | All agents | Pipeline run, decisions made, files changed, issues found |
+| Decision | `decisions/` | Orchestrator, Planner | ADR — problem, options considered, choice, consequences |
+| Pattern | `patterns/` | Coder, Planner | When to use + code example for a recurring approach |
+| Learning | `learnings/` | All agents | What went wrong, root cause, fix, how to prevent it |
+| Review | `reviews/` | Code Reviewer, Security Auditor, UX Reviewer | Findings by severity + overall status |
+| Feature | `features/` | Planner | Feature index — what it is, status, related decisions |
+
+### `vscode/memory` vs the vault
+
+Some agents also have the `vscode/memory` tool (Orchestrator, Planner, Designer). These are **different systems**:
+- **`vscode/memory`** — VS Code Copilot's built-in within-session context. Requires VS Code Insiders with the memory feature enabled. Stores small ephemeral preferences for the current conversation.
+- **`.github/memory/`** — File-based vault committed to git. Persistent across all sessions and shareable with the whole team.
+
+Both are kept — they serve different granularities.
 
 ---------------------------------------------
 

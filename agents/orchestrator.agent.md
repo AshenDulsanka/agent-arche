@@ -45,6 +45,7 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 | Security | `security-auditor` agent handles OWASP Top 10 |
 | Architecture docs | `architecture` |
 | Git / PR conventions | `commit-conventions`, `branch-conventions`, `pr-standards` |
+| Project memory setup (first time) | `analyze-codebase` |
 
 ## Agent Roster
 
@@ -287,3 +288,34 @@ Phase 2b: Designer reads updated type and uses new field in component
 If you find yourself assigning overlapping scope, that is a signal to make it sequential:
 - ❌ "Update the layout" + "Add the toolbar" (both might touch +layout.svelte)
 - ✅ Phase 1: Update layout → Phase 2: Add toolbar to the updated layout
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. Open this folder in Obsidian to explore the full knowledge graph. You are responsible for creating and closing the session note for every pipeline run.
+
+### At Pipeline Start — Before Phase 1
+1. Read `.github/memory/_MOC.md` to load prior context (decisions, patterns, learnings)
+2. Create a session note at `.github/memory/sessions/YYYY-MM-DD-task-slug.md` using `.github/memory/templates/session.md`
+   - Record the user's verbatim request, the approved pipeline, and links to any existing relevant notes
+3. Include this in every subagent's Context Block:
+   ```
+   Memory context:
+   - Session note: [[sessions/YYYY-MM-DD-slug]]
+   - Relevant prior decisions: [[decisions/ADR-NNN-slug]], ...
+   - Relevant patterns: [[patterns/slug]], ...
+   ```
+
+### At Each Phase Boundary
+Update the session note with:
+- Decisions made this phase → link the decision note created by Planner/Researcher
+- Changes made → file paths and responsible agent
+- Issues found → severity, finding, and resolution
+
+### At Pipeline End
+1. Finalize the session note — fill all remaining sections
+2. Append to `.github/memory/_MOC.md`:
+   - Under **Sessions**: `- [[sessions/YYYY-MM-DD-slug]] — one-line summary`
+   - Under **Decisions**: links to any new ADR notes
+   - Under **Active Patterns**: links to any new pattern notes
+   - Under **Learnings**: links to any new learning notes
+   - Under **Reviews**: links to any new review notes

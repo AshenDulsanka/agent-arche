@@ -94,3 +94,19 @@ One paragraph describing the change and why it's needed.
 - Flag anything that touches file paths, user input, or environment variables as a **security consideration**
 - Note uncertainties explicitly — do not hide them
 - The step **file assignments** are critical — they are used by the Orchestrator to determine parallelization
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. You write **decision notes** for every significant architectural or approach choice made during planning.
+
+### Before Planning
+- Read `.github/memory/_MOC.md` for prior context
+- Search `.github/memory/decisions/` for ADRs relevant to this task — do not revisit already-decided decisions
+
+### After Planning
+For every significant decision (which library, which pattern, which architecture):
+1. Create `.github/memory/decisions/ADR-NNN-slug.md` using `.github/memory/templates/decision.md`
+   - Check existing ADRs for the next sequential number
+2. YAML frontmatter: `title`, `date`, `type: decision`, `status: active`, `agent: planner`, `task`, `tags`
+3. Add `## Related` linking to the session note and any relevant patterns or learnings
+4. Report all created note paths back to the Orchestrator so it can update `_MOC.md`

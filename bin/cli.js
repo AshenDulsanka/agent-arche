@@ -6,7 +6,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const PACKAGE_ROOT = path.join(__dirname, '..');
-const SOURCE_DIRS = ['agents', 'hooks', 'instructions', 'prompts', 'skills'];
+const SOURCE_DIRS = ['agents', 'hooks', 'instructions', 'prompts', 'skills', 'memory'];
 const META_FILE = 'agent-arche.json';
 
 // ---------------------------------------------------------------------------

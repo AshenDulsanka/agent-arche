@@ -111,3 +111,23 @@ Any non-obvious choices made (colour selection, spacing, interaction patterns) a
 
 **6. Obstacles Encountered**
 Report any obstacles encountered. This includes: styling conflicts, framework syntax issues, missing design tokens, or ambiguous component boundaries that required decisions.
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. You write **pattern notes** for reusable UI patterns and **learning notes** for design gotchas.
+
+### Before Designing
+- Search `.github/memory/patterns/` for established UI patterns — match them for visual consistency
+- Check `.github/memory/decisions/` for prior design direction decisions
+
+### After Designing
+If you established a new reusable UI pattern (new component structure, layout approach, or interaction pattern):
+1. Create `.github/memory/patterns/slug.md` using `.github/memory/templates/pattern.md`
+
+If you hit an unexpected styling conflict, framework quirk, or design token issue:
+1. Create `.github/memory/learnings/slug.md` using `.github/memory/templates/learning.md`
+
+For every note created:
+- YAML frontmatter: `title`, `date`, `type`, `status: active`, `agent: designer`, `task`, `tags`
+- Add `## Related` linking to the session note and any relevant decisions
+- Report created note paths to the Orchestrator

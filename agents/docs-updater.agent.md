@@ -2,7 +2,7 @@
 name: Docs Updater
 description: Updates and creates project documentation — covers CHANGELOG, README, and the docs/ folder; never touches source code or configuration files.
 model: Claude Sonnet 4.6 (copilot)
-tools: [read, edit, search, 'io.github.upstash/context7/*']
+tools: [read, edit, search, 'context7/*']
 user-invocable: false
 ---
 
@@ -146,3 +146,12 @@ Report any obstacles encountered. This includes: missing information needed to w
 
 **6. Docs Files Created or Updated**
 For each docs/ file touched, list: file name, what was added or changed, and whether any sections are stubs that need filling by the Coder or Designer after implementation is complete.
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. You **read** memory notes to inform documentation updates — you do not write memory notes yourself.
+
+### Before Updating Docs
+- Read `.github/memory/_MOC.md` for the full picture of what changed this session
+- Read the session note passed to you in the Context Block
+- Use linked decision and pattern notes to write accurate, well-contextualized documentation

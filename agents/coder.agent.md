@@ -89,3 +89,23 @@ Anything that still needs to be done: missing types, unhandled edge cases, follo
 
 **6. Obstacles Encountered**
 Report any obstacles encountered. This includes: setup issues, dependency conflicts, framework API surprises, or workarounds that needed to be applied.
+
+## Memory Protocol
+
+The project memory vault lives at `.github/memory/`. You write **pattern notes** for reusable implementations and **learning notes** for gotchas and workarounds.
+
+### Before Coding
+- Search `.github/memory/patterns/` for established patterns relevant to your task — follow them for consistency
+- Check `.github/memory/decisions/` for prior decisions that constrain your implementation
+
+### After Coding
+If you implemented a new reusable pattern (new API structure, validation approach, data-fetching pattern):
+1. Create `.github/memory/patterns/slug.md` using `.github/memory/templates/pattern.md`
+
+If you hit an unexpected gotcha, workaround, or framework quirk:
+1. Create `.github/memory/learnings/slug.md` using `.github/memory/templates/learning.md`
+
+For every note created:
+- YAML frontmatter: `title`, `date`, `type`, `status: active`, `agent: coder`, `task`, `tags`
+- Add `## Related` linking to the session note and any relevant decisions
+- Report created note paths to the Orchestrator

@@ -9,5 +9,6 @@ process.stdout.write(JSON.stringify({
     '(2) Validate all input at system boundaries before use — never pass raw input to SQL, file paths, shell commands, or HTML. ' +
     '(3) Read the relevant skill files in .github/skills/ before starting work in their domain. ' +
     '(4) Take small, reversible actions. Before any destructive operation (delete files, drop data, force-push), confirm with the user. ' +
-    '(5) Commit atomically — one logical change per commit with a conventional commit message.'
+    '(5) Commit atomically — one logical change per commit with a conventional commit message. ' +
+    '(6) Maintain the Obsidian memory vault at .github/memory/. Read _MOC.md before starting work. Create decision/pattern/learning/review notes with [[wiki-links]] for every significant choice. Update the session note after each phase. Update _MOC.md when done.'
 }));

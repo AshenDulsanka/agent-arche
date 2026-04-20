@@ -1,0 +1,22 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    { "query": "tag:#decision", "color": { "a": 1, "rgb": 5431378 } },
+    { "query": "tag:#pattern", "color": { "a": 1, "rgb": 3066993 } },
+    { "query": "tag:#learning", "color": { "a": 1, "rgb": 15844367 } },
+    { "query": "tag:#session", "color": { "a": 1, "rgb": 10181046 } },
+    { "query": "tag:#review", "color": { "a": 1, "rgb": 15158332 } },
+    { "query": "tag:#moc", "color": { "a": 1, "rgb": 16777215 } }
+  ],
+  "collapse-display": false,
+  "showArrow": true,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1,
+  "lineSizeMultiplier": 1
+}

@@ -3,9 +3,24 @@ orchestration files for my projects. agents, skills, hooks, prompts etc. also an
 
 ---------------------------------------------
 
-## Steps
+## Install
 
-- just copy the agents, hooks, instructions, prompts and skills to the project root `.github` folder.
+```bash
+npx agent-arche
+```
+
+Run that command from your project root. It will create a `.github/` folder and install all agents, skills, hooks, instructions, and prompts into it. Commit the folder to your repo and you're done.
+
+**Update to the latest version later:**
+```bash
+npx agent-arche update
+```
+
+---------------------------------------------
+
+## Manual Setup (alternative)
+
+- copy the agents, hooks, instructions, prompts and skills to the project root `.github` folder.
 - and for better agentic workflow add the `PULL_REQUEST_TEMPLATE.md`, `CONTRIBUTING.md`, `ISSUE_TEMPLATE` folder that is inside the **templates** folder for better PRs. you need to update them, just read the comments inside them.
 
 ## Student Developer Pack issue
@@ -120,3 +135,17 @@ Prompts are user-invocable commands that perform a single focused task. They're 
 | `create-issue.prompt.md` | Draft a GitHub issue with title, description, acceptance criteria, labels, and branch name. |
 | `pr-description.prompt.md` | Generate a PR description from staged changes — what changed, why, and how to test it. |
 | `security-review.prompt.md` | Security review covering all OWASP Top 10 categories against selected code. |
+
+---------------------------------------------
+
+## Credits
+
+This project was built on top of excellent open-source work from the community. Full credit to:
+
+| Repo | What we took from it |
+|------|---------------------|
+| [cyxzdev/Uncodixfy](https://github.com/cyxzdev/Uncodixfy/blob/main/SKILL.md) | Design and UI skill inspiration |
+| [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Foundation for the `ui-audit`, `ui-optimize`, `critique`, `animate`,  |
+| [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |  `gsap`, `redesign`, `soft`, `minimalist`, `brutalist`, `stitch`, `output`, and other quality-focused skills |
+| [anthropics/claude-code frontend-design](https://github.com/anthropics/claude-code/blob/main/plugins/frontend-design/skills/frontend-design/SKILL.md) | Frontend design skill patterns |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | `grill-me`, `to-prd`, `to-issues`, `tdd`, and `improve-codebase-architecture` skills |

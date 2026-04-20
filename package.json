@@ -1,0 +1,36 @@
+{
+  "name": "agent-arche",
+  "version": "1.0.0",
+  "description": "AI agent orchestration - installs agents, skills, hooks, instructions, and prompts into your project's .github folder",
+  "keywords": [
+    "github-copilot",
+    "ai-agents",
+    "copilot-agents",
+    "orchestration",
+    "agents",
+    "skills"
+  ],
+  "homepage": "https://github.com/AshenDulsanka/agent-arche#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AshenDulsanka/agent-arche.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AshenDulsanka/agent-arche/issues"
+  },
+  "license": "MIT",
+  "bin": {
+    "agent-arche": "./bin/cli.js"
+  },
+  "files": [
+    "agents/",
+    "hooks/",
+    "instructions/",
+    "prompts/",
+    "skills/",
+    "bin/"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

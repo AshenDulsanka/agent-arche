@@ -1,4 +1,4 @@
-# orchestration
+# agent-arche
 orchestration files for my projects. agents, skills, hooks, prompts etc. also an extra note, this is currently made for github copilot not claude code, even though i'm planning to make a claude version as well in the future.
 
 ---------------------------------------------

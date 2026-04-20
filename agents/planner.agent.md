@@ -34,7 +34,7 @@ For simpler tasks (bug fixes, small changes), skip directly to the "Before Plann
 ## Before Planning
 
 ### 1. Understand the Project
-Read `.github/copilot-instructions.md`, `./AGENTS.md` or `./CLAUDE.md` for the project overview, tech stack, and key conventions. If deeper architectural context is needed (data flows, module boundaries), read `.github/skills/architecture/SKILL.md`. You do **not** need to read `coding-standards/SKILL.md` — language rules auto-load from `.github/instructions/` when agents edit files.
+Read `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md` for the project overview, tech stack, and key conventions. If deeper architectural context is needed (data flows, module boundaries), read `.github/skills/architecture/SKILL.md`. You do **not** need to read `coding-standards/SKILL.md` — language rules auto-load from `.github/instructions/` when agents edit files.
 
 ### 2. Research the Codebase
 Search and read relevant existing files. Find:

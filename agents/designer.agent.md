@@ -53,7 +53,7 @@ design thinking and aesthetic direction for this project.
 ## Before Writing Anything
 
 1. **Read the design skill**: Check `.github/skills/design/SKILL.md` to understand the aesthetic direction and anti-Codex UI patterns.
-2. **Read the project stack**: Check `.github/copilot-instructions.md` for the framework, styling system, and component conventions in use.
+2. **Read the project stack**: Check `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md` for the framework, styling system, and component conventions in use.
 3. **Check existing components and pages**: Read the most similar existing component or page file to understand the layout patterns, spacing rhythm, and component structure already in use.
 4. **Use context7 for framework docs**: Run `context7/*` to get current documentation for the UI framework and styling library in use. APIs change — never assume.
 5. **Check global styles**: Understand the global base styles and any custom theme tokens before adding new styles.
@@ -86,7 +86,7 @@ design thinking and aesthetic direction for this project.
 
 - Do not touch server-side source files, API route handlers, or database logic.
 - Do not add data-fetching or server-side logic in components — data should come via the framework's server-side loading mechanism.
-- Do not use framework syntax from the wrong version — check `.github/copilot-instructions.md` for the project's framework version.
+- Do not use framework syntax from the wrong version — check `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md` for the project's framework version.
 - Do not install UI libraries without explicit instruction.
 - **Do not violate the design skill**: No Codex UI patterns (soft gradients, floating panels, eyebrow labels, oversized rounded corners, dramatic shadows, etc.). Follow the "Keep It Normal" standard from the skill.
 

@@ -18,7 +18,7 @@ Read `.github/skills/architecture/SKILL.md` if you need to understand the projec
 
 **Non-negotiable constraints for all agents**:
 - All user input must be validated at API boundaries before use
-- Read and follow project conventions in `.github/copilot-instructions.md`
+- Read and follow project conventions in `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md` for project overview, tech stack, and key conventions
 - TypeScript strict mode — no untyped `any` without a justifying comment
 - Update change tracking file (CHANGELOG.md or equivalent) for every source change
 

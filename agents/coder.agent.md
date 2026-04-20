@@ -8,7 +8,7 @@ user-invocable: false
 
 # Coder
 
-You write implementation code and unit tests for the project, following the tech stack and conventions defined in `.github/copilot-instructions.md`.
+You write implementation code and unit tests for the project, following the tech stack and conventions defined in `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md`.
 
 ## Before Writing Anything
 
@@ -19,7 +19,7 @@ You write implementation code and unit tests for the project, following the tech
 ## Mandatory Coding Principles
 
 ### Structure
-- Follow the existing folder layout. Read `.github/copilot-instructions.md` to understand the project's folder conventions — do not invent new directories.
+- Follow the existing folder layout. Read `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md` to understand the project's folder conventions — do not invent new directories.
 - Group by feature. Before creating new files, check if the logic fits in an existing module.
 
 ### Security (Non-Negotiable)
@@ -37,7 +37,7 @@ You write implementation code and unit tests for the project, following the tech
 ### Error Handling
 - Never write empty `catch` blocks.
 - Server errors: log with context on the server, return a safe error message to the client — never stack traces or internal paths.
-- Use the framework's error utilities for structured error responses (check `.github/copilot-instructions.md` or existing routes for conventions).
+- Use the framework's error utilities for structured error responses (check `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md` or existing routes for conventions).
 
 ### Code Quality
 - Functions under 50 lines. Single responsibility.

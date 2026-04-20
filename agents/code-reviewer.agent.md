@@ -18,7 +18,7 @@ The authoritative source for all rules is `.github/skills/coding-standards/SKILL
 
 ### Framework Syntax (Critical)
 
-- [ ] Code uses the correct syntax for the project's framework version (check `.github/copilot-instructions.md`)
+- [ ] Code uses the correct syntax for the project's framework version (check `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md`)
 - [ ] No deprecated or old-version syntax patterns
 - [ ] Component API (props, events, slots/children) matches the framework's current conventions
 
@@ -63,7 +63,7 @@ Each group separated by a blank line:
 
 - [ ] No hardcoded secret values, credentials, or environment-specific paths in source files
 - [ ] No `.js` files where `.ts` is appropriate
-- [ ] No framework syntax from the wrong version (check `.github/copilot-instructions.md` for versions)
+- [ ] No framework syntax from the wrong version (check `.github/copilot-instructions.md` or `./AGENTS.md` or `./CLAUDE.md` for versions)
 - [ ] No dead code, unused imports, or commented-out blocks
 
 ## Output Format

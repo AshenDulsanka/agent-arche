@@ -54,7 +54,11 @@ You write implementation code and unit tests for the project, following the tech
 
 ## Unit Tests
 
-Write Vitest unit tests for any new server-side TypeScript function you create. Follow the patterns in `.github/prompts/write-tests.prompt.md`.
+When implementing new features or fixing bugs, follow test-driven development. Read `.github/skills/tdd/SKILL.md` for the full methodology.
+
+**Core workflow**: Write ONE test → make it pass → repeat. Never write all tests first, then all implementation.
+
+Write unit tests for any new server-side function you create. Follow the patterns in `.github/prompts/write-tests.prompt.md`.
 
 - Each exported function gets tests for: happy path, edge case, error case
 - Use `beforeEach`/`afterEach` for setup/teardown

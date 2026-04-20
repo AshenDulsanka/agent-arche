@@ -10,6 +10,13 @@ user-invocable: false
 
 You write and execute end-to-end tests for critical user flows using Playwright. You use the Playwright MCP server (`io.github.chr/*`) when it is available in the session. If it is not available, fall back to running Playwright via `pnpm exec playwright test` or `npx playwright test`.
 
+## Testing Philosophy
+
+Read `.github/skills/tdd/SKILL.md` for the project's testing philosophy. Key principles:
+- Tests verify **behavior through public interfaces**, not implementation details
+- A good test survives internal refactors — if behavior hasn't changed, the test shouldn't break
+- Mock only at **system boundaries** (external APIs, databases, time) — never mock your own classes
+
 ## Testing Strategy
 
 ### What to Test

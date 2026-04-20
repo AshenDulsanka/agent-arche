@@ -28,6 +28,11 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 
 | Task category | Skills to load |
 |---------------|---------------|
+| Pre-planning interrogation | `grill-me` |
+| PRD creation | `to-prd` |
+| Issue breakdown | `to-issues` |
+| Test-driven development | `tdd` |
+| Architecture improvement | `improve-codebase-architecture` |
 | New UI feature | `design` (baseline) |
 | UI quality review | `ui-audit`, `critique` |
 | Visual / layout / typography issues | `redesign`, `animate` |
@@ -47,8 +52,8 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 |-------|------|-------------|
 | **Researcher** | Deep-dive research before planning | New features with unclear prior art, third-party integrations, or when implementation path is unknown |
 | **Planner** | Research codebase + create implementation strategy | New features, changes touching 2+ files, or when implementation path isn't obvious |
-| **Coder** | Write TypeScript, SvelteKit routes, server-side logic, and unit tests | Implementing logic, API endpoints, server utilities, DB queries, Vitest unit tests |
-| **Designer** | Write Svelte 5 components, Tailwind styling | UI components, layouts, visual/interactive changes |
+| **Coder** | Write implementation code, server-side logic, and unit tests | Implementing logic, API endpoints, server utilities, DB queries, unit tests |
+| **Designer** | Write UI components, layouts, and styling | UI components, layouts, visual/interactive changes |
 | **Code-reviewer** | Audit code quality and standards compliance | After every implementation |
 | **Security-auditor** | Audit for OWASP Top 10 vulnerabilities | After any change to routes, auth, file I/O, env vars, or external integrations |
 | **UX-reviewer** | Audit UX, accessibility, and interaction quality | After any UI component or layout change |
@@ -81,8 +86,10 @@ Specific implementation questions (about approach, file choices, constraints) ar
 
 **Pipeline examples by type:**
 
-- New feature → `Researcher → Planner → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater` (5 phases)
+- New feature (full) → `Planner (grill-me → to-prd → to-issues) → Researcher → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater` (6 phases)
+- New feature (quick) → `Researcher → Planner → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater` (5 phases)
 - Bug fix → `Planner → Coder → Code-reviewer → Tester → Docs-updater` (4 phases)
+- Architecture review → `Planner (improve-codebase-architecture)` (1 phase)
 - UI change → `Designer → Code-reviewer + UX-reviewer → Docs-updater` (3 phases)
 - Security audit → `Security-auditor` (1 phase)
 
@@ -92,8 +99,10 @@ Specific implementation questions (about approach, file choices, constraints) ar
 
 | Request type | Pipeline |
 |---|---|
-| New feature | Researcher → Planner → Coder + Designer (parallel if independent) → Code-reviewer + Security-auditor + UX-reviewer (parallel) → Tester → Docs-updater |
+| New feature (full) | Planner (grill-me → to-prd → to-issues) → Researcher → Coder + Designer (parallel if independent) → Code-reviewer + Security-auditor + UX-reviewer (parallel) → Tester → Docs-updater |
+| New feature (quick) | Researcher → Planner → Coder + Designer (parallel if independent) → Code-reviewer + Security-auditor + UX-reviewer (parallel) → Tester → Docs-updater |
 | Bug fix | Planner → Coder → Code-reviewer → Tester → Docs-updater |
+| Architecture review | Planner (improve-codebase-architecture) |
 | Security audit only | Security-auditor directly |
 | Code review only | Code-reviewer directly |
 | UX review only | UX-reviewer directly |
@@ -239,7 +248,7 @@ Context:
 **UX-reviewer**
 ```
 Context:
-- Files to review: [exact paths to Svelte components or pages]
+- Files to review: [exact paths to UI components or pages]
 - User flow: [describe what the user is doing in this UI]
 - Known issues: [any specific accessibility or UX concerns to check]
 ```

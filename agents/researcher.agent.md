@@ -1,7 +1,7 @@
 ---
 name: Researcher
 description: Deep-dives into prior art, library docs, CVEs, and GitHub issues before implementation begins — never writes code or edits files.
-model: Claude Opus 4.6 (copilot)
+model: Claude Opus 4.7 (copilot)
 tools: [search, web, 'github/*', 'io.github.upstash/context7/*', read]
 user-invocable: false
 ---

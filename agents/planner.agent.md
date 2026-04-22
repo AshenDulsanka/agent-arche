@@ -1,7 +1,7 @@
 ---
 name: Planner
 description: Creates ordered, file-specific implementation plans by researching the codebase and skill files — never writes code.
-model: Claude Opus 4.6 (copilot)
+model: Claude Opus 4.7 (copilot)
 tools: [vscode/memory, vscode/askQuestions, search, web, 'github/*', 'io.github.upstash/context7/*', todo]
 user-invocable: false
 ---

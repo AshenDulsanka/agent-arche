@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $(git rev-parse --show-toplevel)/.claude/hooks/scripts/session-start.cjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $(git rev-parse --show-toplevel)/.claude/hooks/scripts/pre-tool-safety.cjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $(git rev-parse --show-toplevel)/.claude/hooks/scripts/changelog-reminder.cjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

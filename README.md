@@ -1,5 +1,5 @@
 # agent-arche
-Multi-platform AI agent orchestration - specialists for GitHub Copilot, Claude Code, and Codex CLI.
+Multi-platform AI agent orchestration - specialists for GitHub Copilot, Claude Code, and Codex.
 
 ---------------------------------------------
 
@@ -17,7 +17,7 @@ Run from your project root. The CLI asks which platform you're using and (for Co
 |----------|-------------------|
 | GitHub Copilot | `.github/` |
 | Claude Code | `.claude/` + `CLAUDE.md` |
-| Codex CLI | `.codex/` + `.agents/skills/` + `AGENTS.md` |
+| Codex | `.codex/` + `.agents/skills/` + `AGENTS.md` |
 
 **Seed the memory / context file** (do this once after install):
 ```
@@ -43,7 +43,7 @@ Compare the hash with the one stored in `agent-arche.json` inside your install d
 Copy the appropriate platform folder to your project:
 - **Copilot:** `copilot/` → `.github/`, `skills/` → `.github/skills/`, `memory/` → `.github/memory/`
 - **Claude Code:** `claude/` → `.claude/`, `skills/` → `.claude/skills/`, `claude/CLAUDE.md` → `CLAUDE.md`
-- **Codex CLI:** `codex/config.toml` → `.codex/config.toml`, `codex/agents/` → `.codex/agents/`, `codex/hooks/` → `.codex/hooks/`, `codex/hooks.json` → `.codex/hooks.json`, `codex/instructions/` → `.codex/instructions/`, `codex/rules/` → `.codex/rules/`, `skills/` → `.agents/skills/`, `codex/AGENTS.md` → `AGENTS.md`
+- **Codex:** `codex/config.toml` → `.codex/config.toml`, `codex/agents/` → `.codex/agents/`, `codex/hooks/` → `.codex/hooks/`, `codex/hooks.json` → `.codex/hooks.json`, `codex/instructions/` → `.codex/instructions/`, `codex/rules/` → `.codex/rules/`, `skills/` → `.agents/skills/`, `codex/AGENTS.md` → `AGENTS.md`
 
 For Codex, `.codex/instructions/` is a project convention used by the bundled Codex agents. Those agents inspect the files they are planning, editing, or reviewing and then load every matching instruction file using the same glob patterns as the Copilot setup.
 
@@ -196,7 +196,7 @@ Every project gets a persistent context file, agents read and update it automati
 |----------|------------|--------|
 | GitHub Copilot | `.github/memory/` (Obsidian vault) | Linked Markdown notes with wiki-links |
 | Claude Code | `CLAUDE.md` at project root | Single Markdown file |
-| Codex CLI | `AGENTS.md` at project root | Single Markdown file |
+| Codex | `AGENTS.md` at project root | Single Markdown file |
 
 After installing, run the `analyze-codebase` skill to seed it with your project's context.
 

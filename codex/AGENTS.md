@@ -1,6 +1,6 @@
 # Project Instructions
 
-<!-- This file is the main project context for Codex CLI agents.
+<!-- This file is the main project context for Codex agents.
      Agents read this file at session start and update it with decisions,
      patterns, and learnings after each session. -->
 

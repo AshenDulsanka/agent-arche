@@ -1,4 +1,4 @@
-# Safety rules — command allow/deny list for Codex CLI
+# Safety rules — command allow/deny list for Codex
 # Starlark syntax. prefix_rule(allow/deny, pattern)
 
 # Allow common development tools

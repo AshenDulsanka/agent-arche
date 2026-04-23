@@ -1,110 +1,18 @@
 #!/usr/bin/env node
-'use strict';
 
-const fs       = require('fs');
-const path     = require('path');
-const readline = require('readline');
-
-const PACKAGE_ROOT = path.join(__dirname, '..');
-const SOURCE_DIRS  = ['agents', 'hooks', 'instructions', 'prompts', 'skills', 'memory'];
-const META_FILE    = 'agent-arche.json';
-const IS_TTY       = Boolean(process.stdout.isTTY);
-
-// ---------------------------------------------------------------------------
-// ANSI helpers (zero dependencies)
-// ---------------------------------------------------------------------------
-const ESC = '\x1b';
-
-const c = {
-  reset:   (s) => `${ESC}[0m${s}${ESC}[0m`,
-  bold:    (s) => `${ESC}[1m${s}${ESC}[0m`,
-  dim:     (s) => `${ESC}[2m${s}${ESC}[0m`,
-  green:   (s) => `${ESC}[32m${s}${ESC}[0m`,
-  yellow:  (s) => `${ESC}[33m${s}${ESC}[0m`,
-  cyan:    (s) => `${ESC}[36m${s}${ESC}[0m`,
-  blue:    (s) => `${ESC}[34m${s}${ESC}[0m`,
-  red:     (s) => `${ESC}[31m${s}${ESC}[0m`,
-  magenta: (s) => `${ESC}[35m${s}${ESC}[0m`,
-};
-
-const cursor = {
-  hide:      () => IS_TTY && process.stdout.write(`${ESC}[?25l`),
-  show:      () => IS_TTY && process.stdout.write(`${ESC}[?25h`),
-  clearLine: () => IS_TTY && process.stdout.write(`\r${ESC}[2K`),
-};
-
-process.on('SIGINT',  () => { cursor.show(); process.stdout.write('\n'); process.exit(130); });
-process.on('SIGTERM', () => { cursor.show(); process.exit(143); });
-
-// ---------------------------------------------------------------------------
-// Spinner  (braille, like Claude Code / Copilot CLI)
-// ---------------------------------------------------------------------------
-const FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-
-class Spinner {
-  constructor() {
-    this._frame = 0;
-    this._timer = null;
-    this._text  = '';
-  }
-
-  start(text) {
-    this._text = text;
-    if (!IS_TTY) {
-      process.stdout.write(`  ${text}\n`);
-      return this;
-    }
-    cursor.hide();
-    this._tick();
-    this._timer = setInterval(() => this._tick(), 80);
-    return this;
-  }
-
-  succeed(text) {
-    this._stop();
-    if (IS_TTY) process.stdout.write(`\r${ESC}[2K  ${c.green('✓')} ${text}\n`);
-    else        console.log(`  ✓ ${text}`);
-  }
-
-  fail(text) {
-    this._stop();
-    if (IS_TTY) process.stdout.write(`\r${ESC}[2K  ${c.red('✗')} ${text}\n`);
-    else        console.log(`  ✗ ${text}`);
-  }
-
-  _tick() {
-    const f = FRAMES[this._frame % FRAMES.length];
-    this._frame++;
-    process.stdout.write(`\r  ${c.cyan(f)} ${this._text}`);
-  }
-
-  _stop() {
-    if (this._timer) { clearInterval(this._timer); this._timer = null; }
-    cursor.show();
-  }
-}
-
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-// ---------------------------------------------------------------------------
-// Confirmation prompt
-// ---------------------------------------------------------------------------
-function confirm(question) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    });
-  });
-}
-
-// ---------------------------------------------------------------------------
-// File helpers
-// ---------------------------------------------------------------------------
-
+// src/cli.jsx
+import React, { useState, useEffect } from "react";
+import { render, Text, Box, useApp, Static, Newline } from "ink";
+import { Select, Spinner } from "@inkjs/ui";
+import fs from "fs";
+import path from "path";
+import https from "https";
+import readline from "readline";
+import { fileURLToPath } from "url";
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = path.dirname(__filename);
+var PACKAGE_ROOT = path.join(__dirname, "..");
+var META_FILE = "agent-arche.json";
 function countDir(src) {
   let n = 0;
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
@@ -113,15 +21,18 @@ function countDir(src) {
   }
   return n;
 }
-
-function copyDir(src, dest) {
+function copyDir(src, dest, transformFn) {
   fs.mkdirSync(dest, { recursive: true });
   let count = 0;
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    const srcPath  = path.join(src,  entry.name);
+    const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {
-      count += copyDir(srcPath, destPath);
+      count += copyDir(srcPath, destPath, transformFn);
+    } else if (transformFn) {
+      const content = fs.readFileSync(srcPath, "utf8");
+      fs.writeFileSync(destPath, transformFn(content, srcPath));
+      count++;
     } else {
       fs.copyFileSync(srcPath, destPath);
       count++;
@@ -129,192 +40,363 @@ function copyDir(src, dest) {
   }
   return count;
 }
-
+function copyFile(src, dest) {
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(src, dest);
+}
 function readPackageJson() {
-  return JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, 'package.json'), 'utf8'));
+  return JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, "package.json"), "utf8"));
 }
-
-function readMeta(githubDir) {
-  const file = path.join(githubDir, META_FILE);
+function readMeta(dir) {
+  const file = path.join(dir, META_FILE);
   if (!fs.existsSync(file)) return null;
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
-  catch { return null; }
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
 }
-
-function writeMeta(githubDir, version) {
+function writeMeta(dir, fields) {
+  fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(
-    path.join(githubDir, META_FILE),
-    JSON.stringify({ version, installedAt: new Date().toISOString() }, null, 2) + '\n',
+    path.join(dir, META_FILE),
+    JSON.stringify(fields, null, 2) + "\n"
   );
 }
-
-// ---------------------------------------------------------------------------
-// Commands
-// ---------------------------------------------------------------------------
-
-async function install(force = false) {
-  const pkg       = readPackageJson();
-  const version   = pkg.version;
-  const cwd       = process.cwd();
-  const githubDir = path.join(cwd, '.github');
-  const existing  = readMeta(githubDir);
-
-  if (existing && !force) {
-    console.log('');
-    console.log(`  ${c.yellow('◆')} ${c.bold('agent-arche')} ${c.dim(`v${existing.version}`)} is already installed.`);
-    console.log(`  ${c.dim(`Run ${c.bold('npx agent-arche update')} to upgrade to the latest version.`)}`);
-    console.log('');
-    return;
+function fetchNpmHash(version) {
+  return new Promise((resolve) => {
+    const req = https.get("https://registry.npmjs.org/agent-arche", { timeout: 5e3 }, (res) => {
+      let data = "";
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        try {
+          const json = JSON.parse(data);
+          resolve(json.versions?.[version]?.dist?.integrity ?? null);
+        } catch {
+          resolve(null);
+        }
+      });
+    });
+    req.on("error", () => resolve(null));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(null);
+    });
+  });
+}
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+var SONNET_MODEL = "Claude Sonnet 4.6 (copilot)";
+var OPUS_MODEL = "Claude Opus 4.7 (copilot)";
+var GPT5_MODEL = "GPT-5.4 (copilot)";
+var CODEX_MODEL = "GPT-5.3-Codex (copilot)";
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function makeAgentTransform(subscription) {
+  if (subscription === "student") {
+    return (content) => content.replace(new RegExp(escapeRegex(OPUS_MODEL), "g"), GPT5_MODEL).replace(new RegExp(escapeRegex(SONNET_MODEL), "g"), CODEX_MODEL);
   }
-
-  // ── Banner ────────────────────────────────────────────────────────────────
-  console.log('');
-  console.log(`  ${c.cyan('◆')} ${c.bold('agent-arche')} ${c.dim(`v${version}`)}`);
-  if (force && existing) {
-    console.log(`  ${c.dim(`Updating from v${existing.version} → v${version}`)}`);
-  } else {
-    console.log(`  ${c.dim('AI agent orchestration for GitHub Copilot')}`);
+  if (subscription === "pro") {
+    return (content) => content.replace(new RegExp(escapeRegex(OPUS_MODEL), "g"), SONNET_MODEL);
   }
-
-  // ── Preview (staggered line reveal) ──────────────────────────────────────
-  console.log('');
-  const action = force ? 'update' : 'install';
-  const actionLabel = force ? 'updated' : 'installed';
-  console.log(`  ${c.dim(`The following will be ${actionLabel} into`)} ${c.bold(`${path.basename(cwd)}/.github/`)}`);
-  console.log('');
-
-  let previewTotal = 0;
-  for (const dir of SOURCE_DIRS) {
-    const src = path.join(PACKAGE_ROOT, dir);
-    if (!fs.existsSync(src)) continue;
-    const n = countDir(src);
-    previewTotal += n;
-    await sleep(65);
-    console.log(`    ${c.dim('→')} ${c.cyan('.github/')}${c.bold(dir + '/')}  ${c.dim(`${n} files`)}`);
-  }
-
-  console.log('');
-  console.log(`    ${c.dim(`${previewTotal} files total`)}`);
-  console.log('');
-
-  // ── Confirmation ──────────────────────────────────────────────────────────
-  const verb = force ? 'Update' : 'Install';
-  const answer = await confirm(`  ${c.bold('?')} ${verb} now? ${c.dim('(Y/n)')} › `);
-  const confirmed = answer === '' || /^y(es)?$/i.test(answer);
-
-  if (!confirmed) {
-    console.log('');
-    console.log(`  ${c.dim('Aborted.')}`);
-    console.log('');
-    return;
-  }
-
-  // ── Install (animated per-directory) ─────────────────────────────────────
-  console.log('');
-  const spinner  = new Spinner();
-  let totalFiles = 0;
-  const missing  = [];
-
-  for (const dir of SOURCE_DIRS) {
-    const src  = path.join(PACKAGE_ROOT, dir);
-    const dest = path.join(githubDir, dir);
-
-    if (!fs.existsSync(src)) { missing.push(dir); continue; }
-
-    spinner.start(`${c.dim('.github/')}${dir}/`);
-    await sleep(500); // enough frames to clearly see the braille spin
-
-    const count = copyDir(src, dest);
-    totalFiles += count;
-
-    spinner.succeed(`${c.dim('.github/')}${c.bold(dir + '/')}  ${c.dim(`${count} file${count !== 1 ? 's' : ''}`)}`);
-    await sleep(60);
-  }
-
-  writeMeta(githubDir, version);
-
-  // ── Summary (staggered reveal) ────────────────────────────────────────────
-  console.log('');
-  await sleep(120);
-
-  if (force) {
-    const prev = existing ? existing.version : '?';
-    console.log(`  ${c.green('✓')} ${c.bold(`${totalFiles} files`)} updated  ${c.dim(`v${prev} → v${version}`)}`);
-  } else {
-    console.log(`  ${c.green('✓')} ${c.bold(`${totalFiles} files`)} installed to ${c.bold('.github/')}`);
-    console.log('');
-    const steps = [
-      `Commit ${c.bold('.github/')} to your repo`,
-      `Open Copilot Chat and use ${c.cyan('@Orchestrator')} to start`,
-      `Seed memory: ask Orchestrator to ${c.cyan('use the analyze-codebase skill')}`,
-    ];
-    for (const [i, step] of steps.entries()) {
-      await sleep(80);
-      console.log(`  ${c.dim(`${i + 1}.`)} ${step}`);
+  return null;
+}
+function getCopilotPlan(cwd, subscription) {
+  const dest = path.join(cwd, ".github");
+  const src = path.join(PACKAGE_ROOT, "copilot");
+  const agentTransform = makeAgentTransform(subscription);
+  return {
+    dest,
+    metaDir: dest,
+    steps: [
+      { label: ".github/agents/", src: path.join(src, "agents"), destDir: path.join(dest, "agents"), transform: agentTransform },
+      { label: ".github/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
+      { label: ".github/instructions/", src: path.join(src, "instructions"), destDir: path.join(dest, "instructions") },
+      { label: ".github/prompts/", src: path.join(src, "prompts"), destDir: path.join(dest, "prompts") },
+      { label: ".github/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
+      { label: ".github/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory") }
+    ],
+    nextSteps: [
+      `Commit .github/ to your repo`,
+      `Open Copilot Chat and use @Orchestrator to start`,
+      `Seed memory: ask Orchestrator to use the analyze-codebase skill`
+    ]
+  };
+}
+function getClaudePlan(cwd) {
+  const dest = path.join(cwd, ".claude");
+  const src = path.join(PACKAGE_ROOT, "claude");
+  return {
+    dest,
+    metaDir: dest,
+    steps: [
+      { label: ".claude/agents/", src: path.join(src, "agents"), destDir: path.join(dest, "agents") },
+      { label: ".claude/rules/", src: path.join(src, "rules"), destDir: path.join(dest, "rules") },
+      { label: ".claude/commands/", src: path.join(src, "commands"), destDir: path.join(dest, "commands") },
+      { label: ".claude/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
+      { label: ".claude/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
+      { label: ".claude/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory") },
+      { label: ".claude/settings.json", src: path.join(src, "settings.json"), destFile: path.join(dest, "settings.json") },
+      { label: "CLAUDE.md", src: path.join(src, "CLAUDE.md"), destFile: path.join(cwd, "CLAUDE.md"), skipIfExists: true }
+    ],
+    nextSteps: [
+      `Commit .claude/ and CLAUDE.md to your repo`,
+      `Run claude to start Claude Code`,
+      `Use @orchestrator agent to begin`,
+      `Seed memory: ask Orchestrator to use the analyze-codebase skill`
+    ]
+  };
+}
+function getCodexPlan(cwd) {
+  const dest = path.join(cwd, ".codex");
+  const src = path.join(PACKAGE_ROOT, "codex");
+  return {
+    dest,
+    metaDir: dest,
+    steps: [
+      { label: ".codex/agents/", src: path.join(src, "agents"), destDir: path.join(dest, "agents") },
+      { label: ".codex/config.toml", src: path.join(src, "config.toml"), destFile: path.join(dest, "config.toml") },
+      { label: ".codex/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
+      { label: ".codex/rules/", src: path.join(src, "rules"), destDir: path.join(dest, "rules") },
+      { label: ".codex/instructions/", src: path.join(src, "instructions"), destDir: path.join(dest, "instructions") },
+      { label: ".codex/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory") },
+      { label: ".agents/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(cwd, ".agents", "skills") },
+      { label: ".codex/hooks.json", src: path.join(src, "hooks.json"), destFile: path.join(dest, "hooks.json") },
+      { label: "AGENTS.md", src: path.join(src, "AGENTS.md"), destFile: path.join(cwd, "AGENTS.md"), skipIfExists: true }
+    ],
+    nextSteps: [
+      `Commit .codex/ and AGENTS.md to your repo`,
+      `Run codex from the repo root and ask it to use the orchestrator agent`,
+      `Seed memory: ask Orchestrator to use the analyze-codebase skill`
+    ]
+  };
+}
+function ConfirmPrompt({ message, onConfirm }) {
+  const [value, setValue] = useState("");
+  useEffect(() => {
+    const onKeypress = (_, key) => {
+      if (key.name === "y" || key.name === "return") {
+        onConfirm(true);
+      } else if (key.name === "n") {
+        onConfirm(false);
+      }
+    };
+    process.stdin.on("keypress", onKeypress);
+    return () => process.stdin.off("keypress", onKeypress);
+  }, [onConfirm]);
+  return /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { bold: true }, "? "), /* @__PURE__ */ React.createElement(Text, null, message, " "), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "(Y/n) \u203A ", value));
+}
+function App({ force = false }) {
+  const { exit } = useApp();
+  const pkg = readPackageJson();
+  const cwd = process.cwd();
+  const [step, setStep] = useState("platform");
+  const [platform, setPlatform] = useState(null);
+  const [subscription, setSubscription] = useState("pro+");
+  const [plan, setPlan] = useState(null);
+  const [existing, setExisting] = useState(null);
+  const [aborted, setAborted] = useState(false);
+  const [installSteps, setInstallSteps] = useState([]);
+  const [currentStepIdx, setCurrentStepIdx] = useState(-1);
+  const [totalFiles, setTotalFiles] = useState(0);
+  const [hash, setHash] = useState(null);
+  const [fetchingHash, setFetchingHash] = useState(false);
+  const [missing, setMissing] = useState([]);
+  const [previewFiles, setPreviewFiles] = useState(null);
+  const onPlatformSelect = (value) => {
+    setPlatform(value);
+    if (value === "copilot") {
+      setStep("subscription");
+    } else {
+      preparePlan(value, "pro+");
     }
-  }
-
-  if (missing.length) {
-    console.log('');
-    console.log(`  ${c.yellow('!')} Skipped (not in package): ${missing.join(', ')}`);
-  }
-
-  console.log('');
+  };
+  const onSubscriptionSelect = (value) => {
+    setSubscription(value);
+    preparePlan(platform, value);
+  };
+  const preparePlan = async (plat, sub) => {
+    let p;
+    if (plat === "copilot") p = getCopilotPlan(cwd, sub);
+    else if (plat === "claude") p = getClaudePlan(cwd);
+    else p = getCodexPlan(cwd);
+    setPlan(p);
+    const ex = readMeta(p.metaDir);
+    setExisting(ex);
+    if (ex && ex.platform === plat && !force) {
+      setStep("existing");
+      setTimeout(() => exit(), 100);
+      return;
+    }
+    setStep("preview");
+  };
+  useEffect(() => {
+    if (step === "preview" && plan) {
+      let total = 0;
+      const calculatedSteps = [];
+      for (const stepInfo of plan.steps) {
+        if (!stepInfo.src || !fs.existsSync(stepInfo.src)) continue;
+        if (stepInfo.destDir) {
+          const n = countDir(stepInfo.src);
+          total += n;
+          calculatedSteps.push({ label: stepInfo.label, count: n });
+        } else if (stepInfo.destFile) {
+          total += 1;
+          calculatedSteps.push({ label: stepInfo.label, count: null });
+        }
+      }
+      setPreviewFiles({ steps: calculatedSteps, total });
+      setStep("confirm");
+    }
+  }, [step, plan]);
+  useEffect(() => {
+    if (step === "install" && plan) {
+      const runInstall = async () => {
+        const results = [];
+        let total = 0;
+        const missingItems = [];
+        for (let i = 0; i < plan.steps.length; i++) {
+          setCurrentStepIdx(i);
+          const stepInfo = plan.steps[i];
+          if (!stepInfo.src || !fs.existsSync(stepInfo.src)) {
+            missingItems.push(stepInfo.label);
+            continue;
+          }
+          await sleep(500);
+          let countMsg = "";
+          if (stepInfo.destDir) {
+            if (stepInfo.skipIfExists && fs.existsSync(stepInfo.destDir)) {
+              countMsg = "skipped (already exists)";
+            } else {
+              const count = copyDir(stepInfo.src, stepInfo.destDir, stepInfo.transform);
+              total += count;
+              countMsg = `${count} file${count !== 1 ? "s" : ""}`;
+            }
+          } else if (stepInfo.destFile) {
+            if (stepInfo.skipIfExists && fs.existsSync(stepInfo.destFile)) {
+              countMsg = "skipped (already exists)";
+            } else {
+              copyFile(stepInfo.src, stepInfo.destFile);
+              total++;
+            }
+          }
+          results.push({ label: stepInfo.label, msg: countMsg });
+          setInstallSteps([...results]);
+          await sleep(60);
+        }
+        setTotalFiles(total);
+        setMissing(missingItems);
+        setCurrentStepIdx(-1);
+        setFetchingHash(true);
+        const h = await fetchNpmHash(pkg.version);
+        setHash(h);
+        setFetchingHash(false);
+        writeMeta(plan.metaDir, {
+          version: pkg.version,
+          installedAt: (/* @__PURE__ */ new Date()).toISOString(),
+          source: "AshenDulsanka/agent-arche",
+          sourceType: "npm",
+          platform,
+          hash: h ?? null
+        });
+        setStep("done");
+        setTimeout(() => exit(), 100);
+      };
+      runInstall();
+    }
+  }, [step, plan]);
+  return /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", paddingY: 1, paddingX: 2 }, /* @__PURE__ */ React.createElement(Box, { marginBottom: 1 }, /* @__PURE__ */ React.createElement(Text, { color: "cyan" }, "\u25C6 "), /* @__PURE__ */ React.createElement(Text, { bold: true }, "agent-arche "), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "v", pkg.version)), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "Multi-platform AI agent orchestration"), /* @__PURE__ */ React.createElement(Newline, null), step === "platform" && /* @__PURE__ */ React.createElement(Box, { flexDirection: "column" }, /* @__PURE__ */ React.createElement(Text, { bold: true }, "? Which AI assistant are you installing for?"), /* @__PURE__ */ React.createElement(Box, { marginLeft: 2, marginTop: 1 }, /* @__PURE__ */ React.createElement(
+    Select,
+    {
+      options: [
+        { label: "GitHub Copilot", value: "copilot" },
+        { label: "Claude Code (beta)", value: "claude" },
+        { label: "Codex CLI", value: "codex" }
+      ],
+      onChange: onPlatformSelect
+    }
+  ))), step !== "platform" && platform && /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { color: "green" }, "\u2713 "), /* @__PURE__ */ React.createElement(Text, { bold: true }, "Which AI assistant are you installing for? "), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, platform === "copilot" ? "GitHub Copilot" : platform === "claude" ? "Claude Code" : "Codex CLI")), step === "subscription" && /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", marginTop: 1 }, /* @__PURE__ */ React.createElement(Text, { bold: true }, "? Which GitHub Copilot subscription do you have?"), /* @__PURE__ */ React.createElement(Box, { marginLeft: 2, marginTop: 1 }, /* @__PURE__ */ React.createElement(
+    Select,
+    {
+      options: [
+        { label: "Student", value: "student" },
+        { label: "Pro", value: "pro" },
+        { label: "Pro+", value: "pro+" }
+      ],
+      onChange: onSubscriptionSelect
+    }
+  ))), step !== "platform" && step !== "subscription" && platform === "copilot" && /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { color: "green" }, "\u2713 "), /* @__PURE__ */ React.createElement(Text, { bold: true }, "Which GitHub Copilot subscription do you have? "), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, subscription === "pro+" ? "Pro+" : subscription === "pro" ? "Pro" : "Student")), step === "existing" && /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", marginTop: 1 }, /* @__PURE__ */ React.createElement(Text, { color: "yellow" }, "\u25C6 "), /* @__PURE__ */ React.createElement(Text, { bold: true }, "agent-arche "), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "v", existing?.version, " is already installed for "), /* @__PURE__ */ React.createElement(Text, { bold: true }, platform), /* @__PURE__ */ React.createElement(Text, null, "."), /* @__PURE__ */ React.createElement(Newline, null), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "Run "), /* @__PURE__ */ React.createElement(Text, { bold: true }, "npx agent-arche update "), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "to upgrade to the latest version.")), (step === "confirm" || step === "install" || step === "done" || aborted) && previewFiles && /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", marginTop: 1, marginBottom: 1 }, /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "The following will be ", force ? "update" : "install", "ed for "), /* @__PURE__ */ React.createElement(Text, { bold: true }, platform), /* @__PURE__ */ React.createElement(Newline, null), previewFiles.steps.map((s, i) => /* @__PURE__ */ React.createElement(Box, { key: i, marginLeft: 2 }, /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "\u2192 "), /* @__PURE__ */ React.createElement(Text, { color: "cyan" }, s.label, "  "), s.count !== null && /* @__PURE__ */ React.createElement(Text, { dimColor: true }, s.count, " files"))), /* @__PURE__ */ React.createElement(Newline, null), /* @__PURE__ */ React.createElement(Box, { marginLeft: 2 }, /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "~", previewFiles.total, " files total"))), step === "confirm" && /* @__PURE__ */ React.createElement(
+    ConfirmPrompt,
+    {
+      message: `${force ? "Update" : "Install"} now?`,
+      onConfirm: (val) => {
+        if (val) setStep("install");
+        else {
+          setAborted(true);
+          setTimeout(() => exit(), 100);
+        }
+      }
+    }
+  ), aborted && /* @__PURE__ */ React.createElement(Box, { marginTop: 1 }, /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "Aborted.")), (step === "install" || step === "done") && /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", marginTop: 1 }, /* @__PURE__ */ React.createElement(Static, { items: installSteps }, (s, i) => /* @__PURE__ */ React.createElement(Box, { key: i, marginLeft: 2 }, /* @__PURE__ */ React.createElement(Text, { color: "green" }, "\u2713 "), /* @__PURE__ */ React.createElement(Text, { color: "cyan" }, s.label, "  "), s.msg && /* @__PURE__ */ React.createElement(Text, { dimColor: true }, s.msg))), step === "install" && currentStepIdx >= 0 && /* @__PURE__ */ React.createElement(Box, { marginLeft: 2 }, /* @__PURE__ */ React.createElement(Spinner, { type: "dots" }), /* @__PURE__ */ React.createElement(Text, { color: "cyan" }, " ", plan.steps[currentStepIdx]?.label)), fetchingHash && /* @__PURE__ */ React.createElement(Box, { marginLeft: 2 }, /* @__PURE__ */ React.createElement(Spinner, { type: "dots" }), /* @__PURE__ */ React.createElement(Text, null, " Fetching integrity hash from npm\u2026")), step === "done" && hash && /* @__PURE__ */ React.createElement(Box, { marginLeft: 2 }, /* @__PURE__ */ React.createElement(Text, { color: "green" }, "\u2713 "), /* @__PURE__ */ React.createElement(Text, null, "Hash verified  "), /* @__PURE__ */ React.createElement(Text, { dimColor: true }, hash.slice(0, 40), "\u2026")), step === "done" && hash === null && /* @__PURE__ */ React.createElement(Box, { marginLeft: 2 }, /* @__PURE__ */ React.createElement(Text, { color: "green" }, "\u2713 "), /* @__PURE__ */ React.createElement(Text, null, "Hash unavailable (offline or not yet published)"))), step === "done" && /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", marginTop: 1 }, /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { color: "green" }, "\u2713 "), /* @__PURE__ */ React.createElement(Text, { bold: true }, totalFiles, " files "), /* @__PURE__ */ React.createElement(Text, null, "installed for "), /* @__PURE__ */ React.createElement(Text, { bold: true }, platform)), /* @__PURE__ */ React.createElement(Newline, null), plan.nextSteps.map((s, i) => /* @__PURE__ */ React.createElement(Box, { key: i, marginLeft: 2 }, /* @__PURE__ */ React.createElement(Text, { dimColor: true }, i + 1, ". "), /* @__PURE__ */ React.createElement(Text, null, s))), hash && /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", marginTop: 1, marginLeft: 2 }, /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "Verify integrity: "), /* @__PURE__ */ React.createElement(Text, { color: "cyan" }, "npm view agent-arche dist.integrity")), /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { dimColor: true }, "Compare with hash in "), /* @__PURE__ */ React.createElement(Text, { bold: true }, path.relative(cwd, path.join(plan.metaDir, META_FILE))))), missing.length > 0 && /* @__PURE__ */ React.createElement(Box, { marginTop: 1, marginLeft: 2 }, /* @__PURE__ */ React.createElement(Text, { color: "yellow" }, "! "), /* @__PURE__ */ React.createElement(Text, null, "Skipped (not found): ", missing.join(", ")))));
 }
-
 function showVersion() {
-  console.log(readPackageJson().version);
+  const pkg = JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, "package.json"), "utf8"));
+  console.log(pkg.version);
 }
-
 function showHelp() {
   console.log(`
-  ${c.cyan('◆')} ${c.bold('agent-arche')} ${c.dim('— AI agent orchestration')}
+  \u25C6 agent-arche \u2014 Multi-platform AI agent orchestration
 
-  ${c.bold('Usage')}
-    npx agent-arche             Install files into .github/ in the current directory
+  Usage
+    npx agent-arche             Install files for your AI assistant
     npx agent-arche install     Same as above
-    npx agent-arche update      Update to latest (overwrites all existing files)
+    npx agent-arche update      Update to latest (overwrites existing files)
     npx agent-arche --version   Print version
     npx agent-arche --help      Show this message
 
-  ${c.bold('What gets installed')}
-    .github/agents/             Specialist AI agent definitions
-    .github/hooks/              Safety hooks (session-start, pre-tool, changelog)
-    .github/instructions/       Auto-injected coding rules by file type
-    .github/prompts/            User-invocable task prompts
-    .github/skills/             Domain knowledge reference files for agents
-    .github/memory/             Persistent Obsidian knowledge vault
+  Supported platforms
+    GitHub Copilot  \u2192  .github/
+    Claude Code     \u2192  .claude/ + CLAUDE.md
+    Codex CLI       \u2192  .codex/ + .agents/skills/ + AGENTS.md
 
-  ${c.bold('Source')}
+  What gets installed
+    agents/         Specialist AI agent definitions
+    config.toml     Codex runtime and MCP server configuration
+    skills/         Domain knowledge reference files
+    hooks/          Safety hooks (session-start, pre-tool, changelog)
+    instructions/   File-type guidance that Codex agents load by matching globs
+    rules/          Extra Codex CLI safety rules
+
+  Verify integrity
+    npm view agent-arche dist.integrity
+    Compare with hash in agent-arche.json inside your install directory.
+
+  Source
     https://github.com/AshenDulsanka/agent-arche
 `);
 }
-
-// ---------------------------------------------------------------------------
-// Entry
-// ---------------------------------------------------------------------------
-
-const [,, command] = process.argv;
-
-switch (command) {
-  case undefined:
-  case 'install':
-    install(false).catch((err) => { cursor.show(); console.error(err); process.exit(1); });
-    break;
-  case 'update':
-    install(true).catch((err) => { cursor.show(); console.error(err); process.exit(1); });
-    break;
-  case '--version':
-  case '-v':
-    showVersion();
-    break;
-  case '--help':
-  case '-h':
-  case 'help':
-    showHelp();
-    break;
-  default:
-    console.error(`\n  ${c.red('✗')} Unknown command: ${c.bold(command)}`);
-    console.error(`  Run ${c.bold('npx agent-arche --help')} for usage.\n`);
-    process.exit(1);
+var [, , command] = process.argv;
+if (command === "--version" || command === "-v") {
+  showVersion();
+  process.exit(0);
+} else if (command === "--help" || command === "-h" || command === "help") {
+  showHelp();
+  process.exit(0);
+} else if (command === void 0 || command === "install" || command === "update") {
+  const force = command === "update";
+  readline.emitKeypressEvents(process.stdin);
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+  }
+  render(/* @__PURE__ */ React.createElement(App, { force }));
+} else {
+  console.error(`
+  \u2717 Unknown command: ${command}`);
+  console.error(`  Run npx agent-arche --help for usage.
+`);
+  process.exit(1);
 }

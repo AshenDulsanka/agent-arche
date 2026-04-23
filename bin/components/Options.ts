@@ -29,6 +29,7 @@ interface OptionListProps {
 interface PlatformCardsProps {
   value: Platform;
   onSubmit: (value: string) => void;
+  onChange?: (value: Platform) => void;
   compact: boolean;
 }
 
@@ -176,20 +177,20 @@ export function OptionList({ options, value, onChange, onSubmit, compact = false
 }
 
 // ─── PlatformCards ────────────────────────────────────────────────────────────
-export function PlatformCards({ value, onSubmit, compact }: PlatformCardsProps): React.ReactElement {
+export function PlatformCards({ value, onSubmit, onChange, compact }: PlatformCardsProps): React.ReactElement {
   const [current, setCurrent] = useState(value || "copilot");
   const platformOptions = useMemo(() => getPlatformOptions(), []);
   const handleChange = (next: string): void => {
     const parsed = asPlatform(next);
     if (parsed) {
       setCurrent(parsed);
+      onChange?.(parsed);
     }
   };
   return h(
     Section,
     { eyebrow: COPY.platform.eyebrow, title: COPY.platform.title },
-    h(OptionList, { options: platformOptions, value: current, onChange: handleChange, onSubmit, compact }),
-    h(KeyHints, { hints: COPY.hints.platform })
+    h(OptionList, { options: platformOptions, value: current, onChange: handleChange, onSubmit, compact })
   );
 }
 
@@ -206,7 +207,6 @@ export function SubscriptionStep({ value, onSubmit, compact }: SubscriptionStepP
   return h(
     Section,
     { eyebrow: COPY.subscription.eyebrow, title: COPY.subscription.title },
-    h(OptionList, { options: subscriptionOptions, value: current, onChange: handleChange, onSubmit, compact }),
-    h(KeyHints, { hints: COPY.hints.subscription })
+    h(OptionList, { options: subscriptionOptions, value: current, onChange: handleChange, onSubmit, compact })
   );
 }

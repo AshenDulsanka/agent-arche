@@ -23,7 +23,7 @@ export const PLATFORM_META = {
     note: "Best when you want the deepest GitHub-native workflow.",
   },
   claude: {
-    name: "Claude Code",
+    name: "Claude Code (beta)",
     short: "Claude",
     accent: "yellow",
     destination: ".claude/ + CLAUDE.md",
@@ -34,7 +34,7 @@ export const PLATFORM_META = {
     note: "Good fit for terminal-first Claude workflows.",
   },
   codex: {
-    name: "Codex",
+    name: "Codex (beta)",
     short: "Codex",
     accent: "cyan",
     destination: ".codex/ + .agents/skills/ + AGENTS.md",
@@ -186,17 +186,5 @@ export const COPY = {
     nextAction: "Next action",
     completedTargets: "Completed targets",
     filesCopied: "Files copied so far",
-  },
-  // Keyboard hint rows
-  hints: {
-    platform: [
-      { label: "↑↓", value: "move" },
-      { label: "enter", value: "select" },
-      { label: "j/k", value: "navigate" },
-    ],
-    subscription: [
-      { label: "↑↓", value: "move" },
-      { label: "enter", value: "continue" },
-    ],
   },
 };

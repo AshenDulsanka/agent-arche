@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Box, Text, useApp } from "ink";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { Box, Text, useApp, useInput } from "ink";
 import fs from "fs";
 import { COPY, type Platform, type Subscription } from "./lib/constants.js";
 import {
@@ -13,9 +13,10 @@ import {
   copyFile,
 } from "./lib/utils.js";
 import { getCopilotPlan, getClaudePlan, getCodexPlan } from "./lib/plans.js";
+import { getFooterHints } from "./lib/hints.js";
 import { Frame, Section } from "./components/Layout.js";
 import { Header } from "./components/Header.js";
-import { PlatformCards, SubscriptionStep } from "./components/Options.js";
+import { KeyHints, PlatformCards, SubscriptionStep } from "./components/Options.js";
 import { InstallPreview, ExistingInstallView } from "./components/Preview.js";
 import { ProgressView } from "./components/Progress.js";
 import { SuccessView } from "./components/Success.js";
@@ -71,6 +72,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
   const { compact } = useCompactLayout();
   const pkg = useMemo(() => readPackageJson(), []);
   const cwd = process.cwd();
+  const escapeLockUntil = useRef(0);
 
   const [step,          setStep]          = useState<AppStep>("platform");
   const [platform,      setPlatform]      = useState<Platform>("copilot");
@@ -86,10 +88,97 @@ export function App({ force = false }: AppProps): React.ReactElement {
   const [missing,       setMissing]       = useState<string[]>([]);
   const [preview,       setPreview]       = useState<PlanSummary | null>(null);
 
+  const resetPreparedState = () => {
+    setPlan(null);
+    setPreview(null);
+    setExisting(null);
+  };
+
   const abortInstall = () => {
     setAborted(true);
     setTimeout(() => exit(), 100);
   };
+
+  const goBack = (currentStep: AppStep, currentPlatform: Platform): boolean => {
+    if (currentStep === "subscription") {
+      setStep("platform");
+      return true;
+    }
+
+    if (currentStep === "confirm") {
+      resetPreparedState();
+      setStep(currentPlatform === "copilot" ? "subscription" : "platform");
+      return true;
+    }
+
+    return false;
+  };
+
+  const lockEscape = () => {
+    escapeLockUntil.current = Date.now() + 250;
+  };
+
+  useInput((input, key) => {
+    const isEscape = key.escape || input === "\u001B";
+
+    if (isEscape && Date.now() < escapeLockUntil.current) {
+      return;
+    }
+
+    if (input === "q" || input === "Q") {
+      if (step === "done" || step === "existing") {
+        exit();
+        return;
+      }
+      abortInstall();
+      return;
+    }
+
+    // Confirm step: own all input here so there's a single handler with fresh state
+    if (step === "confirm") {
+      if (isEscape) {
+        const movedBack = goBack(step, platform);
+        if (movedBack) {
+          lockEscape();
+        }
+        return;
+      }
+      if (key.return || input === "y" || input === "Y") {
+        setStep("install");
+        return;
+      }
+      if (input === "n" || input === "N") {
+        abortInstall();
+        return;
+      }
+      return;
+    }
+
+    if (isEscape) {
+      if (step === "install") {
+        abortInstall();
+        lockEscape();
+        return;
+      }
+
+      if (step === "platform") {
+        abortInstall();
+        lockEscape();
+        return;
+      }
+
+      const movedBack = goBack(step, platform);
+      if (movedBack) {
+        lockEscape();
+        return;
+      }
+
+      if (!movedBack && step !== "done" && step !== "existing") {
+        abortInstall();
+        lockEscape();
+      }
+    }
+  });
 
   const preparePlan = (nextPlatform: Platform, nextSubscription: Subscription): void => {
     let nextPlan: InstallPlan;
@@ -205,6 +294,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
         ? h(PlatformCards, {
             value: platform,
             compact,
+            onChange: setPlatform,
             onSubmit: (value: string) => {
               if (!isPlatform(value)) {
                 return;
@@ -253,7 +343,9 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
       !aborted && step === "done" && plan
         ? h(SuccessView, { platform, plan, totalFiles, hash, missing, force, compact })
-        : null
+        : null,
+
+      h(KeyHints, { hints: getFooterHints(step) })
     )
   );
 }

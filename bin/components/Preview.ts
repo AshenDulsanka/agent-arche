@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text } from "ink";
 import path from "path";
 import { PLATFORM_META, SUBSCRIPTION_META, META_FILE, COPY, type Platform, type Subscription } from "../lib/constants.js";
 import { Section } from "./Layout.js";
@@ -16,7 +16,6 @@ interface InfoLineProps {
 
 interface ConfirmBarProps {
   force: boolean;
-  onConfirm: ConfirmHandler;
 }
 
 interface InstallPreviewProps {
@@ -45,12 +44,7 @@ export function InfoLine({ label, value, valueColor = "white" }: InfoLineProps):
 }
 
 // ─── ConfirmBar ───────────────────────────────────────────────────────────────
-function ConfirmBar({ force, onConfirm }: ConfirmBarProps): React.ReactElement {
-  useInput((input, key) => {
-    if (key.return || input === "y") onConfirm(true);
-    if (input === "n") onConfirm(false);
-  });
-
+function ConfirmBar({ force }: ConfirmBarProps): React.ReactElement {
   return h(
     Box,
     { marginTop: 1, borderStyle: "round", borderColor: "gray", paddingX: 1, paddingY: 0, justifyContent: "space-between" },
@@ -114,7 +108,7 @@ export function InstallPreview({ platform, subscription, plan, preview, force, o
             h(Text, { color: "gray" }, preview.missing.join(", "))
           )
         : null,
-      h(ConfirmBar, { force, onConfirm })
+      h(ConfirmBar, { force })
     )
   );
 }

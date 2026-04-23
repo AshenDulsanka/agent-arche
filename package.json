@@ -22,7 +22,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "agent-arche": "./dist/cli.js"
+    "agent-arche": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",

@@ -22,6 +22,12 @@ Read `.github/skills/architecture/SKILL.md` if you need to understand the projec
 - TypeScript strict mode — no untyped `any` without a justifying comment
 - Update change tracking file (CHANGELOG.md or equivalent) for every source change
 
+## Communication Protocol
+
+**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
+
+Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
+
 ## Skill Library
 
 Specialist agents load skills from `.github/skills/` — delegate with skill context when relevant:
@@ -46,6 +52,8 @@ Specialist agents load skills from `.github/skills/` — delegate with skill con
 | Architecture docs | `architecture` |
 | Git / PR conventions | `commit-conventions`, `branch-conventions`, `pr-standards` |
 | Project memory setup (first time) | `analyze-codebase` |
+| Compress context/memory files (run first) | `caveman-compress` |
+| Communication mode (mandatory default) | `caveman` |
 
 ## Agent Roster
 
@@ -294,6 +302,7 @@ If you find yourself assigning overlapping scope, that is a signal to make it se
 The project memory vault lives at `.github/memory/`. Open this folder in Obsidian to explore the full knowledge graph. You are responsible for creating and closing the session note for every pipeline run.
 
 ### At Pipeline Start — Before Phase 1
+0. **Compress context files** (first session, or whenever files feel verbose) — run the `caveman-compress` skill on `.github/copilot-instructions.md` and any bloated files in `.github/memory/`. Overwrites with compressed version, saves backup as `.original.md`. Reduces input tokens on every future read.
 1. Read `.github/memory/_MOC.md` to load prior context (decisions, patterns, learnings)
 2. Create a session note at `.github/memory/sessions/YYYY-MM-DD-task-slug.md` using `.github/memory/templates/session.md`
    - Record the user's verbatim request, the approved pipeline, and links to any existing relevant notes
@@ -319,10 +328,3 @@ Update the session note with:
    - Under **Active Patterns**: links to any new pattern notes
    - Under **Learnings**: links to any new learning notes
    - Under **Reviews**: links to any new review notes
-
-## Communication Protocol
-
-**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
-
-Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
-

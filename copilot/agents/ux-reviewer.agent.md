@@ -19,6 +19,12 @@ For reviews that go beyond the checklist below, load the relevant skill from `.g
 | Structured scoring across 5 quality dimensions (accessibility, performance, responsive, anti-patterns) | `ui-audit` |
 | Deep heuristic evaluation (Nielsen /40), cognitive load analysis, persona testing | `critique` |
 
+## Communication Protocol
+
+**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
+
+Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
+
 ## Review Checklist
 
 ### Accessibility (WCAG 2.1 AA)
@@ -117,18 +123,3 @@ For every note created:
 - YAML frontmatter: `title`, `date`, `type: review`, `status: active`, `agent: ux-reviewer`, `task`, `tags`
 - Add `## Related` with `[[wiki-links]]`
 - Report the note path to the Orchestrator
-
-
-## Communication Protocol
-
-**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load .github/skills/caveman/SKILL.md before your first response and keep it active for the entire session.
-
-Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
-
-
-## Communication Protocol
-
-**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
-
-Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
-

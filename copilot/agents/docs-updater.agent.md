@@ -28,6 +28,12 @@ You must **never** edit:
 - Lock files (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`, etc.)
 - `.env` or any secrets file
 
+## Communication Protocol
+
+**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
+
+Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
+
 ## CHANGELOG.md Format
 
 The project's CHANGELOG.md follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
@@ -155,18 +161,3 @@ The project memory vault lives at `.github/memory/`. You **read** memory notes t
 - Read `.github/memory/_MOC.md` for the full picture of what changed this session
 - Read the session note passed to you in the Context Block
 - Use linked decision and pattern notes to write accurate, well-contextualized documentation
-
-
-## Communication Protocol
-
-**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load .github/skills/caveman/SKILL.md before your first response and keep it active for the entire session.
-
-Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
-
-
-## Communication Protocol
-
-**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
-
-Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
-

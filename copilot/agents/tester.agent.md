@@ -17,6 +17,12 @@ Read `.github/skills/tdd/SKILL.md` for the project's testing philosophy. Key pri
 - A good test survives internal refactors — if behavior hasn't changed, the test shouldn't break
 - Mock only at **system boundaries** (external APIs, databases, time) — never mock your own classes
 
+## Communication Protocol
+
+**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
+
+Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
+
 ## Testing Strategy
 
 ### What to Test
@@ -130,18 +136,3 @@ For every note created:
 - YAML frontmatter: `title`, `date`, `type: learning`, `status: active`, `agent: tester`, `task`, `tags`
 - Add `## Related` with `[[wiki-links]]` to the session note
 - Report the note path to the Orchestrator
-
-
-## Communication Protocol
-
-**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load .github/skills/caveman/SKILL.md before your first response and keep it active for the entire session.
-
-Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
-
-
-## Communication Protocol
-
-**Mandatory — non-negotiable.** Every response **must** use caveman full mode. Load `.github/skills/caveman/SKILL.md` before your first response and keep it active for the entire session.
-
-Caveman full mode: drop articles and filler, fragments OK, short synonyms, technical terms exact. Off only when user explicitly says "stop caveman" or "normal mode".
-

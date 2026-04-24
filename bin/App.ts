@@ -10,6 +10,7 @@ import {
   summarizePlan,
   fetchNpmHash,
   fetchNpmLatestVersion,
+  isAllowedInstallPath,
   sleep,
   copyDir,
   copyFile,
@@ -87,7 +88,6 @@ export function App({ force = false }: AppProps): React.ReactElement {
   const [fetchingHash,   setFetchingHash]   = useState(false);
   const [missing,        setMissing]        = useState<string[]>([]);
   const [preview,        setPreview]        = useState<PlanSummary | null>(null);
-  const [updateResolved, setUpdateResolved] = useState(false);
   const [updateChecking, setUpdateChecking] = useState(force);
   const [latestVersion,  setLatestVersion]  = useState<string | null>(null);
 
@@ -214,7 +214,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
   };
 
   useEffect(() => {
-    if (!force || updateResolved) {
+    if (!force) {
       return;
     }
 
@@ -222,7 +222,6 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     const resolveUpdateFlow = async () => {
       const detected = detectInstalledPlatform(cwd);
-      setUpdateResolved(true);
 
       if (!detected) {
         setUpdateChecking(false);
@@ -257,7 +256,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
     return () => {
       cancelled = true;
     };
-  }, [cwd, force, updateResolved]);
+  }, [cwd, force, exit]);
 
   useEffect(() => {
     if (step !== "install" || !plan) return;
@@ -283,6 +282,13 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
         let countMsg = "";
         if ("destDir" in s && s.destDir) {
+          if (!isAllowedInstallPath(cwd, s.destDir)) {
+            countMsg = "blocked (unsafe path)";
+            results.push({ label: s.label, msg: countMsg });
+            setInstallSteps([...results]);
+            continue;
+          }
+
           if (s.skipIfExists && fs.existsSync(s.destDir)) {
             countMsg = "skipped (already exists)";
           } else {
@@ -291,6 +297,13 @@ export function App({ force = false }: AppProps): React.ReactElement {
             countMsg = `${count} file${count === 1 ? "" : "s"}`;
           }
         } else if ("destFile" in s && s.destFile) {
+          if (!isAllowedInstallPath(cwd, s.destFile)) {
+            countMsg = "blocked (unsafe path)";
+            results.push({ label: s.label, msg: countMsg });
+            setInstallSteps([...results]);
+            continue;
+          }
+
           if (s.skipIfExists && fs.existsSync(s.destFile)) {
             countMsg = "skipped (already exists)";
           } else {
@@ -314,6 +327,12 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
       setHash(nextHash);
       setFetchingHash(false);
+      if (!isAllowedInstallPath(cwd, plan.metaDir)) {
+        setStep("done");
+        setTimeout(() => exit(), 100);
+        return;
+      }
+
       writeMeta(plan.metaDir, {
         version:      pkg.version,
         installedAt:  new Date().toISOString(),

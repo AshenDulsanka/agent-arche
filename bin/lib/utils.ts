@@ -27,6 +27,42 @@ const __dirname = path.dirname(__filename);
 // bin/lib/ -> bin/ -> package root
 export const PACKAGE_ROOT = path.join(__dirname, "../..");
 
+const NPM_REGISTRY_HOST = "registry.npmjs.org";
+const NPM_PACKAGE_NAME = "agent-arche";
+const SEMVER_LIKE = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
+const ALLOWED_DEST_DIRS = new Set([".github", ".claude", ".codex", ".agents"]);
+const ALLOWED_DEST_FILES = new Set(["AGENTS.md", "CLAUDE.md"]);
+
+function isSubPath(parent: string, target: string): boolean {
+  const rel = path.relative(parent, target);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
+export function isAllowedInstallPath(cwd: string, targetPath: string): boolean {
+  const root = path.resolve(cwd);
+  const target = path.resolve(targetPath);
+
+  if (!isSubPath(root, target)) {
+    return false;
+  }
+
+  const rel = path.relative(root, target);
+  if (!rel || rel === ".") {
+    return false;
+  }
+
+  const first = rel.split(path.sep)[0];
+  if (!first) {
+    return false;
+  }
+
+  if (ALLOWED_DEST_DIRS.has(first)) {
+    return true;
+  }
+
+  return ALLOWED_DEST_FILES.has(first) && rel === first;
+}
+
 // ─── File system helpers ──────────────────────────────────────────────────────
 export function countDir(src: string): number {
   let n = 0;
@@ -44,6 +80,9 @@ export function copyDir(src: string, dest: string, transformFn?: ContentTransfor
   fs.mkdirSync(dest, { recursive: true });
   let count = 0;
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    if (entry.isSymbolicLink()) {
+      continue;
+    }
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {
@@ -134,45 +173,98 @@ export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
 }
 
 // ─── Network ──────────────────────────────────────────────────────────────────
-export function fetchNpmHash(version: string): Promise<string | null> {
-  return new Promise((resolve: (value: string | null) => void) => {
-    const req = https.get("https://registry.npmjs.org/agent-arche", { timeout: 5000 }, (res) => {
+function fetchNpmJson(pathname: string, timeoutMs = 4000): Promise<unknown | null> {
+  return new Promise((resolve: (value: unknown | null) => void) => {
+    const MAX_RESPONSE_BYTES = 256 * 1024;
+    const allowedPath = pathname === "latest" || SEMVER_LIKE.test(pathname);
+    if (!allowedPath) {
+      resolve(null);
+      return;
+    }
+
+    const endpoint = new URL(`https://${NPM_REGISTRY_HOST}/${NPM_PACKAGE_NAME}/${encodeURIComponent(pathname)}`);
+    let settled = false;
+    const finish = (value: unknown | null) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timer);
+      resolve(value);
+    };
+
+    const timer = setTimeout(() => {
+      req.destroy();
+      finish(null);
+    }, timeoutMs);
+
+    const req = https.get(endpoint, { headers: { Accept: "application/json" } }, (res) => {
       let data = "";
-      res.on("data", (chunk: Buffer) => { data += chunk.toString("utf8"); });
+      let bytes = 0;
+      res.setEncoding("utf8");
+      res.on("data", (chunk: string) => {
+        bytes += Buffer.byteLength(chunk, "utf8");
+        if (bytes > MAX_RESPONSE_BYTES) {
+          req.destroy();
+          finish(null);
+          return;
+        }
+        data += chunk;
+      });
       res.on("end", () => {
+        if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+          finish(null);
+          return;
+        }
+
+        const contentType = Array.isArray(res.headers["content-type"])
+          ? res.headers["content-type"].join(";")
+          : (res.headers["content-type"] ?? "");
+        if (!contentType.includes("application/json")) {
+          finish(null);
+          return;
+        }
+
         try {
-          const json = JSON.parse(data) as {
-            versions?: Record<string, { dist?: { integrity?: string } }>;
-          };
-          resolve(json.versions?.[version]?.dist?.integrity ?? null);
+          finish(JSON.parse(data) as unknown);
         } catch {
-          resolve(null);
+          finish(null);
         }
       });
+      res.on("error", () => finish(null));
     });
-    req.on("error", () => resolve(null));
-    req.on("timeout", () => { req.destroy(); resolve(null); });
+
+    req.on("error", () => finish(null));
+    req.on("timeout", () => {
+      req.destroy();
+      finish(null);
+    });
+    req.setTimeout(timeoutMs);
+  });
+}
+
+export function fetchNpmHash(version: string): Promise<string | null> {
+  if (!SEMVER_LIKE.test(version)) {
+    return Promise.resolve(null);
+  }
+
+  return fetchNpmJson(version).then((json) => {
+    const record = json as { dist?: { integrity?: string } } | null;
+    const integrity = record?.dist?.integrity;
+    if (typeof integrity !== "string") {
+      return null;
+    }
+    return integrity.length <= 256 ? integrity : null;
   });
 }
 
 export function fetchNpmLatestVersion(): Promise<string | null> {
-  return new Promise((resolve: (value: string | null) => void) => {
-    const req = https.get("https://registry.npmjs.org/agent-arche", { timeout: 5000 }, (res) => {
-      let data = "";
-      res.on("data", (chunk: Buffer) => { data += chunk.toString("utf8"); });
-      res.on("end", () => {
-        try {
-          const json = JSON.parse(data) as {
-            "dist-tags"?: { latest?: string };
-          };
-          resolve(json["dist-tags"]?.latest ?? null);
-        } catch {
-          resolve(null);
-        }
-      });
-    });
-    req.on("error", () => resolve(null));
-    req.on("timeout", () => { req.destroy(); resolve(null); });
+  return fetchNpmJson("latest").then((json) => {
+    const record = json as { version?: string } | null;
+    if (typeof record?.version !== "string") {
+      return null;
+    }
+    return SEMVER_LIKE.test(record.version) ? record.version : null;
   });
 }
 

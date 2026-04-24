@@ -37,7 +37,15 @@ export interface InstallMeta {
   source: string;
   sourceType: string;
   platform: Platform;
+  subscription?: Subscription;
   hash: string | null;
+}
+
+export interface DetectedInstall {
+  platform: Platform;
+  subscription: Subscription;
+  meta: InstallMeta;
+  metaDir: string;
 }
 
 export interface PlanSummaryStep {

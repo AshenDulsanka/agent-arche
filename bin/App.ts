@@ -5,6 +5,7 @@ import { COPY, type Platform, type Subscription } from "./lib/constants.js";
 import {
   readPackageJson,
   readMeta,
+  detectInstalledPlatform,
   writeMeta,
   summarizePlan,
   fetchNpmHash,
@@ -30,8 +31,6 @@ import type {
 
 const h = React.createElement;
 
-// ─── Layout hook ──────────────────────────────────────────────────────────────
-// compact = true for most real terminals (< 40 rows); keeps everything on screen.
 function useCompactLayout() {
   const read = () => ({
     width:  process.stdout.columns ?? 120,
@@ -62,7 +61,6 @@ function isSubscription(value: string): value is Subscription {
   return value === "auto" || value === "student" || value === "pro" || value === "pro+";
 }
 
-// ─── App ──────────────────────────────────────────────────────────────────────
 interface AppProps {
   force?: boolean;
 }
@@ -74,19 +72,20 @@ export function App({ force = false }: AppProps): React.ReactElement {
   const cwd = process.cwd();
   const escapeLockUntil = useRef(0);
 
-  const [step,          setStep]          = useState<AppStep>("platform");
-  const [platform,      setPlatform]      = useState<Platform>("copilot");
-  const [subscription,  setSubscription]  = useState<Subscription>("auto");
-  const [plan,          setPlan]          = useState<InstallPlan | null>(null);
-  const [existing,      setExisting]      = useState<InstallMeta | null>(null);
-  const [aborted,       setAborted]       = useState(false);
-  const [installSteps,  setInstallSteps]  = useState<InstallStepResult[]>([]);
-  const [currentStepIdx,setCurrentStepIdx]= useState(-1);
-  const [totalFiles,    setTotalFiles]    = useState(0);
-  const [hash,          setHash]          = useState<string | null>(null);
-  const [fetchingHash,  setFetchingHash]  = useState(false);
-  const [missing,       setMissing]       = useState<string[]>([]);
-  const [preview,       setPreview]       = useState<PlanSummary | null>(null);
+  const [step,           setStep]           = useState<AppStep>("platform");
+  const [platform,       setPlatform]       = useState<Platform>("copilot");
+  const [subscription,   setSubscription]   = useState<Subscription>("auto");
+  const [plan,           setPlan]           = useState<InstallPlan | null>(null);
+  const [existing,       setExisting]       = useState<InstallMeta | null>(null);
+  const [aborted,        setAborted]        = useState(false);
+  const [installSteps,   setInstallSteps]   = useState<InstallStepResult[]>([]);
+  const [currentStepIdx, setCurrentStepIdx] = useState(-1);
+  const [totalFiles,     setTotalFiles]     = useState(0);
+  const [hash,           setHash]           = useState<string | null>(null);
+  const [fetchingHash,   setFetchingHash]   = useState(false);
+  const [missing,        setMissing]        = useState<string[]>([]);
+  const [preview,        setPreview]        = useState<PlanSummary | null>(null);
+  const [updateResolved, setUpdateResolved] = useState(false);
 
   const resetPreparedState = () => {
     setPlan(null);
@@ -134,7 +133,6 @@ export function App({ force = false }: AppProps): React.ReactElement {
       return;
     }
 
-    // Confirm step: own all input here so there's a single handler with fresh state
     if (step === "confirm") {
       if (isEscape) {
         const movedBack = goBack(step, platform);
@@ -184,7 +182,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
     let nextPlan: InstallPlan;
     if      (nextPlatform === "copilot") nextPlan = getCopilotPlan(cwd, nextSubscription);
     else if (nextPlatform === "claude")  nextPlan = getClaudePlan(cwd);
-    else                                 nextPlan = getCodexPlan(cwd);
+    else                                  nextPlan = getCodexPlan(cwd);
 
     setPlatform(nextPlatform);
     setSubscription(nextSubscription);
@@ -203,7 +201,22 @@ export function App({ force = false }: AppProps): React.ReactElement {
     setStep("confirm");
   };
 
-  // ─── Install runner ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!force || updateResolved) {
+      return;
+    }
+
+    const detected = detectInstalledPlatform(cwd);
+    setUpdateResolved(true);
+
+    if (!detected) {
+      return;
+    }
+
+    setExisting(detected.meta);
+    preparePlan(detected.platform, detected.subscription);
+  }, [cwd, force, updateResolved]);
+
   useEffect(() => {
     if (step !== "install" || !plan) return;
 
@@ -260,12 +273,13 @@ export function App({ force = false }: AppProps): React.ReactElement {
       setHash(nextHash);
       setFetchingHash(false);
       writeMeta(plan.metaDir, {
-        version:     pkg.version,
-        installedAt: new Date().toISOString(),
-        source:      "AshenDulsanka/agent-arche",
-        sourceType:  "npm",
+        version:      pkg.version,
+        installedAt:  new Date().toISOString(),
+        source:       "AshenDulsanka/agent-arche",
+        sourceType:   "npm",
         platform,
-        hash:        nextHash ?? null,
+        subscription: platform === "copilot" ? subscription : undefined,
+        hash:         nextHash ?? null,
       });
       setStep("done");
       setTimeout(() => exit(), 100);
@@ -273,9 +287,8 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     runInstall();
     return () => { cancelled = true; };
-  }, [pkg.version, plan, platform, step, exit]);
+  }, [pkg.version, plan, platform, step, exit, subscription]);
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
   return h(
     Box,
     { paddingX: 1, paddingY: compact ? 0 : 1, flexDirection: "column" },
@@ -290,7 +303,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
           )
         : null,
 
-      !aborted && step === "platform"
+      !aborted && (!force || updateResolved) && step === "platform"
         ? h(PlatformCards, {
             value: platform,
             compact,
@@ -305,7 +318,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
           })
         : null,
 
-      !aborted && step === "subscription"
+      !aborted && (!force || updateResolved) && step === "subscription"
         ? h(SubscriptionStep, {
             value: subscription,
             compact,

@@ -31,10 +31,10 @@ export function SuccessView({ platform, plan, totalFiles, hash, missing, force, 
       h(
         Box,
         { borderStyle: "round", borderColor: meta.accent, paddingX: 1, paddingY: 0, flexDirection: "column" },
-        h(InfoLine, { label: COPY.labels.filesWritten,   value: `${totalFiles}`,                                 valueColor: meta.accent }),
-        h(InfoLine, { label: COPY.labels.platform,       value: meta.name }),
-        h(InfoLine, { label: COPY.labels.primaryCommand, value: primaryCommand,                                  valueColor: "cyan" }),
-        h(InfoLine, { label: COPY.labels.integrity,      value: hash ? COPY.success.integrityOnline : COPY.success.integrityOffline, valueColor: hash ? "green" : "yellow" })
+        h(InfoLine, { label: COPY.labels.filesWritten, value: `${totalFiles}`, valueColor: meta.accent }),
+        h(InfoLine, { label: COPY.labels.platform, value: meta.name }),
+        h(InfoLine, { label: COPY.labels.primaryCommand, value: primaryCommand, valueColor: "cyan" }),
+        h(InfoLine, { label: COPY.labels.integrity, value: hash ? COPY.success.integrityOnline : COPY.success.integrityOffline, valueColor: hash ? "green" : "yellow" })
       ),
       hash
         ? h(

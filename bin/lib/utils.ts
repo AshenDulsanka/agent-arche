@@ -14,6 +14,7 @@ import {
 } from "./constants.js";
 import type {
   ContentTransform,
+  DetectedInstall,
   HeaderStepInfo,
   InstallMeta,
   OptionItem,
@@ -86,6 +87,13 @@ export function readMeta(dir: string): InstallMeta | null {
       source: typeof data.source === "string" ? data.source : "Unknown",
       sourceType: typeof data.sourceType === "string" ? data.sourceType : "Unknown",
       platform: (data.platform as Platform) ?? "copilot",
+      subscription:
+        data.subscription === "auto" ||
+        data.subscription === "student" ||
+        data.subscription === "pro" ||
+        data.subscription === "pro+"
+          ? data.subscription
+          : undefined,
       hash: typeof data.hash === "string" ? data.hash : null,
     };
   } catch {
@@ -96,6 +104,33 @@ export function readMeta(dir: string): InstallMeta | null {
 export function writeMeta(dir: string, fields: InstallMeta): void {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, META_FILE), JSON.stringify(fields, null, 2) + "\n");
+}
+
+export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
+  const candidates: Array<{ platform: Platform; metaDir: string }> = [
+    { platform: "copilot", metaDir: path.join(cwd, ".github") },
+    { platform: "claude", metaDir: path.join(cwd, ".claude") },
+    { platform: "codex", metaDir: path.join(cwd, ".codex") },
+  ];
+
+  for (const candidate of candidates) {
+    const meta = readMeta(candidate.metaDir);
+    if (!meta) {
+      continue;
+    }
+
+    const platform = meta.platform ?? candidate.platform;
+    const subscription = platform === "copilot" ? (meta.subscription ?? "auto") : "auto";
+
+    return {
+      platform,
+      subscription,
+      meta,
+      metaDir: candidate.metaDir,
+    };
+  }
+
+  return null;
 }
 
 // ─── Network ──────────────────────────────────────────────────────────────────
@@ -137,7 +172,7 @@ export function formatMode(force: boolean): "update" | "install" {
 export function makeAgentTransform(subscription: Subscription): ContentTransform | null {
   if (subscription === "auto") {
     return (content: string) => {
-      const modelList = [MODELS.OPUS, MODELS.SONNET, MODELS.GPT5, MODELS.CODEX];
+      const modelList = [MODELS.OPUS, MODELS.SONNET, MODELS.GPT5, MODELS.CODEX, MODELS.GEMINI];
       let transformed = content;
       for (const model of modelList) {
         transformed = transformed.replace(new RegExp(escapeRegex(model), "g"), MODELS.AUTO);

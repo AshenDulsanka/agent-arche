@@ -1,5 +1,5 @@
-# agent-arche
-Multi-platform AI agent orchestration - specialists for GitHub Copilot, Claude Code, and Codex.
+# agent-arche (beta)
+Multi-platform AI agent orchestration - specialists for GitHub Copilot, Claude Code, and Codex. This is still in beta phase, because some skills are still getting improved on how they are called and used through agents.
 
 ---------------------------------------------
 

@@ -67,13 +67,13 @@ export function InstallPreview({ platform, subscription, plan, preview, force, o
       h(
         Box,
         { borderStyle: "round", borderColor: meta.accent, paddingX: 1, paddingY: 0, flexDirection: "column" },
-        h(InfoLine, { label: COPY.labels.platform,     value: meta.name,          valueColor: meta.accent }),
+        h(InfoLine, { label: COPY.labels.platform, value: meta.name, valueColor: meta.accent }),
         subMeta
-          ? h(InfoLine, { label: COPY.labels.copilotPlan,  value: subMeta.label,      valueColor: subMeta.accent })
+          ? h(InfoLine, { label: COPY.labels.copilotPlan, value: subMeta.label, valueColor: subMeta.accent })
           : null,
-        h(InfoLine, { label: COPY.labels.destination,  value: meta.destination }),
+        h(InfoLine, { label: COPY.labels.destination, value: meta.destination }),
         h(InfoLine, { label: COPY.labels.installUnits, value: `${preview.total} files across ${preview.steps.length} targets` }),
-        h(InfoLine, { label: COPY.labels.metadata,     value: path.join(plan.metaDir, META_FILE) })
+        h(InfoLine, { label: COPY.labels.metadata, value: path.join(plan.metaDir, META_FILE) })
       ),
       h(
         Box,
@@ -122,10 +122,10 @@ export function ExistingInstallView({ platform, existing, compact }: ExistingIns
     h(
       Box,
       { borderStyle: "round", borderColor: "yellow", paddingX: 1, paddingY: 0, flexDirection: "column" },
-      h(InfoLine, { label: COPY.labels.installedVersion, value: existing?.version ?? "Unknown",              valueColor: "yellow" }),
-      h(InfoLine, { label: COPY.labels.platform,         value: meta.name }),
-      h(InfoLine, { label: COPY.labels.installedAt,      value: existing?.installedAt ?? "Unknown" }),
-      h(InfoLine, { label: COPY.labels.nextAction,       value: COPY.existing.nextAction,            valueColor: "cyan" })
+      h(InfoLine, { label: COPY.labels.installedVersion, value: existing?.version ?? "Unknown", valueColor: "yellow" }),
+      h(InfoLine, { label: COPY.labels.platform, value: meta.name }),
+      h(InfoLine, { label: COPY.labels.installedAt, value: existing?.installedAt ?? "Unknown" }),
+      h(InfoLine, { label: COPY.labels.nextAction, value: COPY.existing.nextAction, valueColor: "cyan" })
     ),
     compact ? null : h(Box, { marginTop: 1 }, h(Text, { color: "gray" }, COPY.existing.noFilesChanged))
   );

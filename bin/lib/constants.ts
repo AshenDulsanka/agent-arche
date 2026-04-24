@@ -6,6 +6,7 @@ export const MODELS = {
   OPUS: "Claude Opus 4.7 (copilot)",
   GPT5: "GPT-5.4 (copilot)",
   CODEX: "GPT-5.3-Codex (copilot)",
+  GEMINI: "Gemini 3.1 Pro (Preview) (copilot)",
   AUTO: "Auto (copilot)",
 } as const;
 
@@ -57,6 +58,7 @@ export const SUBSCRIPTION_META = {
       `${MODELS.SONNET} -> ${MODELS.AUTO}`,
       `${MODELS.GPT5} -> ${MODELS.AUTO}`,
       `${MODELS.CODEX} -> ${MODELS.AUTO}`,
+      `${MODELS.GEMINI} -> ${MODELS.AUTO}`,
     ],
   },
   student: {

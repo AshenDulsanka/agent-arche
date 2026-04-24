@@ -34,6 +34,17 @@ interface ExistingInstallViewProps {
   compact: boolean;
 }
 
+interface UpToDateViewProps {
+  platform: Platform;
+  existing: InstallMeta | null;
+  latestVersion: string;
+  compact: boolean;
+}
+
+interface UpdateMissingViewProps {
+  compact: boolean;
+}
+
 export function InfoLine({ label, value, valueColor = "white" }: InfoLineProps): React.ReactElement {
   return h(
     Box,
@@ -128,5 +139,33 @@ export function ExistingInstallView({ platform, existing, compact }: ExistingIns
       h(InfoLine, { label: COPY.labels.nextAction, value: COPY.existing.nextAction, valueColor: "cyan" })
     ),
     compact ? null : h(Box, { marginTop: 1 }, h(Text, { color: "gray" }, COPY.existing.noFilesChanged))
+  );
+}
+
+export function UpToDateView({ platform, existing, latestVersion, compact }: UpToDateViewProps): React.ReactElement {
+  const meta = PLATFORM_META[platform];
+  return h(
+    Section,
+    { eyebrow: COPY.existing.eyebrow, title: COPY.existing.latestTitle },
+    h(
+      Box,
+      { borderStyle: "round", borderColor: "green", paddingX: 1, paddingY: 0, flexDirection: "column" },
+      h(InfoLine, { label: COPY.labels.platform, value: meta.name }),
+      h(InfoLine, { label: COPY.labels.installedVersion, value: existing?.version ?? "Unknown", valueColor: "green" }),
+      h(InfoLine, { label: COPY.labels.npmLatestVersion, value: latestVersion, valueColor: "green" }),
+      h(InfoLine, { label: COPY.labels.installedAt, value: existing?.installedAt ?? "Unknown" })
+    ),
+    compact ? null : h(Box, { marginTop: 1 }, h(Text, { color: "gray" }, COPY.existing.latestMessage))
+  );
+}
+
+export function UpdateMissingView({ compact }: UpdateMissingViewProps): React.ReactElement {
+  return h(
+    Section,
+    { eyebrow: COPY.existing.eyebrow, title: COPY.existing.missingTitle },
+    h(Box, { borderStyle: "round", borderColor: "yellow", paddingX: 1, paddingY: 0, flexDirection: "column" },
+      h(Text, null, COPY.existing.missingMessage),
+      compact ? null : h(Text, { color: "cyan" }, COPY.existing.nextAction.replace("update", "install"))
+    )
   );
 }

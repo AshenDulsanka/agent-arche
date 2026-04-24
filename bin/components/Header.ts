@@ -18,6 +18,7 @@ interface HeaderProps {
   step: string;
   platform: Platform;
   compact: boolean;
+  showSteps: boolean;
 }
 
 function StepIndicator({ visibleSteps, currentIndex }: StepIndicatorProps): React.ReactElement {
@@ -38,7 +39,7 @@ function StepIndicator({ visibleSteps, currentIndex }: StepIndicatorProps): Reac
   );
 }
 
-export function Header({ version, force, cwd, step, platform, compact }: HeaderProps): React.ReactElement {
+export function Header({ version, force, cwd, step, platform, compact, showSteps }: HeaderProps): React.ReactElement {
   const stepInfo = getStepIndex(step, platform);
 
   return h(
@@ -61,8 +62,12 @@ export function Header({ version, force, cwd, step, platform, compact }: HeaderP
       Box,
       { marginTop: compact ? 0 : 1, justifyContent: "space-between" },
       h(Text, { color: "gray" }, `Project  ${path.basename(cwd) || cwd}`),
-      h(Text, { color: "gray" }, `Step ${stepInfo.currentIndex + 1}/${stepInfo.visibleSteps.length}`)
+      showSteps
+        ? h(Text, { color: "gray" }, `Step ${stepInfo.currentIndex + 1}/${stepInfo.visibleSteps.length}`)
+        : null
     ),
-    h(StepIndicator, { visibleSteps: stepInfo.visibleSteps, currentIndex: stepInfo.currentIndex })
+    showSteps
+      ? h(StepIndicator, { visibleSteps: stepInfo.visibleSteps, currentIndex: stepInfo.currentIndex })
+      : null
   );
 }

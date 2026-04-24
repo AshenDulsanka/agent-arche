@@ -9,6 +9,7 @@ import {
   writeMeta,
   summarizePlan,
   fetchNpmHash,
+  fetchNpmLatestVersion,
   sleep,
   copyDir,
   copyFile,
@@ -18,9 +19,10 @@ import { getFooterHints } from "./lib/hints.js";
 import { Frame, Section } from "./components/Layout.js";
 import { Header } from "./components/Header.js";
 import { KeyHints, PlatformCards, SubscriptionStep } from "./components/Options.js";
-import { InstallPreview, ExistingInstallView } from "./components/Preview.js";
+import { InstallPreview, ExistingInstallView, UpToDateView, UpdateMissingView } from "./components/Preview.js";
 import { ProgressView } from "./components/Progress.js";
 import { SuccessView } from "./components/Success.js";
+import { Spinner } from "@inkjs/ui";
 import type {
   AppStep,
   InstallPlan,
@@ -86,6 +88,8 @@ export function App({ force = false }: AppProps): React.ReactElement {
   const [missing,        setMissing]        = useState<string[]>([]);
   const [preview,        setPreview]        = useState<PlanSummary | null>(null);
   const [updateResolved, setUpdateResolved] = useState(false);
+  const [updateChecking, setUpdateChecking] = useState(force);
+  const [latestVersion,  setLatestVersion]  = useState<string | null>(null);
 
   const resetPreparedState = () => {
     setPlan(null);
@@ -124,8 +128,16 @@ export function App({ force = false }: AppProps): React.ReactElement {
       return;
     }
 
+    // Block all input while the update check async is in flight
+    if (force && updateChecking) {
+      if (input === "q" || input === "Q" || isEscape) {
+        exit();
+      }
+      return;
+    }
+
     if (input === "q" || input === "Q") {
-      if (step === "done" || step === "existing") {
+      if (step === "done" || step === "existing" || step === "up-to-date" || step === "update-missing") {
         exit();
         return;
       }
@@ -171,7 +183,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
         return;
       }
 
-      if (!movedBack && step !== "done" && step !== "existing") {
+      if (!movedBack && step !== "done" && step !== "existing" && step !== "up-to-date" && step !== "update-missing") {
         abortInstall();
         lockEscape();
       }
@@ -206,15 +218,45 @@ export function App({ force = false }: AppProps): React.ReactElement {
       return;
     }
 
-    const detected = detectInstalledPlatform(cwd);
-    setUpdateResolved(true);
+    let cancelled = false;
 
-    if (!detected) {
-      return;
-    }
+    const resolveUpdateFlow = async () => {
+      const detected = detectInstalledPlatform(cwd);
+      setUpdateResolved(true);
 
-    setExisting(detected.meta);
-    preparePlan(detected.platform, detected.subscription);
+      if (!detected) {
+        setUpdateChecking(false);
+        setStep("update-missing");
+        setTimeout(() => exit(), 1200);
+        return;
+      }
+
+      setExisting(detected.meta);
+      setPlatform(detected.platform);
+      setSubscription(detected.subscription);
+
+      const npmLatest = await fetchNpmLatestVersion();
+      if (cancelled) {
+        return;
+      }
+
+      if (npmLatest) {
+        setLatestVersion(npmLatest);
+        if (detected.meta.version === npmLatest) {
+          setUpdateChecking(false);
+          setStep("up-to-date");
+          return;
+        }
+      }
+
+      setUpdateChecking(false);
+      preparePlan(detected.platform, detected.subscription);
+    };
+
+    resolveUpdateFlow();
+    return () => {
+      cancelled = true;
+    };
   }, [cwd, force, updateResolved]);
 
   useEffect(() => {
@@ -295,7 +337,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
     h(
       Frame,
       null,
-      h(Header, { version: pkg.version, force, cwd, step, platform, compact }),
+      h(Header, { version: pkg.version, force, cwd, step, platform, compact, showSteps: !force }),
 
       aborted
         ? h(Section, { eyebrow: COPY.cancelled.eyebrow, title: COPY.cancelled.title },
@@ -303,7 +345,16 @@ export function App({ force = false }: AppProps): React.ReactElement {
           )
         : null,
 
-      !aborted && (!force || updateResolved) && step === "platform"
+      !aborted && force && updateChecking
+        ? h(Section, { eyebrow: "UPDATE", title: COPY.install.updateChecking },
+            h(Box, { marginTop: 0 },
+              h(Spinner, { type: "dots" }),
+              h(Text, { color: "gray" }, "  npm registry")
+            )
+          )
+        : null,
+
+      !aborted && !force && step === "platform"
         ? h(PlatformCards, {
             value: platform,
             compact,
@@ -318,7 +369,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
           })
         : null,
 
-      !aborted && (!force || updateResolved) && step === "subscription"
+      !aborted && !force && step === "subscription"
         ? h(SubscriptionStep, {
             value: subscription,
             compact,
@@ -333,6 +384,14 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
       !aborted && step === "existing"
         ? h(ExistingInstallView, { platform, existing, compact })
+        : null,
+
+      !aborted && step === "up-to-date" && latestVersion
+        ? h(UpToDateView, { platform, existing, latestVersion, compact })
+        : null,
+
+      !aborted && step === "update-missing"
+        ? h(UpdateMissingView, { compact })
         : null,
 
       !aborted && step === "confirm" && preview && plan

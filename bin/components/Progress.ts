@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, Static } from "ink";
+import { Box, Text } from "ink";
 import { Spinner } from "@inkjs/ui";
 import { COPY } from "../lib/constants.js";
 import { Section } from "./Layout.js";
@@ -47,15 +47,13 @@ export function ProgressView({ plan, installSteps, currentStepIdx, fetchingHash,
           Box,
           { marginTop: 1, flexDirection: "column" },
           h(Text, { bold: true }, COPY.install.completed),
-          h(Static<InstallStepResult>, {
-            items: installSteps.slice(-(compact ? 4 : 8)),
-            children: (item: InstallStepResult, index: number) =>
-              h(Box, { key: `${item.label}-${index}` },
-                h(Text, { color: "green" }, "✓ "),
-                h(Text, { color: "white" }, item.label),
-                item.msg ? h(Text, { color: "gray" }, `  ${item.msg}`) : null
-              ),
-          })
+          ...installSteps.slice(-(compact ? 4 : 8)).map((item: InstallStepResult, index: number) =>
+            h(Box, { key: `${item.label}-${index}` },
+              h(Text, { color: "green" }, "✓ "),
+              h(Text, { color: "white" }, item.label),
+              item.msg ? h(Text, { color: "gray" }, `  ${item.msg}`) : null
+            )
+          )
         )
       : null
   );

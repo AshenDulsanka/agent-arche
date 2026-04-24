@@ -155,6 +155,27 @@ export function fetchNpmHash(version: string): Promise<string | null> {
   });
 }
 
+export function fetchNpmLatestVersion(): Promise<string | null> {
+  return new Promise((resolve: (value: string | null) => void) => {
+    const req = https.get("https://registry.npmjs.org/agent-arche", { timeout: 5000 }, (res) => {
+      let data = "";
+      res.on("data", (chunk: Buffer) => { data += chunk.toString("utf8"); });
+      res.on("end", () => {
+        try {
+          const json = JSON.parse(data) as {
+            "dist-tags"?: { latest?: string };
+          };
+          resolve(json["dist-tags"]?.latest ?? null);
+        } catch {
+          resolve(null);
+        }
+      });
+    });
+    req.on("error", () => resolve(null));
+    req.on("timeout", () => { req.destroy(); resolve(null); });
+  });
+}
+
 // ─── Misc helpers ─────────────────────────────────────────────────────────────
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

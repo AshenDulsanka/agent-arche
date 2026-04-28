@@ -1,169 +1,84 @@
 ---
 name: coding-standards
-description: Use when writing or reviewing TypeScript, Svelte 5 components, or API routes. Covers strict mode requirements, rune syntax ($state, $derived, $effect, $props), naming conventions, file organisation, error handling, import ordering, load() function patterns, and what never to do.
+description: Use when writing or reviewing code in any language. Covers typed-language rules (TypeScript, Python, Go), naming conventions, file organisation, error handling, import ordering, and universal quality rules. Read project conventions first to identify the stack, then apply only the relevant language sections.
 ---
 
 # Coding Standards
 
-> **Stack note:** These standards target SvelteKit + Svelte 5 + TypeScript as the default stack. Adapt the Svelte-specific sections when working with a different framework.
+> Before reviewing, read `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md` to identify the project's language, framework, and version. Adapt stack-specific rules accordingly.
 
-This document defines the coding conventions for SvelteKit + Svelte 5 + TypeScript projects. All contributors and AI agents must follow these standards.
+## Typed Language Rules (apply only when project uses the language)
 
-## TypeScript
+**TypeScript**
+- Strict mode required — never disable `strict: true`
+- No `any` without comment explaining why unavoidable
+- No `@ts-ignore` without comment
+- Use `unknown` + narrowing instead of `any` when type genuinely unknown
+- `interface` for object shapes; `type` for unions, intersections, utilities
+- All exported functions: explicit return type annotations
 
-- **Strict mode is required** — `tsconfig.json` enables `strict: true`. Never disable it.
-- **No `any` types** without a comment explaining exactly why it is unavoidable.
-- **No `@ts-ignore`** unless absolutely necessary, always paired with a comment.
-- Use `unknown` instead of `any` when the type is genuinely unknown — then narrow it.
-- Prefer `interface` for object shapes that describe data structures.
-- Prefer `type` for unions, intersections, and utility types.
-- All exported functions must have explicit return type annotations.
-- All component props must be typed — no untyped `export let`.
+**Python**
+- Type hints required on all function signatures (`def fn(x: int) -> str:`)
+- No `# type: ignore` without explanatory comment
+- Use `T | None` (Python 3.10+) or `Optional[T]` — no implicit `None` returns
+- Use `dataclasses` or `pydantic` for structured data shapes
 
-## Svelte 5
-
-- **Use runes only**: `$state`, `$derived`, `$effect`, `$props`, `$bindable`.
-- **No Svelte 4 syntax**: `$:` reactive declarations, `let:` slot bindings, `on:event` directives are all forbidden.
-- Event handlers use the Svelte 5 `onclick`, `oninput`, `onkeydown` syntax.
-- Use `$props()` for component props:
-  ```svelte
-  <script lang="ts">
-    const { label, onClick }: { label: string; onClick: () => void } = $props();
-  </script>
-  ```
-- Avoid deeply nested `$effect` — prefer `$derived` for computed values.
-
-## Svelte File Structure
-
-Every `.svelte` file must follow this exact order — no exceptions:
-
-1. `<script lang="ts">` block
-2. Markup (HTML template)
-3. `<style>` block (if needed)
-
-```svelte
-<script lang="ts">
-  // imports, state, logic
-</script>
-
-<div class="...">
-  <!-- markup -->
-</div>
-
-<style>
-  /* component-scoped styles */
-</style>
-```
+**Go**
+- All errors must be checked — never discard with `_` unless intentional + commented
+- Exported identifiers must have doc comments
+- No `interface{}` / `any` without justification
+- Prefer table-driven tests; use `errors.Is`/`errors.As` for error checking
 
 ## Naming Conventions
 
 | Thing | Convention | Example |
 |-------|-----------|---------|
-| `.svelte` components | PascalCase | `FileTree.svelte`, `SyncButton.svelte` |
-| `.ts` utilities and helpers | kebab-case | `sync-messages.ts`, `safe-path.ts` |
-| `.ts` type files | kebab-case | `types.ts` |
-| SvelteKit route files | SvelteKit convention | `+page.svelte`, `+page.server.ts`, `+server.ts` |
-| CSS classes | Tailwind utility classes — no custom class names unless necessary |
-| Variables and functions | camelCase | `activeWorkspace`, `loadTree()` |
-| Constants | UPPER_SNAKE_CASE for module-level constants | `MAX_SEARCH_RESULTS` |
-| TypeScript interfaces | PascalCase | `Workspace`, `FileNode` |
+| UI components / classes | PascalCase | `UserCard`, `NoteEditor` |
+| Utility / helper files | kebab-case | `sync-messages.ts`, `format-date.py` |
+| Variables and functions | camelCase | `activeUser`, `loadData()` |
+| Module-level constants | UPPER_SNAKE_CASE | `MAX_RETRIES` |
+| Type / interface names | PascalCase | `UserSchema`, `ApiResponse` |
+| Route / endpoint files | Follow framework convention | `+page.server.ts`, `router.py` |
 
-## File and Folder Organisation
+## File Organisation
 
-- `src/lib/components/` — Svelte UI components, grouped by domain subdirectory
-- `src/lib/server/` — server-side only code (database, migrations, file I/O, AI)
-- `src/lib/data/` — static data and constants used across the app
-- `src/routes/` — SvelteKit routes; API endpoints under `src/routes/api/`
-- One component per file — never put two exported components in the same `.svelte` file
-
-## SvelteKit Route Files
-
-| File | When to use |
-|------|-------------|
-| `+page.server.ts` | Server-only data loading — DB calls, secrets, authentication. Data is serialised and sent to the client. |
-| `+page.ts` | Universal load — runs on server at first load, on client for navigations. Use when data can be public and does not need secrets. |
-| `+server.ts` | API endpoints — returns `Response` or uses SvelteKit helpers (`json`, `error`). Used for AJAX calls from the client. |
-
-If the choice is non-obvious, add a comment at the top of the file explaining why that route type was chosen.
-
-## Import Ordering
-
-Imports must be ordered as follows, separated by blank lines:
-
-1. External packages (npm dependencies)
-2. SvelteKit internals (`$app/navigation`, `$app/environment`, etc.)
-3. Internal `$lib` aliases (`$lib/types`, `$lib/server/database`, etc.)
-4. Relative imports (`../component.svelte`, `./utils.ts`)
-
-```typescript
-import { json, error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-
-import { getDb } from '$lib/server/database';
-import type { Workspace } from '$lib/types';
-```
+- Group by feature/domain, not by type
+- One exported component per file
+- Target under 400 lines per file; split larger files by concern
+- Before creating a new file, check if logic fits in an existing module
 
 ## Error Handling
 
-- **No silent catches** — every `catch` block must either re-throw, log, or return a structured error response.
-- In `+page.server.ts` and `+page.ts` load functions, use SvelteKit's `error()` and `redirect()` helpers. Never construct manual `Response` objects in load functions.
-- In `+server.ts` API routes, return appropriate HTTP status codes (`400`, `404`, `500`) with a JSON body: `{ error: string }`.
-- All server errors must be logged with enough context to reproduce the issue.
+- Never empty `catch` blocks — re-throw, log, or return structured error
+- Server errors: log with context server-side; return safe message to client (no stack traces, no internal paths)
+- API routes: return appropriate HTTP status codes with structured error body
+- Validate all user input at system boundaries before use
 
-```typescript
-// Correct
-} catch (err) {
-  console.error('Failed to read note:', err);
-  return error(500, 'Failed to read note');
-}
+## Security (non-negotiable)
 
-// Wrong
-} catch (_) {}
-```
+- No hardcoded secrets, credentials, or API keys — use environment variables
+- Parameterized queries only — never interpolate user input into SQL/queries
+- Sanitize user-controlled HTML before rendering (DOMPurify or equivalent)
+- Never return stack traces or internal paths to the client
 
-## `load()` Function Patterns
+## Import Ordering
 
-- Always annotate the return type.
-- Always handle errors explicitly — never let load return `undefined` silently.
-- Never return raw database objects — map them to typed interfaces first.
+Groups separated by a blank line:
+1. External packages / standard library
+2. Framework internals
+3. Internal path aliases
+4. Relative imports
 
-```typescript
-export const load: PageServerLoad = async ({ params, locals }) => {
-  const module = locals.db.prepare('SELECT * FROM modules WHERE id = ?').get(params.id);
-  if (!module) error(404, 'Module not found');
-  return { module: module as Module };
-};
-```
+## Code Quality
 
-## Async Patterns
-
-- Prefer `async/await` over `.then()` chains everywhere.
-- Avoid nested `async` functions where a top-level `await` suffices.
-
-## Svelte State: Store vs Local
-
-- `$state` (local runes) — use for state that belongs to a single component or its direct children.
-- Svelte stores (`writable`, `readable`, `derived`) — use only for state shared across multiple components that are not in a parent-child relationship.
-- Do not create a store just to avoid prop drilling — if only two levels deep, props are cleaner.
-
-## Comments
-
-- Comments explain **why** something is done, not **what** the code does.
-- Code that requires a comment to understand **what** it does should be refactored for clarity instead.
-- Exception: complex regex, non-obvious algorithms, and security-critical validation logic may have a brief **what** comment.
-- All `@ts-ignore` and `any` usages must have a comment explaining the reason.
-
-## Function Length and Responsibility
-
-- Target under 50 lines per function.
-- A function should do one thing. If it needs a multi-clause name ("load and validate"), split it.
-- Extract repeated logic into named helpers — but only after it appears at least twice.
+- Functions under 50 lines, single responsibility
+- No dead code, unused imports, or commented-out blocks in commits
+- No logic repeated at 3+ call sites without extraction into a named helper
+- Comment the *why*, not the *what*
 
 ## What Never to Do
 
-- Do not install React, Vue, Angular, or Radix UI packages.
-- Do not write `.js` files where `.ts` files should exist.
-- Do not use Svelte 4 syntax anywhere.
-- Do not hardcode file paths — always use environment variables with documented fallbacks.
-- Do not commit `.env` files, `data/*.db`, or anything in `data/screenshots/`.
-- Do not leave dead code, unused imports, or commented-out blocks in commits.
+- No syntax from the wrong framework version — check project conventions
+- No untyped code where the language supports type annotations
+- No hardcoded environment-specific values
+- No deprecated APIs without a migration comment

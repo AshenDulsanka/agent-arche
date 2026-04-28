@@ -38,6 +38,13 @@ Compare the hash with the one stored in `agent-arche.json` inside your install d
 
 ---------------------------------------------
 
+## Agent to Skill Relationships
+
+![agent-to-skill-relationships](./assets/agent-skill-relationships.svg)
+If anyone is curious about how the agents utilize the skills, it's mapped as in the image.
+
+---------------------------------------------
+
 ## Manual Setup (alternative)
 
 Copy the appropriate platform folder to your project:

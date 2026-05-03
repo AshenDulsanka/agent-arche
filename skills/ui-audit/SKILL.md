@@ -7,10 +7,6 @@ user-invocable: true
 
 Systematically score and identify quality issues across five dimensions to create an actionable improvement plan.
 
-## Mandatory Preparation
-
-Before auditing, read `.github/skills/impeccable/SKILL.md` to load the full design quality reference system.
-
 ## Audit Framework
 
 Score the UI across five dimensions, each 0–4:

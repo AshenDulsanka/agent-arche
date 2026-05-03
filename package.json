@@ -1,6 +1,6 @@
 {
   "name": "agent-arche",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Multi-platform AI agent orchestration for GitHub Copilot, Claude Code, and Codex",
   "keywords": [
     "github-copilot",

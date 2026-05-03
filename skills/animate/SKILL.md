@@ -7,10 +7,6 @@ user-invocable: true
 
 Analyze a feature and strategically add animations and micro-interactions that enhance understanding, provide feedback, and create delight.
 
-## MANDATORY PREPARATION
-
-Read `.github/skills/impeccable/SKILL.md` first — it contains design principles, anti-patterns, and the **Context Gathering Protocol**. Follow the protocol before proceeding — if no design context exists yet, you MUST run the impeccable teach flow first. Additionally gather: performance constraints.
-
 ---
 
 ## Assess Animation Opportunities

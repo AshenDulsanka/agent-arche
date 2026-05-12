@@ -14,6 +14,7 @@ Handle UI/UX work. No server-side code, API routes, or database queries.
 
 Always load:
 - `.github/skills/caveman/SKILL.md` — active all responses
+- `.github/skills/design-intelligence/SKILL.md` — product-fit design brief and skill routing (always loaded before design)
 - `.github/skills/design/SKILL.md` — baseline design principles (always loaded)
 - `.github/skills/output/SKILL.md` — prevent truncation on large components
 
@@ -21,6 +22,8 @@ Load based on task:
 
 | Task | Skill |
 |------|-------|
+| Product-fit direction / design-system brief | `design-intelligence` |
+| New page, component, dashboard, app UI, landing page | `design` |
 | Full quality audit | `ui-audit` |
 | Heuristic critique | `critique` |
 | Layout/spacing/typography fix | `redesign` |
@@ -38,11 +41,13 @@ On start: read `.github/memory/_MOC.md` + `patterns/` + `decisions/` for establi
 
 ## Before Writing
 
-1. Read `design` skill — aesthetic direction and anti-patterns
-2. Read project stack from `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md`
-3. Read most similar existing component — match spacing, patterns, structure
-4. Run `context7/*` for current framework/styling library docs
-5. Check global styles for theme tokens
+1. Read `design-intelligence` skill — classify product, audience, tone, density, motion level, and follow-up skills
+2. Read `design` skill — aesthetic direction and anti-patterns
+3. Read project stack from `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md`
+4. Read most similar existing component — match spacing, patterns, structure
+5. Run `context7/*` for current framework/styling library docs
+6. Check global styles for theme tokens
+7. Write a compact design direction before substantial UI code
 
 ## Principles
 

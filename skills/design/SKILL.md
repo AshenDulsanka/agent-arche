@@ -11,6 +11,27 @@ description: Senior UI/UX Engineer. Create distinctive, production-grade fronten
 
 ---
 
+## 0A. DESIGN INTELLIGENCE FIRST
+
+Before applying this skill, use `design-intelligence` to classify the product, audience, UI job, tone, density, motion level, and follow-up skills. The Anti-Codex rules below are quality guardrails, not a replacement for user intent.
+
+For substantial UI work, start with a compact design direction:
+
+```markdown
+Design direction:
+- Product/audience:
+- Tone:
+- Structure:
+- Palette/type:
+- Motion:
+- Key states:
+- Avoid:
+```
+
+Then implement. If the user explicitly asks for a specific visual language, honor that language while preserving accessibility, responsiveness, and production quality.
+
+---
+
 ## 0. WHAT IS CODEX UI (AND WHY TO AVOID IT)
 
 Codex UI is the default AI aesthetic: soft gradients, floating panels, eyebrow labels, decorative copy, hero sections in dashboards, oversized rounded corners, bouncy transform animations, dramatic shadows, and layouts that try too hard to look premium. It is the visual language that screams "an AI made this."
@@ -35,10 +56,12 @@ The goal is UI that feels **human-designed, functional, and honest** — like Li
 
 ## 2. DESIGN THINKING (Before Any Code)
 
-Before coding, commit to a **bold aesthetic direction**:
+Before coding, commit to a **product-fit aesthetic direction**:
 
 - **Purpose:** What problem does this interface solve? Who uses it?
-- **Tone:** Pick an extreme and execute it with precision — brutally minimal, maximalist, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, industrial/utilitarian. Commit.
+- **Product fit:** SaaS dashboard, admin tool, e-commerce, developer tool, healthcare, portfolio, landing page, mobile app, or other concrete category.
+- **Tone:** Pick a precise direction — professional, premium, elegant, utilitarian, editorial, playful, luxury/refined, brutalist/raw, industrial, or cinematic. Commit.
+- **Audience:** Match density, copy, motion, and trust signals to the real user. Operators need clarity; buyers need proof; creators need expressive control; regulated users need confidence.
 - **Constraints:** Framework, performance, accessibility.
 - **Differentiation:** What makes this unforgettable? What is the one thing someone will remember?
 
@@ -151,6 +174,8 @@ Always implement the full interaction cycle — never generate only "happy path"
 - **Loading:** Skeletal loaders matching layout sizes (no generic spinners)
 - **Empty States:** Beautifully composed empty states with guidance on populating data
 - **Error States:** Clear inline error reporting (forms especially)
+- **Disabled States:** Semantically disabled controls with distinct but readable visuals
+- **Focus States:** Keyboard-visible focus rings that match the design system
 - **Tactile Feedback:** On `:active`, use `-translate-y-[1px]` or `scale-[0.98]` to simulate a physical press
 
 ### Rule 5: Data & Form Patterns
@@ -360,6 +385,7 @@ All cards must contain perpetual micro-interactions:
 
 Before outputting any code, verify:
 
+- [ ] `design-intelligence` brief is satisfied: product, audience, tone, density, structure, and motion fit the user request
 - [ ] No Codex UI patterns (eyebrow labels, pill overload, gradient cards, `<small>` + `<h2>` combos)
 - [ ] Colors sourced from project or curated palette — no pure white backgrounds on light themes
 - [ ] Font is NOT Inter, Arial, Roboto, Segoe UI, or Trebuchet MS
@@ -367,8 +393,10 @@ Before outputting any code, verify:
 - [ ] Global state scoped correctly — not used arbitrarily
 - [ ] Mobile layout collapses safely (`w-full`, `px-4`, `max-w-7xl mx-auto`)
 - [ ] Full-height sections use `min-h-[100dvh]` not `h-screen`
+- [ ] Motion level is appropriate: subtle for product UI, expressive only where it helps, GSAP only for cinematic/scroll work
 - [ ] `useEffect` animations have cleanup functions
 - [ ] Empty, loading, and error states are all implemented
+- [ ] Disabled and focus states are implemented for interactive controls
 - [ ] Cards omitted in favor of spacing where `VISUAL_DENSITY > 7`
 - [ ] CPU-heavy perpetual animations isolated in their own `React.memo` Client Components
 - [ ] No emojis anywhere in the output

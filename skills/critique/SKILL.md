@@ -9,10 +9,11 @@ Deliver expert-level design critique through structured heuristic evaluation and
 
 ## Mandatory Preparation
 
-1. Read `.github/skills/design/SKILL.md` to load the full design quality reference system and anti-pattern catalogue.
-2. Read `critique/reference/heuristics-scoring.md` for the 10-heuristic scoring rubric.
-3. Read `critique/reference/cognitive-load.md` for cognitive load analysis framework.
-4. Read `critique/reference/personas.md` for persona-based testing.
+1. Read the local `design-intelligence` skill to understand the intended product, audience, tone, motion level, and fit criteria.
+2. Read the local `design` skill to load the design quality reference system and anti-pattern catalogue.
+3. Read `critique/reference/heuristics-scoring.md` for the 10-heuristic scoring rubric.
+4. Read `critique/reference/cognitive-load.md` for cognitive load analysis framework.
+5. Read `critique/reference/personas.md` for persona-based testing.
 
 ## Step 1: Gather Context
 
@@ -29,6 +30,13 @@ Before critiquing, understand intent:
 Run both assessments before writing the combined report.
 
 ### Assessment A: LLM Design Review
+
+**Intent Fit Check — verify first:**
+- Product type and audience are clear
+- Visual tone matches the user's stated goal
+- Density matches the workflow (airy marketing vs dense operations)
+- Motion level is appropriate and not distracting
+- Page structure supports the primary user action
 
 **AI Slop Detection — Check for these patterns first:**
 - Generic hero sections (gradient + centered text + two buttons)
@@ -151,10 +159,10 @@ Provide an ordered action plan using the available skills:
 
 1. **Fix P0 issues first** — specific actions
 2. **Address P1 issues** — suggest `audit` or targeted skills
-3. **Improve weak heuristics** — suggest `layout`, `typeset`, `polish`
-4. **Visual quality pass** — end with `polish`
+3. **Improve weak heuristics** — suggest `design`, `redesign`, `animate`, or `ui-optimize` depending on the evidence
+4. **Visual quality pass** — end with `design` for implementation or `critique` for review-only follow-up
 
-Reference available skills: `polish, animate, optimize, audit, critique, layout, typeset, shape, adapt`
+Reference available skills: `design-intelligence`, `design`, `redesign`, `animate`, `gsap`, `ui-optimize`, `ui-audit`, `critique`, `soft`, `minimalist`, `brutalist`, `stitch`.
 
 **NEVER**:
 - Invent positive feedback (be honest, even if it's hard)

@@ -29,10 +29,14 @@ Run from your project root. The installer now asks in this order:
 | Codex | `.codex/` + `.agents/skills/` + `AGENTS.md` |
 
 **Seed the memory / context file** (do this once after install):
-```
-@Orchestrator use the analyze-codebase skill on this project
-```
-This walks through your codebase, interviews you about decisions and context, then populates the project memory file that all agents read in future sessions.
+
+| Platform | Prompt |
+|---|---|
+| GitHub Copilot | `@Orchestrator use the analyze-codebase skill on this project` |
+| Claude Code | `Use the orchestrator agent to run the analyze-codebase skill on this project` |
+| Codex | `Use the orchestrator agent to run the analyze-codebase skill on this project` |
+
+This walks through your codebase, interviews you about decisions and context, then populates the project memory that all agents read in future sessions.
 
 **Update to the latest version later:**
 ```bash
@@ -59,7 +63,7 @@ If anyone is curious about how the agents utilize the skills, it's mapped as in 
 Copy the appropriate platform folder to your project:
 - **Copilot:** `copilot/` → `.github/`, `skills/` → `.github/skills/`, `memory/` → `.github/memory/`
 - **Claude Code:** `claude/` → `.claude/`, `skills/` → `.claude/skills/`, `claude/CLAUDE.md` → `CLAUDE.md`
-- **Codex:** `codex/config.toml` → `.codex/config.toml`, `codex/agents/` → `.codex/agents/`, `codex/hooks/` → `.codex/hooks/`, `codex/hooks.json` → `.codex/hooks.json`, `codex/instructions/` → `.codex/instructions/`, `codex/rules/` → `.codex/rules/`, `skills/` → `.agents/skills/`, `codex/AGENTS.md` → `AGENTS.md`
+- **Codex:** `codex/config.toml` → `.codex/config.toml`, `codex/agents/` → `.codex/agents/`, `codex/hooks/` → `.codex/hooks/`, `codex/hooks.json` → `.codex/hooks.json`, `codex/instructions/` → `.codex/instructions/`, `codex/rules/` → `.codex/rules/`, `memory/` → `.codex/memory/`, `skills/` → `.agents/skills/`, `codex/AGENTS.md` → `AGENTS.md`
 
 For Codex, `.codex/instructions/` is a project convention used by the bundled Codex agents. Those agents inspect the files they are planning, editing, or reviewing and then load every matching instruction file using the same glob patterns as the Copilot setup.
 
@@ -89,10 +93,10 @@ Agents are specialist roles that handle specific types of work. The **Orchestrat
 | **Planner** | Creates implementation plans by researching the codebase and skill files. For new features, runs the grill-me → to-prd → to-issues workflow before planning. Never writes code. |
 | **Researcher** | Deep-dives into prior art, library docs, CVEs, and GitHub issues before implementation begins. Never writes code. |
 | **Coder** | Writes implementation code and unit tests following project conventions. Uses TDD (red-green-refactor) methodology. |
-| **Designer** | Handles all UI/UX work, components, layouts, and styling using the project's frontend framework. Never touches server-side code. |
+| **Designer** | Handles UI/UX work using `design-intelligence` plus the design skills to create product-fit components, layouts, styling, and motion. Never touches server-side code. |
 | **Code Reviewer** | Audits code for standards compliance, framework syntax correctness, TypeScript strictness, naming, and error handling. Returns a structured issue report. Never modifies code. |
 | **Security Auditor** | Scans for OWASP Top 10 vulnerabilities, injection, broken access control, XSS, hardcoded secrets, SSRF, etc. Never modifies code. |
-| **UX Reviewer** | Reviews UI components for accessibility, usability, interaction design, and cognitive load. Never modifies code. |
+| **UX Reviewer** | Reviews UI components for product fit, accessibility, usability, interaction design, visual quality, and cognitive load. Never modifies code. |
 | **Tester** | Writes and runs Playwright E2E tests for critical user flows. Focuses on happy path, error path, and edge cases. |
 | **Docs Updater** | Updates CHANGELOG, README, and docs/ after implementation is verified. Never touches source code. |
 
@@ -130,13 +134,14 @@ Skills are reference documents that agents load before doing work in a specific 
 
 | Skill | Purpose |
 |-------|---------|
-| `design` | The baseline design system, "Anti-Codex" approach with tunable dials (variance, motion, density) to produce human-looking UI. Inspired by Linear, Raycast, Stripe. |
+| `design-intelligence` | Product-aware UI/UX direction and routing. Builds the design-system brief before implementation: audience, product type, tone, density, palette, typography, motion level, states, accessibility, and follow-up skills. |
+| `design` | Baseline premium UI implementation skill. Uses the design-intelligence brief plus Anti-Codex quality guardrails to produce polished, product-fit interfaces. |
 | `soft` | High-end agency aesthetic with vibe archetypes (Ethereal Glass, Editorial Luxury, Soft Structuralism). |
 | `minimalist` | Ultra-flat editorial style, warm monochrome, typographic contrast, bento grids, extreme whitespace. No gradients or heavy shadows. |
 | `brutalist` | Raw mechanical interfaces, Swiss typographic print meets military terminal aesthetics. Rigid grids, extreme type scale contrast. |
-| `redesign` | Surgically upgrades existing UIs to premium quality via Scan → Diagnose → Fix workflow. Identifies generic AI patterns and replaces them. |
-| `animate` | Reviews a feature and enhances it with purposeful animations and micro-interactions that improve usability. |
-| `gsap` | Advanced GSAP motion engineering, ScrollTrigger animations, editorial typography, gapless bento grids, award-level motion-rich pages. |
+| `redesign` | Surgically upgrades existing UIs to premium quality via Scan → Diagnose → Fix workflow while preserving the current stack and behavior. |
+| `animate` | Everyday purposeful motion: hover, focus, active, loading, empty, error, route, modal, accordion, list, and state transitions. |
+| `gsap` | Advanced GSAP motion engineering for cinematic landing pages, pinned scroll sections, scrubbed timelines, editorial stories, and immersive product showcases. |
 | `stitch` | Generates agent-friendly `DESIGN.md` files for Google Stitch with calibrated color, typography, and motion specs. |
 
 ### Code Quality & Standards
@@ -145,9 +150,8 @@ Skills are reference documents that agents load before doing work in a specific 
 |-------|---------|
 | `coding-standards` | Project coding standards, TypeScript strict mode, naming conventions, file organization, error handling patterns, forbidden patterns. |
 | `api-design` | REST API conventions, response envelopes, HTTP status codes, Zod validation, pagination, error hierarchy, URL design, and security checklist. |
-| `architecture` | Documentation template for describing a system's architecture, folder structure, API surface, data layer, deployment, and design decisions. |
-| `critique` | Deep dual-assessment design critique, AI design review (heuristic scoring, cognitive load analysis) combined with manual code review (design tokens, component consistency, a11y). |
-| `ui-audit` | Scores a UI across five quality dimensions (including accessibility) on a 0–4 scale with an actionable improvement plan. |
+| `critique` | Deep design critique using product-fit checks, heuristic scoring, cognitive load analysis, personas, design-token review, component consistency, and accessibility evidence. |
+| `ui-audit` | Scores a UI across quality dimensions, including accessibility, performance, responsiveness, visual consistency, anti-patterns, and fit to the intended product/audience. |
 | `ui-optimize` | Diagnoses and fixes UI performance, Core Web Vitals, rendering, animations, images, and bundle size with before/after validation. |
 | `seo` | 8-phase prioritized SEO execution plan, technical foundation, metadata, structured data, Core Web Vitals, internal linking, and monitoring. |
 | `output` | Overrides default LLM truncation behavior. Demands complete code output, bans placeholder patterns, skeleton code, and `// ...` comments. |
@@ -159,6 +163,38 @@ Skills are reference documents that agents load before doing work in a specific 
 | `commit-conventions` | Conventional Commits format, type prefixes, imperative mood subject lines, 72-char limit, breaking change format. |
 | `branch-conventions` | Branch naming format: `<type>/<issue>-<description>` with lowercase-hyphen rules and lifecycle management. |
 | `pr-standards` | PR title format, required issue references, description template (What/Why/How to test), 400-line diff limit, squash merge policy. |
+
+### Example Scenarios
+
+| Skill | Example request |
+|-------|-----------------|
+| `caveman` | "Use compressed mode while coordinating this implementation." |
+| `caveman-compress` | "Compress the project memory files so agents spend fewer tokens on startup." |
+| `analyze-codebase` | "Bootstrap this repo's memory before we start using the agents." |
+| `grill-me` | "Interrogate me until the product requirements are no longer vague." |
+| `to-prd` | "Turn this feature discussion into a PRD issue." |
+| `to-issues` | "Break the PRD into implementation issues that can be worked independently." |
+| `tdd` | "Implement this parser with red-green-refactor and focused tests." |
+| `improve-codebase-architecture` | "Find shallow modules and propose a deeper interface for this subsystem." |
+| `design-intelligence` | "Plan the visual direction for a premium SaaS dashboard before implementation." |
+| `design` | "Build the settings page with polished, production-grade UI." |
+| `soft` | "Make this agency homepage feel elegant, luminous, and high-end." |
+| `minimalist` | "Create a clean editorial dashboard with warm monochrome surfaces." |
+| `brutalist` | "Design a raw tactical telemetry interface for dense operational data." |
+| `redesign` | "Upgrade this existing landing page without changing its behavior." |
+| `animate` | "Add purposeful transitions, loading feedback, and micro-interactions to this flow." |
+| `gsap` | "Create a cinematic landing page with pinned scroll sections." |
+| `stitch` | "Generate a DESIGN.md for Google Stitch to keep future screens consistent." |
+| `coding-standards` | "Review this TypeScript module for naming, strictness, imports, and error handling." |
+| `api-design` | "Design the REST API shape, validation, pagination, and error responses." |
+| `critique` | "Give a deep UX critique of this dashboard with heuristic scoring and persona risks." |
+| `ui-audit` | "Score this checkout flow before launch and tell me what must be fixed first." |
+| `ui-optimize` | "Find why this page feels janky and reduce load, CLS, and animation cost." |
+| `seo` | "Prepare this marketing page for search, sharing, and Core Web Vitals." |
+| `output` | "Return the complete component without placeholders or skipped sections." |
+| `commit-conventions` | "Help me name commits for these staged changes." |
+| `branch-conventions` | "Create a branch name for issue 42's checkout redesign." |
+| `pr-standards` | "Draft a PR title, body, checklist, and test notes for this change." |
 
 ## Hooks
 
@@ -193,7 +229,7 @@ Codex does not use a Copilot-style `tools: [...]` frontmatter list inside agent 
 
 ## Prompts / Commands
 
-User-invocable shortcuts that perform a single focused task.
+User-invocable shortcuts that perform a single focused task. These install as Copilot prompts and Claude commands; Codex does not install prompt files, so use the Codex agents by name instead.
 
 | Prompt | Purpose |
 |--------|---------|
@@ -208,13 +244,13 @@ User-invocable shortcuts that perform a single focused task.
 
 ## Memory
 
-Every project gets a persistent context file, agents read and update it automatically across every session.
+Every project gets persistent context. Native project files give the host assistant startup guidance; agent-arche memory folders store longer-lived decisions, patterns, learnings, reviews, and session notes.
 
-| Platform | Memory file | Format |
+| Platform | Memory location | Format |
 |----------|------------|--------|
 | GitHub Copilot | `.github/memory/` (Obsidian vault) | Linked Markdown notes with wiki-links |
-| Claude Code | `CLAUDE.md` at project root | Single Markdown file |
-| Codex | `AGENTS.md` at project root | Single Markdown file |
+| Claude Code | `.claude/memory/` + `CLAUDE.md` at project root | Linked Markdown notes plus root project context |
+| Codex | `.codex/memory/` + `AGENTS.md` at project root | Linked Markdown notes plus Codex project instructions |
 
 After installing, run the `analyze-codebase` skill to seed it with your project's context.
 

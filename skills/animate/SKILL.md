@@ -9,6 +9,12 @@ Analyze a feature and strategically add animations and micro-interactions that e
 
 ---
 
+## Motion Scope
+
+Use this skill for everyday product motion: hover, focus, active, loading, empty, error, route, modal, accordion, list, and state transitions.
+
+Escalate to `gsap` when the user asks for GSAP, cinematic motion, pinned scroll, scrubbed timelines, horizontal scroll stories, animated product showcases, or page-wide choreography. Do not solve those with ad hoc scroll handlers.
+
 ## Assess Animation Opportunities
 
 Analyze where motion would improve the experience:
@@ -38,6 +44,7 @@ Create a purposeful animation plan:
 - **Feedback layer**: Which interactions need acknowledgment?
 - **Transition layer**: Which state changes need smoothing?
 - **Delight layer**: Where can we surprise and delight?
+- **Escalation check**: Does this need `gsap`, or can it stay as CSS/Web Animations/Framer-level product motion?
 
 **IMPORTANT**: One well-orchestrated experience beats scattered animations everywhere. Focus on high-impact moments.
 

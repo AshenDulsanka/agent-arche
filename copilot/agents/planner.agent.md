@@ -21,6 +21,8 @@ Load in order, every run:
 For architecture improvement tasks, also load:
 - `.github/skills/improve-codebase-architecture/SKILL.md`
 
+For UI-heavy feature plans, do not design the UI yourself. Include `design-intelligence` in the Designer context and require a design-system brief before implementation.
+
 ## Memory Protocol
 
 On start: read `.github/memory/_MOC.md` + `decisions/` for relevant ADRs — avoid re-deciding settled questions. Do not write to memory — include a **Handoff** block in output for Docs-updater.

@@ -38,9 +38,11 @@ Check if `.claude/memory/_MOC.md` exists and has content.
 | Pre-planning interrogation | `grill-me` (via Planner — mandatory) |
 | PRD + issues | `to-prd`, `to-issues` |
 | Architecture improvement | `improve-codebase-architecture` |
-| New UI | `design` |
-| UI quality | `ui-audit`, `critique` |
-| Visual/layout fix | `redesign`, `animate` |
+| New UI / visual direction / design system | `design-intelligence`, `design` |
+| Landing/dashboard/app design | `design-intelligence`, `design` |
+| Premium or polished UI | `design-intelligence`, `design`, optional `soft` / `minimalist` / `brutalist` |
+| UI quality | `design-intelligence`, `ui-audit`, `critique` |
+| Visual/layout fix | `design-intelligence`, `redesign`, `animate` |
 | Cinematic scroll | `gsap` |
 | UI performance | `ui-optimize` |
 | Aesthetic | `soft`, `minimalist`, `brutalist` |

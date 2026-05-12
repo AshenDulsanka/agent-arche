@@ -69,6 +69,7 @@ Check:
 - Consistent typography (defined scale, not arbitrary sizes)
 - Consistent component styles (same buttons look the same)
 - Coherent visual language (elements feel related)
+- Fit to intended product, audience, and tone from `design-intelligence`
 
 ### Dimension 5: Anti-Patterns (0–4)
 - **4 — Excellent**: No anti-patterns detected, follows best practices throughout
@@ -149,18 +150,19 @@ Patterns that cut across multiple dimensions (e.g., "no design system creates in
 Things done well that shouldn't be changed.
 
 ### Recommended Actions
-Ordered by impact, referencing specific skills for each fix:
+Ordered by impact, referencing specific available skills for each fix:
 
-1. **[P0 issue]** → use `audit` or `polish`
-2. **[P1 issue]** → use `optimize` or `typeset`
-3. **[P2 issue]** → use `layout` or `animate`
-4. **[P3 issues]** → batch with `polish` at end
+1. **Product/tone mismatch** → use `design-intelligence` then `design`
+2. **Accessibility/usability failure** → use `redesign` or `design`
+3. **Motion or feedback gap** → use `animate`; use `gsap` only for cinematic scroll work
+4. **Performance/jank issue** → use `ui-optimize`
+5. **Systemic visual inconsistency** → use `redesign`, then a final `design` pass
 
-Always end recommended actions with `polish` for final quality pass.
+Always end recommended actions with a focused `design` quality pass.
 
 **NEVER**:
 - Score without evidence (each score needs justification)
 - Audit without seeing the actual code or screenshots
-- Recommend fixes without referencing the available skills: `polish, animate, optimize, audit, critique, layout, typeset, shape, adapt`
+- Recommend fixes without referencing the available skills: `design-intelligence`, `design`, `redesign`, `animate`, `gsap`, `ui-optimize`, `ui-audit`, `critique`, `soft`, `minimalist`, `brutalist`, `stitch`
 - Give only criticism without positive findings
 - Skip the executive summary (actionability is the goal)

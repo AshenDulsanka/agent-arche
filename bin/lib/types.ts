@@ -1,4 +1,4 @@
-import type { Platform, Subscription, Step } from "./constants.js";
+import type { InstallScope, Platform, Subscription, Step } from "./constants.js";
 
 export type AppStep = Step | "existing" | "confirm" | "up-to-date" | "update-missing";
 
@@ -36,6 +36,7 @@ export interface InstallMeta {
   installedAt: string;
   source: string;
   sourceType: string;
+  scope: InstallScope;
   platform: Platform;
   subscription?: Subscription;
   hash: string | null;
@@ -92,6 +93,7 @@ export interface PackageJsonLike {
 export type ConfirmHandler = (confirmed: boolean) => void;
 
 export interface PreparePlanInput {
+  scope: InstallScope;
   platform: Platform;
   subscription: Subscription;
 }

@@ -28,7 +28,7 @@ export function getFooterHints(step: AppStep): readonly HintItem[] {
     return INSTALL_HINTS;
   }
 
-  if (step === "platform" || step === "subscription") {
+  if (step === "scope" || step === "platform" || step === "subscription") {
     return [...NAVIGATION_HINTS, ...BACK_QUIT_HINTS];
   }
 

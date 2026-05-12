@@ -3,11 +3,13 @@ import path from "path";
 import https from "https";
 import { fileURLToPath } from "url";
 import {
+  INSTALL_SCOPE_META,
   PLATFORM_META,
   SUBSCRIPTION_META,
   META_FILE,
   MODELS,
   STEP_ORDER,
+  type InstallScope,
   type Platform,
   type Step,
   type Subscription,
@@ -125,6 +127,7 @@ export function readMeta(dir: string): InstallMeta | null {
       installedAt: typeof data.installedAt === "string" ? data.installedAt : "Unknown",
       source: typeof data.source === "string" ? data.source : "Unknown",
       sourceType: typeof data.sourceType === "string" ? data.sourceType : "Unknown",
+      scope: data.scope === "skills" ? "skills" : "orchestration",
       platform: (data.platform as Platform) ?? "copilot",
       subscription:
         data.subscription === "auto" ||
@@ -164,7 +167,10 @@ export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
     return {
       platform,
       subscription,
-      meta,
+      meta: {
+        ...meta,
+        scope: meta.scope ?? "orchestration",
+      },
       metaDir: candidate.metaDir,
     };
   }
@@ -338,14 +344,30 @@ export function summarizePlan(
   return { total, steps, missing, notes };
 }
 
-export function getStepIndex(step: string, platform: Platform): HeaderStepInfo {
+export function getStepIndexForScope(step: string, platform: Platform, scope: InstallScope): HeaderStepInfo {
   const normalized = step === "existing" || step === "confirm" ? "preview" : step;
-  const normalizedStep: Step = STEP_ORDER.includes(normalized as Step) ? (normalized as Step) : "platform";
-  const visibleSteps = (platform === "copilot"
-    ? STEP_ORDER
-    : STEP_ORDER.filter((s) => s !== "subscription")) as Step[];
+  const normalizedStep: Step = STEP_ORDER.includes(normalized as Step) ? (normalized as Step) : "scope";
+
+  const visibleSteps = STEP_ORDER.filter((s) => {
+    if (s !== "subscription") {
+      return true;
+    }
+
+    return scope === "orchestration" && platform === "copilot";
+  }) as Step[];
+
   const currentIndex = Math.max(visibleSteps.indexOf(normalizedStep), 0);
   return { visibleSteps, currentIndex };
+}
+
+export function getScopeOptions(): OptionItem[] {
+  return Object.entries(INSTALL_SCOPE_META).map(([value, meta]) => ({
+    value,
+    label: meta.label,
+    accent: meta.accent,
+    description: meta.summary,
+    details: meta.details,
+  }));
 }
 
 export function getPlatformOptions(): OptionItem[] {

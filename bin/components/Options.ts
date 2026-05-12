@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Box, Text, useInput } from "ink";
 import { COPY } from "../lib/constants.js";
-import { getPlatformOptions, getSubscriptionOptions } from "../lib/utils.js";
+import { getPlatformOptions, getScopeOptions, getSubscriptionOptions } from "../lib/utils.js";
 import { Section } from "./Layout.js";
 import type { HintItem, OptionItem } from "../lib/types.js";
-import type { Platform, Subscription } from "../lib/constants.js";
+import type { InstallScope, Platform, Subscription } from "../lib/constants.js";
 
 const h = React.createElement;
 
@@ -33,6 +33,13 @@ interface PlatformCardsProps {
   compact: boolean;
 }
 
+interface ScopeStepProps {
+  value: InstallScope;
+  onSubmit: (value: string) => void;
+  onChange?: (value: InstallScope) => void;
+  compact: boolean;
+}
+
 interface SubscriptionStepProps {
   value: Subscription;
   onSubmit: (value: string) => void;
@@ -41,6 +48,13 @@ interface SubscriptionStepProps {
 
 function asPlatform(value: string): Platform | null {
   if (value === "copilot" || value === "claude" || value === "codex") {
+    return value;
+  }
+  return null;
+}
+
+function asScope(value: string): InstallScope | null {
+  if (value === "orchestration" || value === "skills") {
     return value;
   }
   return null;
@@ -191,6 +205,25 @@ export function PlatformCards({ value, onSubmit, onChange, compact }: PlatformCa
     Section,
     { eyebrow: COPY.platform.eyebrow, title: COPY.platform.title },
     h(OptionList, { options: platformOptions, value: current, onChange: handleChange, onSubmit, compact })
+  );
+}
+
+// ─── ScopeStep ────────────────────────────────────────────────────────────────
+export function ScopeStep({ value, onSubmit, onChange, compact }: ScopeStepProps): React.ReactElement {
+  const [current, setCurrent] = useState<InstallScope>(value || "orchestration");
+  const scopeOptions = useMemo(() => getScopeOptions(), []);
+  const handleChange = (next: string): void => {
+    const parsed = asScope(next);
+    if (parsed) {
+      setCurrent(parsed);
+      onChange?.(parsed);
+    }
+  };
+
+  return h(
+    Section,
+    { eyebrow: COPY.scope.eyebrow, title: COPY.scope.title },
+    h(OptionList, { options: scopeOptions, value: current, onChange: handleChange, onSubmit, compact })
   );
 }
 

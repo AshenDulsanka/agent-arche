@@ -84,14 +84,38 @@ export const SUBSCRIPTION_META = {
   },
 } as const;
 
+// ─── Install scope definitions ───────────────────────────────────────────────
+export const INSTALL_SCOPE_META = {
+  orchestration: {
+    label: "Full orchestration",
+    accent: "green",
+    summary: "Install agents, hooks, instructions/rules, prompts/commands, skills, and memory.",
+    details: [
+      "Best for first-time setup",
+      "Includes all platform-specific orchestration files",
+    ],
+  },
+  skills: {
+    label: "Skills only",
+    accent: "cyan",
+    summary: "Install only shared skills into the platform's skills destination.",
+    details: [
+      "No agents, hooks, prompts, rules, or memory",
+      "Great for lightweight skill updates",
+    ],
+  },
+} as const;
+
 // ─── Step order & labels ──────────────────────────────────────────────────────
-export const STEP_ORDER = ["platform", "subscription", "preview", "install", "done"] as const;
+export const STEP_ORDER = ["scope", "platform", "subscription", "preview", "install", "done"] as const;
 
 export type Platform = keyof typeof PLATFORM_META;
 export type Subscription = keyof typeof SUBSCRIPTION_META;
+export type InstallScope = keyof typeof INSTALL_SCOPE_META;
 export type Step = (typeof STEP_ORDER)[number];
 
 export const STEP_LABELS = {
+  scope: "Scope",
   platform: "Platform",
   subscription: "Plan",
   preview: "Preview",
@@ -135,7 +159,11 @@ export const COPY = {
   },
   platform: {
     eyebrow: "Start",
-    title: "Choose the workspace you want agent-arche to wire up.",
+    title: "Choose where to install this package set.",
+  },
+  scope: {
+    eyebrow: "Install mode",
+    title: "Choose what you want to install.",
   },
   subscription: {
     eyebrow: "Copilot plan",
@@ -180,6 +208,7 @@ export const COPY = {
   },
   // Row labels used in info tables
   labels: {
+    installScope: "Install scope",
     platform: "Platform",
     copilotPlan: "Copilot plan",
     destination: "Destination",

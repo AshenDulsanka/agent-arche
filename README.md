@@ -9,7 +9,16 @@ Multi-platform AI agent orchestration - specialists for GitHub Copilot, Claude C
 npx agent-arche install
 ```
 
-Run from your project root. The CLI asks which platform you're using and (for Copilot) your subscription tier, then installs the right set of agents, skills, hooks, and rules into your project.
+Run from your project root. The installer now asks in this order:
+
+1. Install scope: Full orchestration or Skills only
+2. Platform: GitHub Copilot, Claude Code, or Codex
+3. Copilot plan: only when scope is Full orchestration and platform is GitHub Copilot
+
+| Scope | What gets installed |
+|------|----------------------|
+| Full orchestration | Full platform package set (agents, hooks, instructions/rules, prompts/commands, skills, memory, and platform root files where applicable) |
+| Skills only | Shared skills folder only, installed to the platform skill destination |
 
 **Platforms supported:**
 
@@ -59,6 +68,8 @@ For better PR and issue workflows, copy the `templates/` contents to `.github/` 
 ## GitHub Copilot subscription
 
 The CLI automatically adjusts agent models based on your subscription:
+
+Note: this applies only to Full orchestration installs. For Skills only installs, Copilot plan selection is skipped.
 
 | Subscription | Model change |
 |---|---|
@@ -206,6 +217,8 @@ Every project gets a persistent context file, agents read and update it automati
 | Codex | `AGENTS.md` at project root | Single Markdown file |
 
 After installing, run the `analyze-codebase` skill to seed it with your project's context.
+
+If you installed Skills only, memory files are not installed by the CLI.
 
 ---------------------------------------------
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Box, Text, useApp, useInput } from "ink";
 import fs from "fs";
-import { COPY, type Platform, type Subscription } from "./lib/constants.js";
+import { COPY, type InstallScope, type Platform, type Subscription } from "./lib/constants.js";
 import {
   readPackageJson,
   readMeta,
@@ -19,7 +19,7 @@ import { getCopilotPlan, getClaudePlan, getCodexPlan } from "./lib/plans.js";
 import { getFooterHints } from "./lib/hints.js";
 import { Frame, Section } from "./components/Layout.js";
 import { Header } from "./components/Header.js";
-import { KeyHints, PlatformCards, SubscriptionStep } from "./components/Options.js";
+import { KeyHints, PlatformCards, ScopeStep, SubscriptionStep } from "./components/Options.js";
 import { InstallPreview, ExistingInstallView, UpToDateView, UpdateMissingView } from "./components/Preview.js";
 import { ProgressView } from "./components/Progress.js";
 import { SuccessView } from "./components/Success.js";
@@ -64,6 +64,10 @@ function isSubscription(value: string): value is Subscription {
   return value === "auto" || value === "student" || value === "pro" || value === "pro+";
 }
 
+function isInstallScope(value: string): value is InstallScope {
+  return value === "orchestration" || value === "skills";
+}
+
 interface AppProps {
   force?: boolean;
 }
@@ -75,7 +79,8 @@ export function App({ force = false }: AppProps): React.ReactElement {
   const cwd = process.cwd();
   const escapeLockUntil = useRef(0);
 
-  const [step,           setStep]           = useState<AppStep>("platform");
+  const [step,           setStep]           = useState<AppStep>("scope");
+  const [scope,          setScope]          = useState<InstallScope>("orchestration");
   const [platform,       setPlatform]       = useState<Platform>("copilot");
   const [subscription,   setSubscription]   = useState<Subscription>("auto");
   const [plan,           setPlan]           = useState<InstallPlan | null>(null);
@@ -102,15 +107,20 @@ export function App({ force = false }: AppProps): React.ReactElement {
     setTimeout(() => exit(), 100);
   };
 
-  const goBack = (currentStep: AppStep, currentPlatform: Platform): boolean => {
+  const goBack = (currentStep: AppStep, currentScope: InstallScope, currentPlatform: Platform): boolean => {
     if (currentStep === "subscription") {
       setStep("platform");
       return true;
     }
 
+    if (currentStep === "platform") {
+      setStep("scope");
+      return true;
+    }
+
     if (currentStep === "confirm") {
       resetPreparedState();
-      setStep(currentPlatform === "copilot" ? "subscription" : "platform");
+      setStep(currentScope === "orchestration" && currentPlatform === "copilot" ? "subscription" : "platform");
       return true;
     }
 
@@ -147,7 +157,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     if (step === "confirm") {
       if (isEscape) {
-        const movedBack = goBack(step, platform);
+        const movedBack = goBack(step, scope, platform);
         if (movedBack) {
           lockEscape();
         }
@@ -171,13 +181,13 @@ export function App({ force = false }: AppProps): React.ReactElement {
         return;
       }
 
-      if (step === "platform") {
+      if (step === "scope") {
         abortInstall();
         lockEscape();
         return;
       }
 
-      const movedBack = goBack(step, platform);
+      const movedBack = goBack(step, scope, platform);
       if (movedBack) {
         lockEscape();
         return;
@@ -190,21 +200,24 @@ export function App({ force = false }: AppProps): React.ReactElement {
     }
   });
 
-  const preparePlan = (nextPlatform: Platform, nextSubscription: Subscription): void => {
-    let nextPlan: InstallPlan;
-    if      (nextPlatform === "copilot") nextPlan = getCopilotPlan(cwd, nextSubscription);
-    else if (nextPlatform === "claude")  nextPlan = getClaudePlan(cwd);
-    else                                  nextPlan = getCodexPlan(cwd);
+  const preparePlan = (nextScope: InstallScope, nextPlatform: Platform, nextSubscription: Subscription): void => {
+    const resolvedSubscription = nextScope === "orchestration" && nextPlatform === "copilot" ? nextSubscription : "auto";
 
+    let nextPlan: InstallPlan;
+    if      (nextPlatform === "copilot") nextPlan = getCopilotPlan(cwd, resolvedSubscription, nextScope);
+    else if (nextPlatform === "claude")  nextPlan = getClaudePlan(cwd, nextScope);
+    else                                  nextPlan = getCodexPlan(cwd, nextScope);
+
+    setScope(nextScope);
     setPlatform(nextPlatform);
-    setSubscription(nextSubscription);
+    setSubscription(resolvedSubscription);
     setPlan(nextPlan);
-    setPreview(summarizePlan(nextPlan, nextPlatform, nextSubscription));
+    setPreview(summarizePlan(nextPlan, nextPlatform, resolvedSubscription));
 
     const detected = readMeta(nextPlan.metaDir);
     setExisting(detected);
 
-    if (detected && detected.platform === nextPlatform && !force) {
+    if (detected && detected.platform === nextPlatform && detected.scope === nextScope && !force) {
       setStep("existing");
       setTimeout(() => exit(), 100);
       return;
@@ -231,6 +244,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
       }
 
       setExisting(detected.meta);
+      setScope(detected.meta.scope);
       setPlatform(detected.platform);
       setSubscription(detected.subscription);
 
@@ -249,7 +263,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
       }
 
       setUpdateChecking(false);
-      preparePlan(detected.platform, detected.subscription);
+      preparePlan(detected.meta.scope, detected.platform, detected.subscription);
     };
 
     resolveUpdateFlow();
@@ -338,8 +352,9 @@ export function App({ force = false }: AppProps): React.ReactElement {
         installedAt:  new Date().toISOString(),
         source:       "AshenDulsanka/agent-arche",
         sourceType:   "npm",
+        scope,
         platform,
-        subscription: platform === "copilot" ? subscription : undefined,
+        subscription: scope === "orchestration" && platform === "copilot" ? subscription : undefined,
         hash:         nextHash ?? null,
       });
       setStep("done");
@@ -348,7 +363,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     runInstall();
     return () => { cancelled = true; };
-  }, [pkg.version, plan, platform, step, exit, subscription]);
+  }, [pkg.version, plan, platform, step, exit, scope, subscription]);
 
   return h(
     Box,
@@ -356,7 +371,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
     h(
       Frame,
       null,
-      h(Header, { version: pkg.version, force, cwd, step, platform, compact, showSteps: !force }),
+      h(Header, { version: pkg.version, force, cwd, step, scope, platform, compact, showSteps: !force }),
 
       aborted
         ? h(Section, { eyebrow: COPY.cancelled.eyebrow, title: COPY.cancelled.title },
@@ -373,6 +388,22 @@ export function App({ force = false }: AppProps): React.ReactElement {
           )
         : null,
 
+      !aborted && !force && step === "scope"
+        ? h(ScopeStep, {
+            value: scope,
+            compact,
+            onChange: setScope,
+            onSubmit: (value: string) => {
+              if (!isInstallScope(value)) {
+                return;
+              }
+
+              setScope(value);
+              setStep("platform");
+            },
+          })
+        : null,
+
       !aborted && !force && step === "platform"
         ? h(PlatformCards, {
             value: platform,
@@ -382,8 +413,14 @@ export function App({ force = false }: AppProps): React.ReactElement {
               if (!isPlatform(value)) {
                 return;
               }
-              if (value === "copilot") { setPlatform(value); setStep("subscription"); return; }
-              preparePlan(value, "auto");
+
+              if (scope === "orchestration" && value === "copilot") {
+                setPlatform(value);
+                setStep("subscription");
+                return;
+              }
+
+              preparePlan(scope, value, "auto");
             },
           })
         : null,
@@ -396,7 +433,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
               if (!isSubscription(value)) {
                 return;
               }
-              preparePlan("copilot", value);
+              preparePlan(scope, "copilot", value);
             },
           })
         : null,
@@ -415,6 +452,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
       !aborted && step === "confirm" && preview && plan
         ? h(InstallPreview, {
+            scope,
             platform,
             subscription,
             plan,

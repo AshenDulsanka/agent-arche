@@ -18,6 +18,16 @@ Write and execute E2E tests for critical user flows using Playwright.
 
 On start: read `.codex/memory/_MOC.md` + `learnings/` for testing gotchas, flaky selectors, and setup quirks. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
+## File Instruction Protocol
+
+Before planning, editing, or reviewing any test or source file, inspect the target paths and read every matching file from `.codex/instructions/`:
+- `**/*.ts`, `**/*.tsx` -> `.codex/instructions/typescript.md`
+- `**/*.svelte` -> `.codex/instructions/svelte.md`
+- `**/*.test.ts`, `**/*.test.js`, `**/*.spec.ts`, `**/*.spec.js` -> `.codex/instructions/tests.md`
+- `**/routes/api/**`, `**/api/**`, `**/server/**` -> `.codex/instructions/api-routes.md`
+
+If multiple patterns match, load all matching instruction files before writing tests.
+
 ## Testing Approach
 
 Test **behavior through public interfaces**. Good tests survive internal refactors.
@@ -35,7 +45,7 @@ Never position-based (`nth-child`, `first`, `last`) unless unavoidable.
 
 ## Playwright Workflow
 
-### MCP (when `playwright/*` available)
+### Browser MCP (when configured in `.codex/config.toml`)
 Navigate → screenshot → interact → assert → write test. Confirms selectors before committing to `.spec.ts`.
 
 ### CLI Fallback

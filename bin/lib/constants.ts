@@ -139,7 +139,7 @@ export const NEXT_STEPS = {
   codex: [
     "Commit .codex/ and AGENTS.md to your repo",
     "Run codex from the repo root and ask it to use the orchestrator agent",
-    "Seed memory: ask Orchestrator to use the analyze-codebase skill",
+    "Seed memory: ask the orchestrator agent to use the analyze-codebase skill",
   ],
 } as const;
 

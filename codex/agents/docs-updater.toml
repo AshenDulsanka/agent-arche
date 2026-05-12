@@ -48,8 +48,7 @@ May edit:
 - `README.md`, `CONTRIBUTING.md`, `AGENTS.md`
 - Any `.md` in `docs/`
 - `.agents/skills/**/*.md`
-- `codex/agents/*.toml`
-- `commands/*.prompt.md`
+- `.codex/agents/*.toml`
 - `.codex/memory/**/*.md`
 
 Never edit: source code (`.ts`, `.tsx`, `.js`, `.svelte`, `.py`, etc.), `package.json`, config files, lock files, `.env`.

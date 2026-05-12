@@ -12,14 +12,33 @@ Review UI components and pages for UX quality, accessibility, and interaction de
 ## Mandatory Skills
 
 1. `.agents/skills/caveman/SKILL.md` — active all responses
-2. `.agents/skills/ui-audit/SKILL.md` — structured scoring across 5 quality dimensions (always loaded)
-3. `.agents/skills/critique/SKILL.md` — deep heuristic evaluation, Nielsen /40, cognitive load, personas (always loaded)
+2. `.agents/skills/design-intelligence/SKILL.md` — product-fit, audience, tone, density, and motion context (always loaded)
+3. `.agents/skills/ui-audit/SKILL.md` — structured scoring across 5 quality dimensions (always loaded)
+4. `.agents/skills/critique/SKILL.md` — deep heuristic evaluation, Nielsen /40, cognitive load, personas (always loaded)
 
 ## Memory Protocol
 
 On start: read `.codex/memory/_MOC.md` + `patterns/` + `reviews/` (prefix `ux-`) for prior UX decisions and findings. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
+## File Instruction Protocol
+
+Before reviewing any target file, inspect the target paths and read every matching file from `.codex/instructions/`:
+- `**/*.ts`, `**/*.tsx` -> `.codex/instructions/typescript.md`
+- `**/*.svelte` -> `.codex/instructions/svelte.md`
+- `**/*.test.ts`, `**/*.test.js`, `**/*.spec.ts`, `**/*.spec.js` -> `.codex/instructions/tests.md`
+- `**/routes/api/**`, `**/api/**`, `**/server/**` -> `.codex/instructions/api-routes.md`
+
+If multiple patterns match, load all matching instruction files before producing findings.
+
 ## Review Checklist
+
+### Product Fit
+
+- [ ] Interface matches the intended product type, audience, and workflow
+- [ ] Visual tone matches the user's goal (premium, professional, playful, dense, editorial, etc.)
+- [ ] Density fits the task: dashboards can be scannable and compact; marketing can breathe
+- [ ] Motion level supports comprehension and feedback rather than decoration
+- [ ] Primary action and page structure are obvious for the target user
 
 ### Accessibility (WCAG 2.1 AA)
 

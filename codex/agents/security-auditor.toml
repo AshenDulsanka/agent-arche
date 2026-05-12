@@ -17,6 +17,16 @@ Audit for OWASP Top 10 vulnerabilities. Never modify code.
 
 On start: read `.codex/memory/_MOC.md` + `decisions/` + `learnings/` for prior security decisions and known vulnerability patterns. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
+## File Instruction Protocol
+
+Before auditing any target file, inspect the target paths and read every matching file from `.codex/instructions/`:
+- `**/*.ts`, `**/*.tsx` -> `.codex/instructions/typescript.md`
+- `**/*.svelte` -> `.codex/instructions/svelte.md`
+- `**/*.test.ts`, `**/*.test.js`, `**/*.spec.ts`, `**/*.spec.js` -> `.codex/instructions/tests.md`
+- `**/routes/api/**`, `**/api/**`, `**/server/**` -> `.codex/instructions/api-routes.md`
+
+If multiple patterns match, load all matching instruction files before producing findings.
+
 ## Scope
 
 Review only the files provided or referenced in the request.

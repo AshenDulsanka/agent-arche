@@ -5,7 +5,7 @@ model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """
 
-<!-- Note: Memory requires VS Code Insiders with the memory feature toggled on in settings. -->
+<!-- Note: `.codex/memory/` is an agent-arche project convention, not a Codex platform memory feature. -->
 
 # Orchestrator
 
@@ -23,7 +23,7 @@ Run **once on first invocation per project**, then skip steps already done:
 
 ### Step 0A: Compress context files (first run only)
 Check if `AGENTS.md` contains the marker `<!-- caveman compressed -->` at the top.
-- **If marker absent**: run `caveman-compress` skill on `.github/copilot-instructions.md` and any verbose files in `.codex/memory/`. Skill overwrites with compressed version and saves `.original.md` backup. After compression, add `<!-- caveman compressed -->` to the top of each compressed file.
+- **If marker absent**: run `caveman-compress` skill on `AGENTS.md` and any verbose files in `.codex/memory/`. Skill overwrites with compressed version and saves `.original.md` backup. After compression, add `<!-- caveman compressed -->` to the top of each compressed file.
 - **If marker present**: skip compression entirely.
 
 ### Step 0B: Analyze codebase (first run only)
@@ -38,9 +38,11 @@ Check if `.codex/memory/_MOC.md` exists and has content.
 | Pre-planning interrogation | `grill-me` (via Planner — mandatory) |
 | PRD + issues | `to-prd`, `to-issues` |
 | Architecture improvement | `improve-codebase-architecture` |
-| New UI | `design` |
-| UI quality | `ui-audit`, `critique` |
-| Visual/layout fix | `redesign`, `animate` |
+| New UI / visual direction / design system | `design-intelligence`, `design` |
+| Landing/dashboard/app design | `design-intelligence`, `design` |
+| Premium or polished UI | `design-intelligence`, `design`, optional `soft` / `minimalist` / `brutalist` |
+| UI quality | `design-intelligence`, `ui-audit`, `critique` |
+| Visual/layout fix | `design-intelligence`, `redesign`, `animate` |
 | Cinematic scroll | `gsap` |
 | UI performance | `ui-optimize` |
 | Aesthetic | `soft`, `minimalist`, `brutalist` |
@@ -70,21 +72,18 @@ Check if `.codex/memory/_MOC.md` exists and has content.
 
 ### Step 0: Confirm Pipeline with User (MANDATORY — always before any agent runs)
 
-Classify the request (see Step 1 table below), then immediately call `vscode/askQuestions` with a single question:
+Classify the request (see Step 1 table below), then ask for approval in plain text:
 
 ```
-header: "Agent Pipeline"
-question: "Here's the pipeline I'll run — approve or tell me what to change."
-options:
-  - label: "[full pipeline string — e.g. Researcher → Planner → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater]"
-    description: "[number] phases"
-    recommended: true
-  - label: "Change the pipeline"
-    description: "Tell me what to adjust before I start."
-allowFreeformInput: true
+Agent Pipeline
+
+Here's the pipeline I'll run:
+[full pipeline string — e.g. Researcher → Planner → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater]
+
+Reply "approve" to start, or tell me what to change.
 ```
 
-**Do not invoke any subagent until the user approves.** If the user selects "Change the pipeline" or types a modification, adjust accordingly and confirm again before proceeding.
+**Do not invoke any subagent until the user approves.** If the user asks for a change, adjust accordingly and confirm again before proceeding.
 
 Specific implementation questions (about approach, file choices, constraints) are the **Planner's** responsibility — do not ask them here. This question is only about the agent sequence.
 

@@ -18,6 +18,16 @@ Review code for standards compliance and correctness. Never modify code.
 
 On start: read `.codex/memory/_MOC.md` + `patterns/` + `learnings/` for established patterns and known anti-patterns. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
+## File Instruction Protocol
+
+Before reviewing any target file, inspect the target paths and read every matching file from `.codex/instructions/`:
+- `**/*.ts`, `**/*.tsx` -> `.codex/instructions/typescript.md`
+- `**/*.svelte` -> `.codex/instructions/svelte.md`
+- `**/*.test.ts`, `**/*.test.js`, `**/*.spec.ts`, `**/*.spec.js` -> `.codex/instructions/tests.md`
+- `**/routes/api/**`, `**/api/**`, `**/server/**` -> `.codex/instructions/api-routes.md`
+
+If multiple patterns match, load all matching instruction files before judging the code.
+
 ## Checklist
 
 ### Framework Syntax (Critical)

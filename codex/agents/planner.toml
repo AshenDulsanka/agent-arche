@@ -20,15 +20,27 @@ Load in order, every run:
 For architecture improvement tasks, also load:
 - `.agents/skills/improve-codebase-architecture/SKILL.md`
 
+For UI-heavy feature plans, do not design the UI yourself. Include `design-intelligence` in the Designer context and require a design-system brief before implementation.
+
 ## Memory Protocol
 
 On start: read `.codex/memory/_MOC.md` + `decisions/` for relevant ADRs — avoid re-deciding settled questions. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+
+## File Instruction Protocol
+
+Before creating a plan, inspect known or likely target paths and read every matching file from `.codex/instructions/`:
+- `**/*.ts`, `**/*.tsx` -> `.codex/instructions/typescript.md`
+- `**/*.svelte` -> `.codex/instructions/svelte.md`
+- `**/*.test.ts`, `**/*.test.js`, `**/*.spec.ts`, `**/*.spec.js` -> `.codex/instructions/tests.md`
+- `**/routes/api/**`, `**/api/**`, `**/server/**` -> `.codex/instructions/api-routes.md`
+
+If multiple patterns match, load all matching instruction files and include those constraints in the plan.
 
 ## Workflow
 
 Every task (no exceptions):
 1. **Grill** — interrogate user with grill-me skill. Ask one question at a time. Explore codebase instead of asking if codebase can answer it. Never skip, even for bug fixes.
-2. **Research codebase** — find existing patterns, types, conventions. Use `context7/*` for framework docs.
+2. **Research codebase** — find existing patterns, types, conventions. Use configured MCP docs servers from `.codex/config.toml` when enabled; otherwise use official docs or local package docs.
 3. **PRD** — synthesize shared understanding into PRD, submit as GitHub issue
 4. **Issues** — break PRD into vertical-slice tracer-bullet GitHub issues (dependency order)
 5. **Plan output** — return ordered steps with file assignments
@@ -60,9 +72,9 @@ Every task (no exceptions):
 
 ## Before Planning
 
-1. Read `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md` — project overview, stack, conventions
+1. Read `AGENTS.md` first — project overview, stack, conventions. Then read any other platform instruction files if present
 2. Search and read relevant existing files — patterns, types, API conventions
-3. Use `context7/*` for any framework/library docs. Use `web` / `github/*` for CVEs, existing issues
+3. Use configured MCP servers from `.codex/config.toml` for framework/library docs, GitHub issues, and CVEs when enabled; otherwise use official docs, web search, and local package docs
 4. Identify edge cases: missing env vars, 404 paths, input validation, race conditions
 
 ## Rules
@@ -70,6 +82,6 @@ Every task (no exceptions):
 - Grill-me every run — no exceptions, even for bug fixes
 - Identify files for each step (Orchestrator uses for parallelization)
 - Flag file paths, user input, env vars as security considerations
-- Use `context7/*` for all external framework/library docs — never training data
+- Use configured MCP docs servers or official documentation for all external framework/library docs — never training data alone
 """
 

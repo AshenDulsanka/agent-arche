@@ -1,8 +1,8 @@
 # Project Instructions
 
 <!-- This file is the main project context for Codex agents.
-     Agents read this file at session start and update it with decisions,
-     patterns, and learnings after each session. -->
+     Codex reads this file at session start. The bundled agents keep
+     decisions, patterns, and learnings in .codex/memory/. -->
 
 ## Project Overview
 
@@ -25,19 +25,23 @@ This project uses agent-arche — a multi-specialist agent workflow.
 | Orchestrator | Coordinates all agents, breaks tasks into phases | gpt-5.4 |
 | Planner | Creates ordered implementation plans with file assignments | gpt-5.4 |
 | Researcher | Deep-dives documentation and codebases for research reports | gpt-5.4 |
-| Coder | Implements backend/business logic and unit tests | gpt-5.4 |
+| Coder | Implements backend/business logic and unit tests | gpt-5.3-codex |
 | Designer | Implements UI components, layouts, and styling | gpt-5.4 |
-| Code-reviewer | Reviews for correctness, maintainability, standards | gpt-5.4 |
-| Security-auditor | Audits for OWASP Top 10 vulnerabilities | gpt-5.4 |
-| Tester | Writes and runs Playwright E2E tests | gpt-5.4 |
+| Code-reviewer | Reviews for correctness, maintainability, standards | gpt-5.3-codex |
+| Security-auditor | Audits for OWASP Top 10 vulnerabilities | gpt-5.3-codex |
+| Tester | Writes and runs Playwright E2E tests | gpt-5.3-codex |
 | Docs-updater | Updates CHANGELOG, README, docs | gpt-5.4 |
-| UX-reviewer | Reviews usability, accessibility, visual quality | gpt-5.4 |
+| UX-reviewer | Reviews usability, accessibility, visual quality | gpt-5.3-codex |
 
 Run `codex` from the project root, then ask Codex to use the `orchestrator` agent or another custom agent by name.
 
 ## Skill Library
 
 Skills live in `.agents/skills/`. Agents load skills before starting work.
+
+## Project Memory
+
+Codex automatically reads `AGENTS.md` as project instructions. agent-arche also installs `.codex/memory/` as a custom Markdown vault for durable decisions, patterns, learnings, reviews, and session notes. The bundled agents read it before work; `docs-updater` is the only agent that writes to it.
 
 ## MCP / Tools
 
@@ -78,4 +82,4 @@ If multiple patterns match a file, agents load all matching instruction files.
 
 ---
 
-*Seeded by agent-arche. Agents update this file automatically during sessions.*
+*Seeded by agent-arche. Codex reads this file automatically; agent-arche agents update `.codex/memory/` during sessions.*

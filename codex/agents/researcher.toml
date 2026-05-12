@@ -28,8 +28,8 @@ Research needed for:
 
 ## Workflow
 
-1. **GitHub prior art** — `github/*` for repos, issues, discussions solving same problem
-2. **Official docs** — `context7/*` for current framework/library/API docs. Never training data
+1. **GitHub prior art** — use configured GitHub MCP from `.codex/config.toml` when enabled; otherwise use web search for repos, issues, and discussions solving the same problem
+2. **Official docs** — use configured docs MCP servers when enabled; otherwise use official documentation directly. Never training data alone
 3. **Security** — for auth/file I/O/external APIs: check OWASP, search CVEs in dependencies
 4. **Compare options** — security profile, maintenance, bundle size, stack compatibility
 

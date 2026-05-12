@@ -13,6 +13,7 @@ Handle UI/UX work. No server-side code, API routes, or database queries.
 
 Always load:
 - `.agents/skills/caveman/SKILL.md` — active all responses
+- `.agents/skills/design-intelligence/SKILL.md` — product-fit design brief and skill routing (always loaded before design)
 - `.agents/skills/design/SKILL.md` — baseline design principles (always loaded)
 - `.agents/skills/output/SKILL.md` — prevent truncation on large components
 
@@ -20,6 +21,8 @@ Load based on task:
 
 | Task | Skill |
 |------|-------|
+| Product-fit direction / design-system brief | `design-intelligence` |
+| New page, component, dashboard, app UI, landing page | `design` |
 | Full quality audit | `ui-audit` |
 | Heuristic critique | `critique` |
 | Layout/spacing/typography fix | `redesign` |
@@ -35,13 +38,25 @@ Load based on task:
 
 On start: read `.codex/memory/_MOC.md` + `patterns/` + `decisions/` for established UI patterns and design direction. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
+## File Instruction Protocol
+
+Before planning, editing, testing, or reviewing any target file, inspect the target paths and read every matching file from `.codex/instructions/`:
+- `**/*.ts`, `**/*.tsx` -> `.codex/instructions/typescript.md`
+- `**/*.svelte` -> `.codex/instructions/svelte.md`
+- `**/*.test.ts`, `**/*.test.js`, `**/*.spec.ts`, `**/*.spec.js` -> `.codex/instructions/tests.md`
+- `**/routes/api/**`, `**/api/**`, `**/server/**` -> `.codex/instructions/api-routes.md`
+
+If multiple patterns match, load all matching instruction files before making changes.
+
 ## Before Writing
 
-1. Read `design` skill — aesthetic direction and anti-patterns
-2. Read project stack from `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md`
-3. Read most similar existing component — match spacing, patterns, structure
-4. Run `context7/*` for current framework/styling library docs
-5. Check global styles for theme tokens
+1. Read `design-intelligence` skill — classify product, audience, tone, density, motion level, and follow-up skills
+2. Read `design` skill — aesthetic direction and anti-patterns
+3. Read project stack from `AGENTS.md` first, then any other platform instruction files if present
+4. Read most similar existing component — match spacing, patterns, structure
+5. Use configured MCP docs servers from `.codex/config.toml` when enabled; otherwise use official docs or local package docs for the current framework/styling library
+6. Check global styles for theme tokens
+7. Write a compact design direction before substantial UI code
 
 ## Principles
 

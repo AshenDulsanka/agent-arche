@@ -22,11 +22,21 @@ Write implementation code and unit tests. Follow project stack and conventions.
 
 On start: read `.codex/memory/_MOC.md` + `patterns/` + `decisions/` for established patterns and constraints. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
+## File Instruction Protocol
+
+Before planning, editing, testing, or reviewing any target file, inspect the target paths and read every matching file from `.codex/instructions/`:
+- `**/*.ts`, `**/*.tsx` -> `.codex/instructions/typescript.md`
+- `**/*.svelte` -> `.codex/instructions/svelte.md`
+- `**/*.test.ts`, `**/*.test.js`, `**/*.spec.ts`, `**/*.spec.js` -> `.codex/instructions/tests.md`
+- `**/routes/api/**`, `**/api/**`, `**/server/**` -> `.codex/instructions/api-routes.md`
+
+If multiple patterns match, load all matching instruction files before making changes.
+
 ## Before Writing
 
 1. Search existing patterns — find closest implementation, follow its structure
-2. Run `context7/*` for current docs on every framework/library touched
-3. Check `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md` for project conventions
+2. Use configured MCP docs servers from `.codex/config.toml` when enabled; otherwise use official docs or local package docs for every framework/library touched
+3. Check `AGENTS.md` first for project conventions, then any other platform instruction files if present
 
 ## Principles
 

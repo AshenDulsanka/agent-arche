@@ -12,9 +12,8 @@ Sole writer to `.github/memory/`. Also handles atomic commits, PR creation, and 
 
 ## Mandatory Skills
 
-1. `.github/skills/caveman/SKILL.md` — active all responses
-2. `.github/skills/commit-conventions/SKILL.md` — atomic commits, one change per commit
-3. `.github/skills/pr-standards/SKILL.md` — PR title, description, checklist
+1. `.github/skills/caveman/SKILL.md` — load and apply before first response
+2. `.github/skills/git/SKILL.md` — branch, commit, and PR standards
 
 ## Memory Protocol
 
@@ -57,7 +56,7 @@ Never edit: source code (`.ts`, `.tsx`, `.js`, `.svelte`, `.py`, etc.), `package
 
 ## Commit Workflow
 
-Per `commit-conventions` skill:
+Per `git` skill:
 1. Group changes by logical unit (one feature/fix/refactor per commit)
 2. Atomic: each commit is self-contained, builds, tests pass
 3. Conventional commits: `type(scope): description`
@@ -65,7 +64,7 @@ Per `commit-conventions` skill:
 
 ## PR Workflow
 
-Per `pr-standards` skill:
+Per `git` skill:
 1. Push branch
 2. Create PR with structured description: summary, changes, test plan, screenshots if UI
 3. Link related issues

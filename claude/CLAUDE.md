@@ -2,7 +2,8 @@
 
 <!-- This file is your persistent project context for Claude Code.
      Agents read and update this file to maintain knowledge across sessions.
-     Run the analyze-codebase skill once after install to seed this file. -->
+     Run the project-startup skill once after install to seed this file
+     and configure engineering skill context. -->
 
 ## Project Overview
 
@@ -28,7 +29,11 @@
 
 <!-- Module boundaries, data flows, API surface overview -->
 
+## Skill Library
+
+Skills live in `.claude/skills/`. Core bundled skills include Product planning (`product-brainstorming`, `create-prd`, `create-epics-and-stories`), Matt engineering (`grill-me`, `grill-with-docs`, `diagnose`, `handoff`, `improve-codebase-architecture`, `prototype`, `review`, `triage`, `tdd`), code quality and data (`coding-standards`, `karpathy-guidelines`, `api-design`, `postgres-patterns`, `seo`), and workflow support (`project-startup`, `caveman`, `design`, `git`).
+
 ---
 
 *Seeded by agent-arche. Agents update this file automatically during sessions.*
-*Run `$analyze-codebase` to populate this file with your project's context.*
+*Run `$project-startup` to populate this file and configure engineering skill context.*

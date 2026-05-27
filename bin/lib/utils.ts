@@ -127,7 +127,10 @@ export function readMeta(dir: string): InstallMeta | null {
       installedAt: typeof data.installedAt === "string" ? data.installedAt : "Unknown",
       source: typeof data.source === "string" ? data.source : "Unknown",
       sourceType: typeof data.sourceType === "string" ? data.sourceType : "Unknown",
-      scope: data.scope === "skills" ? "skills" : "orchestration",
+      scope:
+        data.scope === "skills" || data.scope === "lean"
+          ? data.scope
+          : "orchestration",
       platform: (data.platform as Platform) ?? "copilot",
       subscription:
         data.subscription === "auto" ||
@@ -353,7 +356,7 @@ export function getStepIndexForScope(step: string, platform: Platform, scope: In
       return true;
     }
 
-    return scope === "orchestration" && platform === "copilot";
+    return scope !== "skills" && platform === "copilot";
   }) as Step[];
 
   const currentIndex = Math.max(visibleSteps.indexOf(normalizedStep), 0);

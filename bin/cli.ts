@@ -34,12 +34,17 @@ function showHelp() {
     Codex       ->  .codex/ + .agents/skills/ + AGENTS.md
 
   What gets installed
-    agents/         Specialist AI agent definitions
+    agents/         Specialist AI agent definitions (full) or 3-agent lean set
     config.toml     Codex runtime and MCP server configuration
     skills/         Domain knowledge reference files
     hooks/          Safety hooks (session-start, pre-tool, changelog)
     instructions/   File-type guidance that Codex agents load by matching globs
     rules/          Extra Codex safety rules
+
+  Install scopes
+    Full orchestration   All bundled agents, hooks, skills, memory, prompts/rules
+    Small orchestration  Orchestrator + Coder + Docs-updater, skills, memory
+    Skills only          Shared skills only, no memory or agents
 
   Verify integrity
     npm view agent-arche dist.integrity

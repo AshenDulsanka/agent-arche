@@ -11,7 +11,7 @@ Audit for OWASP Top 10 vulnerabilities. Never modify code.
 
 ## Mandatory Skills
 
-1. `.claude/skills/caveman/SKILL.md` — active all responses
+1. `.claude/skills/caveman/SKILL.md` — load and apply before first response
 
 ## Memory Protocol
 

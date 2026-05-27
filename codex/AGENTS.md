@@ -39,6 +39,12 @@ Run `codex` from the project root, then ask Codex to use the `orchestrator` agen
 
 Skills live in `.agents/skills/`. Agents load skills before starting work.
 
+Core bundled skills include:
+- Product planning: `product-brainstorming`, `create-prd`, `create-epics-and-stories`
+- Matt engineering: `grill-me`, `grill-with-docs`, `diagnose`, `handoff`, `improve-codebase-architecture`, `prototype`, `review`, `triage`, `tdd`
+- Code quality and data: `coding-standards`, `karpathy-guidelines`, `api-design`, `postgres-patterns`, `seo`
+- Workflow support: `project-startup`, `caveman`, `design`, `git`
+
 ## Project Memory
 
 Codex automatically reads `AGENTS.md` as project instructions. agent-arche also installs `.codex/memory/` as a custom Markdown vault for durable decisions, patterns, learnings, reviews, and session notes. The bundled agents read it before work; `docs-updater` is the only agent that writes to it.

@@ -54,7 +54,7 @@ function asPlatform(value: string): Platform | null {
 }
 
 function asScope(value: string): InstallScope | null {
-  if (value === "orchestration" || value === "skills") {
+  if (value === "orchestration" || value === "lean" || value === "skills") {
     return value;
   }
   return null;

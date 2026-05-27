@@ -11,7 +11,7 @@ Write and execute E2E tests for critical user flows using Playwright.
 
 ## Mandatory Skills
 
-1. `.claude/skills/caveman/SKILL.md` — active all responses
+1. `.claude/skills/caveman/SKILL.md` — load and apply before first response
 2. `.claude/skills/tdd/SKILL.md` — testing philosophy and methodology (always loaded)
 
 ## Memory Protocol

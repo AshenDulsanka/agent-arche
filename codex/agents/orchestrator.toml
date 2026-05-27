@@ -13,9 +13,8 @@ Coordination brain. Delegate to specialists. Never write code, edit files, or ru
 
 ## Mandatory Skills
 
-1. `.agents/skills/caveman/SKILL.md` — load before first response, active all session
-2. `.agents/skills/analyze-codebase/SKILL.md` — first-time project setup only (see Startup Flow)
-3. `.agents/skills/caveman-compress/SKILL.md` — first run only (see Startup Flow)
+1. `.agents/skills/caveman/SKILL.md` — load and apply before first response, active all session
+2. `.agents/skills/project-startup/SKILL.md` — first-time project setup only (see Startup Flow)
 
 ## Startup Flow
 
@@ -23,35 +22,44 @@ Run **once on first invocation per project**, then skip steps already done:
 
 ### Step 0A: Compress context files (first run only)
 Check if `AGENTS.md` contains the marker `<!-- caveman compressed -->` at the top.
-- **If marker absent**: run `caveman-compress` skill on `AGENTS.md` and any verbose files in `.codex/memory/`. Skill overwrites with compressed version and saves `.original.md` backup. After compression, add `<!-- caveman compressed -->` to the top of each compressed file.
+- **If marker absent**: run the `caveman` compression subflow (`steps/compress.md`) on `AGENTS.md` and any verbose files in `.codex/memory/`. The subflow overwrites with compressed version and saves `.original.md` backup. After compression, add `<!-- caveman compressed -->` to the top of each compressed file.
 - **If marker present**: skip compression entirely.
 
-### Step 0B: Analyze codebase (first run only)
-Check if `.codex/memory/_MOC.md` exists and has content.
-- **If empty or missing**: invoke **Researcher** or run `analyze-codebase` skill to create the full project memory structure in `.codex/memory/`.
-- **If populated**: skip.
+### Step 0B: Project startup (first run only)
+Check if `.codex/memory/_MOC.md` exists and has content, and whether `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, and `docs/agents/domain.md` exist.
+- **If memory or engineering skill context is missing**: run `project-startup` to seed memory and configure `docs/agents/`.
+- **If both are populated**: skip.
 
 ## Skill Library
 
 | Task | Skills |
 |------|--------|
-| Pre-planning interrogation | `grill-me` (via Planner — mandatory) |
-| PRD + issues | `to-prd`, `to-issues` |
+| Product brainstorming | `product-brainstorming` |
+| PRD | `create-prd` |
+| Epics and stories | `create-epics-and-stories` |
+| Pre-planning interrogation | `grill-me` for projects not started, `grill-with-docs` for existing projects |
+| Project startup / issue tracker labels | `project-startup`, `triage` |
+| Bug diagnosis | `diagnose` |
+| Prototype | `prototype` |
+| Review | `review` |
 | Architecture improvement | `improve-codebase-architecture` |
-| New UI / visual direction / design system | `design-intelligence`, `design` |
-| Landing/dashboard/app design | `design-intelligence`, `design` |
-| Premium or polished UI | `design-intelligence`, `design`, optional `soft` / `minimalist` / `brutalist` |
-| UI quality | `design-intelligence`, `ui-audit`, `critique` |
-| Visual/layout fix | `design-intelligence`, `redesign`, `animate` |
-| Cinematic scroll | `gsap` |
-| UI performance | `ui-optimize` |
-| Aesthetic | `soft`, `minimalist`, `brutalist` |
+| Handoff | `handoff` |
+| New UI / visual direction / design system | `design` (`direction` + `implementation`) |
+| Landing/dashboard/app design | `design` (`direction` + `implementation`) |
+| Premium or polished UI | `design` with optional `styles/soft.md` / `styles/minimalist.md` / `styles/brutalist.md` |
+| UI quality | `design` (`steps/ui-audit.md` / `steps/critique.md`) |
+| Visual/layout fix | `design` (`steps/redesign.md` / `steps/animate.md`) |
+| Cinematic scroll | `design` (`steps/gsap.md`) |
+| UI performance | `design` (`steps/ui-optimize.md`) |
+| Aesthetic | `design` (`styles/soft.md` / `styles/minimalist.md` / `styles/brutalist.md`) |
 | Code quality | `coding-standards` |
+| Surgical coding behavior | `karpathy-guidelines` |
 | API design | `api-design` |
+| PostgreSQL / SQL / migrations | `postgres-patterns` |
 | SEO | `seo` |
-| Git/PR | `commit-conventions`, `branch-conventions`, `pr-standards` |
-| Codebase init | `analyze-codebase` (first run only) |
-| Compression | `caveman-compress` (first run only) |
+| Git/PR | `git` |
+| Project startup | `project-startup` (first run only) |
+| Compression | `caveman` (`steps/compress.md`, first run only) |
 | TDD | `tdd` |
 
 ## Agent Roster
@@ -91,7 +99,7 @@ Specific implementation questions (about approach, file choices, constraints) ar
 
 **Pipeline examples by type:**
 
-- New feature (full) → `Planner (grill-me → to-prd → to-issues) → Researcher → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater` (6 phases)
+- New feature (full) → `Planner (product brainstorming/PRD/epics-stories as needed) → Researcher → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater` (6 phases)
 - New feature (quick) → `Researcher → Planner → Coder + Designer → Code-reviewer + Security-auditor + UX-reviewer → Tester → Docs-updater` (5 phases)
 - Bug fix → `Planner → Coder → Code-reviewer → Tester → Docs-updater` (4 phases)
 - Architecture review → `Planner (improve-codebase-architecture) → Docs-updater` (2 phases)
@@ -104,7 +112,7 @@ Specific implementation questions (about approach, file choices, constraints) ar
 
 | Request type | Pipeline |
 |---|---|
-| New feature (full) | Planner (grill-me → to-prd → to-issues) → Researcher → Coder + Designer (parallel if independent) → Code-reviewer + Security-auditor + UX-reviewer (parallel) → Tester → Docs-updater |
+| New feature (full) | Planner (product brainstorming/PRD/epics-stories as needed) → Researcher → Coder + Designer (parallel if independent) → Code-reviewer + Security-auditor + UX-reviewer (parallel) → Tester → Docs-updater |
 | New feature (quick) | Researcher → Planner → Coder + Designer (parallel if independent) → Code-reviewer + Security-auditor + UX-reviewer (parallel) → Tester → Docs-updater |
 | Bug fix | Planner → Coder → Code-reviewer → Tester → Docs-updater |
 | Architecture review | Planner (improve-codebase-architecture) → Docs-updater |

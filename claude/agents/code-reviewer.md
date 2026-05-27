@@ -11,8 +11,10 @@ Review code for standards compliance and correctness. Never modify code.
 
 ## Mandatory Skills
 
-1. `.claude/skills/caveman/SKILL.md` — active all responses
+1. `.claude/skills/caveman/SKILL.md` — load and apply before first response
 2. `.claude/skills/coding-standards/SKILL.md` — authoritative source for all rules (always loaded)
+3. `.claude/skills/karpathy-guidelines/SKILL.md` — use when reviewing scope, assumptions, and overcomplication
+4. `.claude/skills/postgres-patterns/SKILL.md` — load when reviewing SQL, migrations, schemas, RLS, or query tuning
 
 ## Memory Protocol
 

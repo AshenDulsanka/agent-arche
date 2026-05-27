@@ -12,8 +12,10 @@ Review code for standards compliance and correctness. Never modify code.
 
 ## Mandatory Skills
 
-1. `.github/skills/caveman/SKILL.md` — active all responses
+1. `.github/skills/caveman/SKILL.md` — load and apply before first response
 2. `.github/skills/coding-standards/SKILL.md` — authoritative source for all rules (always loaded)
+3. `.github/skills/karpathy-guidelines/SKILL.md` — use when reviewing scope, assumptions, and overcomplication
+4. `.github/skills/postgres-patterns/SKILL.md` — load when reviewing SQL, migrations, schemas, RLS, or query tuning
 
 ## Memory Protocol
 

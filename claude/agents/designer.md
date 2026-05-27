@@ -12,27 +12,25 @@ Handle UI/UX work. No server-side code, API routes, or database queries.
 ## Mandatory Skills
 
 Always load:
-- `.claude/skills/caveman/SKILL.md` — active all responses
-- `.claude/skills/design-intelligence/SKILL.md` — product-fit design brief and skill routing (always loaded before design)
-- `.claude/skills/design/SKILL.md` — baseline design principles (always loaded)
-- `.claude/skills/output/SKILL.md` — prevent truncation on large components
+- `.claude/skills/caveman/SKILL.md` — load and apply before first response
+- `.claude/skills/design/SKILL.md` — consolidated design workflow, subflow routing, quality guardrails, review, motion, performance, style modes, and full-output support
 
 Load based on task:
 
 | Task | Skill |
 |------|-------|
-| Product-fit direction / design-system brief | `design-intelligence` |
-| New page, component, dashboard, app UI, landing page | `design` |
-| Full quality audit | `ui-audit` |
-| Heuristic critique | `critique` |
-| Layout/spacing/typography fix | `redesign` |
-| Motion design | `animate` |
-| Performance | `ui-optimize` |
-| Cinematic scroll / GSAP | `gsap` |
-| Soft premium aesthetic | `soft` |
-| Swiss industrial / raw | `brutalist` |
-| Clean editorial (Notion/Linear) | `minimalist` |
-| Complete DESIGN.md | `stitch` |
+| Product-fit direction / design-system brief | `design` / `steps/direction.md` |
+| New page, component, dashboard, app UI, landing page | `design` / `steps/implementation.md` |
+| Full quality audit | `design` / `steps/ui-audit.md` |
+| Heuristic critique | `design` / `steps/critique.md` |
+| Layout/spacing/typography fix | `design` / `steps/redesign.md` |
+| Motion design | `design` / `steps/animate.md` |
+| Performance | `design` / `steps/ui-optimize.md` |
+| Cinematic scroll / GSAP | `design` / `steps/gsap.md` |
+| Soft premium aesthetic | `design` / `styles/soft.md` |
+| Swiss industrial / raw | `design` / `styles/brutalist.md` |
+| Clean editorial (Notion/Linear) | `design` / `styles/minimalist.md` |
+| Complete DESIGN.md | `design` / `resources/stitch.md` |
 
 ## Memory Protocol
 
@@ -40,8 +38,8 @@ On start: read `.claude/memory/_MOC.md` + `patterns/` + `decisions/` for establi
 
 ## Before Writing
 
-1. Read `design-intelligence` skill — classify product, audience, tone, density, motion level, and follow-up skills
-2. Read `design` skill — aesthetic direction and anti-patterns
+1. Read `design` skill and `workflow.md` — route to the right subflow
+2. Read `steps/direction.md` for substantial UI work, then load the needed implementation, review, motion, style, or output file
 3. Read project stack from `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md`
 4. Read most similar existing component — match spacing, patterns, structure
 5. Run `context7/*` for current framework/styling library docs

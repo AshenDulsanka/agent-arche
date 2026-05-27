@@ -1,5 +1,5 @@
 ---
-description: Draft a GitHub issue for a task or bug. Produces a focused issue with a clear title, problem description, acceptance criteria checklist, affected component, label suggestions, and branch name following branch-conventions/SKILL.md.
+description: Draft a GitHub issue for a task or bug. Produces a focused issue with a clear title, problem description, acceptance criteria checklist, affected component, label suggestions, and branch name following git/SKILL.md.
 ---
 
 Draft a GitHub issue based on the following task or bug description:
@@ -36,7 +36,7 @@ List the files most likely to need changes:
 Suggest appropriate labels from: `bug`, `enhancement`, `documentation`, `chore`, `security`, `performance`, `dependencies`
 
 ### Branch Name
-Suggest a branch name following `.github/skills/branch-conventions/SKILL.md`:
+Suggest a branch name following `.github/skills/git/SKILL.md`:
 - Format: `<type>/<issue-number>-<short-description>`
 - Example: `feat/42-workspace-search-filter`
 - Cut from `development`

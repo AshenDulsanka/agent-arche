@@ -12,10 +12,11 @@ Review UI components and pages for UX quality, accessibility, and interaction de
 
 ## Mandatory Skills
 
-1. `.github/skills/caveman/SKILL.md` — active all responses
-2. `.github/skills/design-intelligence/SKILL.md` — product-fit, audience, tone, density, and motion context (always loaded)
-3. `.github/skills/ui-audit/SKILL.md` — structured scoring across 5 quality dimensions (always loaded)
-4. `.github/skills/critique/SKILL.md` — deep heuristic evaluation, Nielsen /40, cognitive load, personas (always loaded)
+1. `.github/skills/caveman/SKILL.md` — load and apply before first response
+2. `.github/skills/design/SKILL.md` — consolidated design workflow
+3. `.github/skills/design/steps/direction.md` — product-fit, audience, tone, density, and motion context
+4. `.github/skills/design/steps/ui-audit.md` — structured scoring across 5 quality dimensions
+5. `.github/skills/design/steps/critique.md` — deep heuristic evaluation, Nielsen /40, cognitive load, personas
 
 ## Memory Protocol
 

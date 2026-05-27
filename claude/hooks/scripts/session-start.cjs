@@ -12,5 +12,5 @@ process.stdout.write(JSON.stringify({
     '(5) Commit atomically — one logical change per commit with a conventional commit message. ' +
     '(6) Read CLAUDE.md before starting work to load project context. Update CLAUDE.md with significant decisions, patterns, and learnings after each session. ' +
     '(7) Maintain the Obsidian memory vault at .claude/memory/. Read _MOC.md before starting work. Create decision/pattern/learning/review notes with [[wiki-links]] for every significant choice. Update the session note after each phase. Update _MOC.md when done. ' +
-    '(8) Caveman full mode is ACTIVE for this entire session. Load .claude/skills/caveman/SKILL.md now. Drop articles, filler, hedging. Fragments OK. Short synonyms. Technical terms exact. Code blocks unchanged. Off only if user says "stop caveman" or "normal mode".'
+    '(8) Load .claude/skills/caveman/SKILL.md now and apply caveman full mode before the first user-visible response. Drop articles, filler, hedging. Fragments OK. Short synonyms. Technical terms exact. Code blocks unchanged. Off only if user says "stop caveman" or "normal mode".'
 }));

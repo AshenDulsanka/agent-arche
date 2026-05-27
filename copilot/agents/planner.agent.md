@@ -13,15 +13,17 @@ Create implementation plans. Never write code or edit files.
 ## Mandatory Skills
 
 Load in order, every run:
-1. `.github/skills/caveman/SKILL.md` — active all responses
-2. `.github/skills/grill-me/SKILL.md` — interrogate before any plan (mandatory, no exceptions)
-3. `.github/skills/to-prd/SKILL.md` — synthesize shared understanding into PRD
-4. `.github/skills/to-issues/SKILL.md` — break PRD into vertical-slice GitHub issues
+1. `.github/skills/caveman/SKILL.md` — load and apply before first response
+2. `.github/skills/grill-me/SKILL.md` — use for projects that have not started yet
+3. `.github/skills/grill-with-docs/SKILL.md` — use for projects with existing code or domain docs
+4. `.github/skills/create-prd/SKILL.md` — create the PRD
+5. `.github/skills/create-epics-and-stories/SKILL.md` — break PRD into epics and stories
+6. `.github/skills/project-startup/SKILL.md` — load if `docs/agents/` context is missing for engineering skills
 
 For architecture improvement tasks, also load:
 - `.github/skills/improve-codebase-architecture/SKILL.md`
 
-For UI-heavy feature plans, do not design the UI yourself. Include `design-intelligence` in the Designer context and require a design-system brief before implementation.
+For UI-heavy feature plans, do not design the UI yourself. Include `design` in the Designer context and require the `steps/direction.md` design-system brief before implementation.
 
 ## Memory Protocol
 
@@ -30,10 +32,10 @@ On start: read `.github/memory/_MOC.md` + `decisions/` for relevant ADRs — avo
 ## Workflow
 
 Every task (no exceptions):
-1. **Grill** — interrogate user with grill-me skill. Ask one question at a time. Explore codebase instead of asking if codebase can answer it. Never skip, even for bug fixes.
+1. **Grill** — use `grill-me` if the project has not started; use `grill-with-docs` if code/docs exist. Ask one question at a time. Explore codebase instead of asking if codebase can answer it.
 2. **Research codebase** — find existing patterns, types, conventions. Use `context7/*` for framework docs.
-3. **PRD** — synthesize shared understanding into PRD, submit as GitHub issue
-4. **Issues** — break PRD into vertical-slice tracer-bullet GitHub issues (dependency order)
+3. **Product PRD** — for product planning, run `create-prd`.
+4. **Epics/stories** — when PRD exists, run `create-epics-and-stories` for low-dependency work slices.
 5. **Plan output** — return ordered steps with file assignments
 
 ## Plan Output Format
@@ -57,7 +59,7 @@ Every task (no exceptions):
 - **summary**: [one-line task description]
 - **grill-qa**: [each question asked + user's verbatim answer, in order]
 - **decisions**: [significant choices from grill session and planning]
-- **files**: [GitHub issues created]
+- **files**: [planning artifacts or issues created]
 - **security**: false
 - **notes**: [constraints, edge cases, open questions]
 
@@ -70,7 +72,7 @@ Every task (no exceptions):
 
 ## Rules
 
-- Grill-me every run — no exceptions, even for bug fixes
+- Grill every run — use `grill-me` for greenfield, `grill-with-docs` for existing projects
 - Identify files for each step (Orchestrator uses for parallelization)
 - Flag file paths, user input, env vars as security considerations
 - Use `context7/*` for all external framework/library docs — never training data

@@ -11,12 +11,14 @@ Write implementation code and unit tests. Follow project stack and conventions.
 
 ## Mandatory Skills
 
-1. `.claude/skills/caveman/SKILL.md` — active all responses
+1. `.claude/skills/caveman/SKILL.md` — load and apply before first response
 2. `.claude/skills/tdd/SKILL.md` — test-driven development methodology
-3. `.claude/skills/branch-conventions/SKILL.md` — create branches per issue using correct naming
-4. `.claude/skills/api-design/SKILL.md` — load when building API routes or endpoints
-5. `.claude/skills/improve-codebase-architecture/SKILL.md` — load when task involves architecture improvement or refactoring
-6. `.claude/skills/seo/SKILL.md` — load when task involves SEO, discoverability, or web performance
+3. `.claude/skills/git/SKILL.md` — branch, commit, and PR workflow
+4. `.claude/skills/karpathy-guidelines/SKILL.md` — surgical implementation behavior and success criteria
+5. `.claude/skills/api-design/SKILL.md` — load when building API routes or endpoints
+6. `.claude/skills/postgres-patterns/SKILL.md` — load when writing SQL, migrations, schemas, RLS, or query tuning
+7. `.claude/skills/improve-codebase-architecture/SKILL.md` — load when task involves architecture improvement or refactoring
+8. `.claude/skills/seo/SKILL.md` — load when task involves SEO, discoverability, or web performance
 
 ## Memory Protocol
 
@@ -54,7 +56,7 @@ Each exported function: happy path + edge case + error case. Mock only at system
 ## Branch + Issue Flow
 
 Per Planner's issues:
-1. Load `branch-conventions` skill — create branch per issue following naming rules
+1. Load `git` skill — create branch per issue following naming rules
 2. Implement issue scope
 3. Commit per issue (atomic)
 

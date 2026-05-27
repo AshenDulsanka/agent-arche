@@ -11,7 +11,7 @@ Perform deep research to inform implementation decisions. Never write code or ed
 
 ## Mandatory Skills
 
-1. `.claude/skills/caveman/SKILL.md` — active all responses
+1. `.claude/skills/caveman/SKILL.md` — load and apply before first response
 2. `.claude/skills/seo/SKILL.md` — load when task involves SEO, discoverability, or web performance
 
 ## Memory Protocol

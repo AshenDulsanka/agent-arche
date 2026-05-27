@@ -95,6 +95,15 @@ export const INSTALL_SCOPE_META = {
       "Includes all platform-specific orchestration files",
     ],
   },
+  lean: {
+    label: "Small orchestration",
+    accent: "yellow",
+    summary: "Install a 3-agent workflow, hooks, instructions/rules, skills, and memory.",
+    details: [
+      "Orchestrator, Coder, and Docs-updater only",
+      "Keeps memory support without the full specialist roster",
+    ],
+  },
   skills: {
     label: "Skills only",
     accent: "cyan",
@@ -128,18 +137,18 @@ export const NEXT_STEPS = {
   copilot: [
     "Commit .github/ to your repo",
     "Open Copilot Chat and use @Orchestrator to start",
-    "Seed memory: ask Orchestrator to use the analyze-codebase skill",
+    "Run startup: ask Orchestrator to use the project-startup skill",
   ],
   claude: [
     "Commit .claude/ and CLAUDE.md to your repo",
     "Run claude to start Claude Code",
     "Use @orchestrator agent to begin",
-    "Seed memory: ask Orchestrator to use the analyze-codebase skill",
+    "Run startup: ask Orchestrator to use the project-startup skill",
   ],
   codex: [
     "Commit .codex/ and AGENTS.md to your repo",
     "Run codex from the repo root and ask it to use the orchestrator agent",
-    "Seed memory: ask the orchestrator agent to use the analyze-codebase skill",
+    "Run startup: ask the orchestrator agent to use the project-startup skill",
   ],
 } as const;
 

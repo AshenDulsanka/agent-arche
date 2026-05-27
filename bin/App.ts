@@ -65,7 +65,7 @@ function isSubscription(value: string): value is Subscription {
 }
 
 function isInstallScope(value: string): value is InstallScope {
-  return value === "orchestration" || value === "skills";
+  return value === "orchestration" || value === "lean" || value === "skills";
 }
 
 interface AppProps {
@@ -120,7 +120,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     if (currentStep === "confirm") {
       resetPreparedState();
-      setStep(currentScope === "orchestration" && currentPlatform === "copilot" ? "subscription" : "platform");
+      setStep(currentScope !== "skills" && currentPlatform === "copilot" ? "subscription" : "platform");
       return true;
     }
 
@@ -201,7 +201,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
   });
 
   const preparePlan = (nextScope: InstallScope, nextPlatform: Platform, nextSubscription: Subscription): void => {
-    const resolvedSubscription = nextScope === "orchestration" && nextPlatform === "copilot" ? nextSubscription : "auto";
+    const resolvedSubscription = nextScope !== "skills" && nextPlatform === "copilot" ? nextSubscription : "auto";
 
     let nextPlan: InstallPlan;
     if      (nextPlatform === "copilot") nextPlan = getCopilotPlan(cwd, resolvedSubscription, nextScope);
@@ -354,7 +354,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
         sourceType:   "npm",
         scope,
         platform,
-        subscription: scope === "orchestration" && platform === "copilot" ? subscription : undefined,
+        subscription: scope !== "skills" && platform === "copilot" ? subscription : undefined,
         hash:         nextHash ?? null,
       });
       setStep("done");
@@ -414,7 +414,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
                 return;
               }
 
-              if (scope === "orchestration" && value === "copilot") {
+              if (scope !== "skills" && value === "copilot") {
                 setPlatform(value);
                 setStep("subscription");
                 return;

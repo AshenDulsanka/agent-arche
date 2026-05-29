@@ -1,6 +1,6 @@
 name = "orchestrator"
 description = "Lean coordinator for low-token workflows. Uses only Coder and Docs-updater while preserving skills and memory."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """

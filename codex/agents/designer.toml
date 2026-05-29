@@ -1,6 +1,6 @@
 name = "designer"
 description = "Writes UI components and layouts for the project's frontend framework — never touches server-side code, API routes, or database logic."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 developer_instructions = """

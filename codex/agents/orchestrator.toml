@@ -1,6 +1,6 @@
 name = "orchestrator"
 description = "Orchestrates complex tasks by breaking requests into phases and delegating to specialist subagents — never writes code or edits files directly."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """

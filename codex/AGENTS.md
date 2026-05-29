@@ -22,15 +22,15 @@ This project uses agent-arche — a multi-specialist agent workflow.
 
 | Agent | Role | Model |
 |---|---|---|
-| Orchestrator | Coordinates all agents, breaks tasks into phases | gpt-5.4 |
-| Planner | Creates ordered implementation plans with file assignments | gpt-5.4 |
-| Researcher | Deep-dives documentation and codebases for research reports | gpt-5.4 |
+| Orchestrator | Coordinates all agents, breaks tasks into phases | gpt-5.5 |
+| Planner | Creates ordered implementation plans with file assignments | gpt-5.5 |
+| Researcher | Deep-dives documentation and codebases for research reports | gpt-5.5 |
 | Coder | Implements backend/business logic and unit tests | gpt-5.3-codex |
-| Designer | Implements UI components, layouts, and styling | gpt-5.4 |
+| Designer | Implements UI components, layouts, and styling | gpt-5.5 |
 | Code-reviewer | Reviews for correctness, maintainability, standards | gpt-5.3-codex |
 | Security-auditor | Audits for OWASP Top 10 vulnerabilities | gpt-5.3-codex |
 | Tester | Writes and runs Playwright E2E tests | gpt-5.3-codex |
-| Docs-updater | Updates CHANGELOG, README, docs | gpt-5.4 |
+| Docs-updater | Updates CHANGELOG, README, docs | gpt-5.5 |
 | UX-reviewer | Reviews usability, accessibility, visual quality | gpt-5.3-codex |
 
 Run `codex` from the project root, then ask Codex to use the `orchestrator` agent or another custom agent by name.

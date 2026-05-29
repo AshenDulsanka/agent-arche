@@ -1,6 +1,6 @@
 name = "researcher"
 description = "Deep-dives into prior art, library docs, CVEs, and GitHub issues before implementation begins — never writes code or edits files."
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 developer_instructions = """

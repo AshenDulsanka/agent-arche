@@ -42,8 +42,10 @@ function showHelp() {
     rules/          Extra Codex safety rules
 
   Install scopes
-    Full orchestration   All bundled agents, hooks, skills, memory, prompts/rules
-    Small orchestration  Orchestrator + Coder + Docs-updater, skills, memory
+    Full orchestration   All bundled agents, hooks, skills, root memory, prompts/rules
+    Small orchestration  Orchestrator + Coder + Docs-updater, skills, root memory
+    Skills + hooks + memory
+                         Shared skills plus hooks and root memory, no agents
     Skills only          Shared skills only, no memory or agents
 
   Verify integrity

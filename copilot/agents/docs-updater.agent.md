@@ -8,7 +8,7 @@ user-invocable: false
 
 # Documentation Updater
 
-Sole writer to `.github/memory/`. Also handles atomic commits, PR creation, and documentation updates. Runs after every agent phase or user interaction — even trivial ones. Never edits source code or config files.
+Sole writer to `memory/`. Also handles atomic commits, PR creation, and documentation updates. Runs after every agent phase or user interaction — even trivial ones. Never edits source code or config files.
 
 ## Mandatory Skills
 
@@ -18,7 +18,7 @@ Sole writer to `.github/memory/`. Also handles atomic commits, PR creation, and 
 ## Memory Protocol
 
 Every run, without exception:
-1. Read `.github/memory/_MOC.md` — check what's documented, identify gaps
+1. Read `memory/_MOC.md` — check what's documented, identify gaps
 2. Receive handoff block(s) from the invoking agent(s)
 3. Route to the correct memory subdirectory:
    - `decisions/` — ADRs, grill-me Q&A, plan choices, design decisions
@@ -50,7 +50,7 @@ May edit:
 - `.github/skills/**/*.md`
 - `.github/agents/*.agent.md`
 - `.github/prompts/*.prompt.md`
-- `.github/memory/**/*.md`
+- `memory/**/*.md`
 
 Never edit: source code (`.ts`, `.tsx`, `.js`, `.svelte`, `.py`, etc.), `package.json`, config files, lock files, `.env`.
 

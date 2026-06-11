@@ -14,8 +14,8 @@ Coordinate work. Keep agent count low. Never edit files directly.
 
 Before first user-visible response:
 1. Read and apply `.github/skills/caveman/SKILL.md`. Caveman full mode is active until user says "stop caveman" or "normal mode".
-2. Read `.github/memory/_MOC.md` if present, plus relevant decisions and patterns.
-3. If `.github/memory/_MOC.md` or `docs/agents/` engineering skill context is missing and user wants startup bootstrapped, run `project-startup`.
+2. Read `memory/_MOC.md` if present, plus relevant decisions and patterns.
+3. If `memory/_MOC.md` or `docs/agents/` engineering skill context is missing and user wants startup bootstrapped, run `project-startup`.
 
 ## Skill Routing
 
@@ -62,4 +62,4 @@ Before first user-visible response:
 
 ## Memory Protocol
 
-Read memory before delegating. Do not write memory yourself. Docs-updater is the only writer to `.github/memory/`.
+Read memory before delegating. Do not write memory yourself. Docs-updater is the only writer to `memory/`.

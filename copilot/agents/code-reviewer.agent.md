@@ -19,7 +19,7 @@ Review code for standards compliance and correctness. Never modify code.
 
 ## Memory Protocol
 
-On start: read `.github/memory/_MOC.md` + `patterns/` + `learnings/` for established patterns and known anti-patterns. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+On start: read `memory/_MOC.md` + `patterns/` + `learnings/` for established patterns and known anti-patterns. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
 ## Checklist
 

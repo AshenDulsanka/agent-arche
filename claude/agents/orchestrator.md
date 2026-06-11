@@ -22,11 +22,11 @@ Run **once on first invocation per project**, then skip steps already done:
 
 ### Step 0A: Compress context files (first run only)
 Check if `CLAUDE.md` or `AGENTS.md` contains the marker `<!-- caveman compressed -->` at the top.
-- **If marker absent**: run the `caveman` compression subflow (`steps/compress.md`) on `CLAUDE.md` and any verbose files in `.claude/memory/`. The subflow overwrites with compressed version and saves `.original.md` backup. After compression, add `<!-- caveman compressed -->` to the top of each compressed file.
+- **If marker absent**: run the `caveman` compression subflow (`steps/compress.md`) on `CLAUDE.md` and any verbose files in `memory/`. The subflow overwrites with compressed version and saves `.original.md` backup. After compression, add `<!-- caveman compressed -->` to the top of each compressed file.
 - **If marker present**: skip compression entirely.
 
 ### Step 0B: Project startup (first run only)
-Check if `.claude/memory/_MOC.md` exists and has content, and whether `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, and `docs/agents/domain.md` exist.
+Check if `memory/_MOC.md` exists and has content, and whether `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, and `docs/agents/domain.md` exist.
 - **If memory or engineering skill context is missing**: run `project-startup` to seed memory and configure `docs/agents/`.
 - **If both are populated**: skip.
 
@@ -226,5 +226,5 @@ If tasks must share a file, make them sequential (complete first task before sta
 
 ## Memory Protocol
 
-On start: read `.claude/memory/_MOC.md` + relevant prior decisions/patterns. Include context in subagent Context Blocks. Never write to memory — Docs-updater is the sole memory writer. Invoke Docs-updater with agent handoffs after every phase.
+On start: read `memory/_MOC.md` + relevant prior decisions/patterns. Include context in subagent Context Blocks. Never write to memory — Docs-updater is the sole memory writer. Invoke Docs-updater with agent handoffs after every phase.
 

@@ -14,7 +14,7 @@ const additionalContext = [
   '   - **/*.test.ts,**/*.test.js,**/*.spec.ts,**/*.spec.js -> tests.md',
   '   - **/routes/api/**,**/api/**,**/server/** -> api-routes.md',
   '8. If multiple instruction patterns match, load all matching instruction files.',
-  '9. Maintain the custom Obsidian memory vault at .codex/memory/ when the active agent prompt requires it.',
+  '9. Maintain the custom Obsidian memory vault at memory/. Read memory/_MOC.md before work when it exists, update memory with what was done before finishing, and keep _MOC.md linked to new notes.',
   '10. Load .agents/skills/caveman/SKILL.md now and apply caveman full mode before the first user-visible response. It stays active until the user says "stop caveman" or "normal mode".',
 ].join(' ');
 

@@ -2,7 +2,7 @@
 
 <!-- This file is the main project context for Codex agents.
      Codex reads this file at session start. The bundled agents keep
-     decisions, patterns, and learnings in .codex/memory/. -->
+     decisions, patterns, and learnings in memory/. -->
 
 ## Project Overview
 
@@ -47,7 +47,7 @@ Core bundled skills include:
 
 ## Project Memory
 
-Codex automatically reads `AGENTS.md` as project instructions. agent-arche also installs `.codex/memory/` as a custom Markdown vault for durable decisions, patterns, learnings, reviews, and session notes. The bundled agents read it before work; `docs-updater` is the only agent that writes to it.
+Codex automatically reads `AGENTS.md` as project instructions. agent-arche also installs `memory/` as a custom Markdown vault for durable decisions, patterns, learnings, reviews, and session notes. The bundled agents read it before work; `docs-updater` is the only agent that writes to it.
 
 ## MCP / Tools
 
@@ -88,4 +88,4 @@ If multiple patterns match a file, agents load all matching instruction files.
 
 ---
 
-*Seeded by agent-arche. Codex reads this file automatically; agent-arche agents update `.codex/memory/` during sessions.*
+*Seeded by agent-arche. Codex reads this file automatically; agent-arche agents update `memory/` during sessions.*

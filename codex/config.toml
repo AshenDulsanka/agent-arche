@@ -10,7 +10,7 @@ max_depth = 2
 
 [features]
 # Hooks are currently disabled on Windows, but keeping this enabled makes the same project work on macOS/Linux without extra setup.
-codex_hooks = true
+hooks = true
 
 # Optional MCP servers
 # Flip `enabled` to true for the servers you want to use in this project.

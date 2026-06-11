@@ -20,7 +20,7 @@ Review UI components and pages for UX quality, accessibility, and interaction de
 
 ## Memory Protocol
 
-On start: read `.github/memory/_MOC.md` + `patterns/` + `reviews/` (prefix `ux-`) for prior UX decisions and findings. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+On start: read `memory/_MOC.md` + `patterns/` + `reviews/` (prefix `ux-`) for prior UX decisions and findings. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
 ## Review Checklist
 

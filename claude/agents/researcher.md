@@ -16,7 +16,7 @@ Perform deep research to inform implementation decisions. Never write code or ed
 
 ## Memory Protocol
 
-On start: read `.claude/memory/_MOC.md` + `learnings/` + `decisions/` — avoid re-researching settled topics. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+On start: read `memory/_MOC.md` + `learnings/` + `decisions/` — avoid re-researching settled topics. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
 ## When Invoked
 

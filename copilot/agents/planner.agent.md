@@ -27,7 +27,7 @@ For UI-heavy feature plans, do not design the UI yourself. Include `design` in t
 
 ## Memory Protocol
 
-On start: read `.github/memory/_MOC.md` + `decisions/` for relevant ADRs — avoid re-deciding settled questions. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+On start: read `memory/_MOC.md` + `decisions/` for relevant ADRs — avoid re-deciding settled questions. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
 ## Workflow
 

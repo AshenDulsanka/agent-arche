@@ -1,40 +1,100 @@
 #!/usr/bin/env node
-// Runs after every tool use. If a source file was edited, reminds the agent to update
-// the change tracking file — supports CHANGELOG.md, HISTORY.md, or CHANGES.md.
+
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
+
+function parseChangedPaths(statusOutput) {
+  return statusOutput
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+    .filter(Boolean)
+    .map((line) => line.slice(3).trim())
+    .map((filePath) => filePath.includes(' -> ') ? filePath.split(' -> ').pop() : filePath)
+    .filter(Boolean)
+    .map((filePath) => filePath.replace(/\\/g, '/'));
+}
+
+function isSourceFile(filePath) {
+  const ext = path.extname(filePath);
+  const sourceExts = new Set([
+    '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
+    '.svelte', '.vue', '.py', '.go', '.rs', '.java',
+    '.rb', '.php', '.cs', '.swift', '.kt',
+  ]);
+
+  if (filePath.startsWith('.claude/') || filePath.startsWith('.agents/') || filePath.startsWith('docs/')) {
+    return false;
+  }
+
+  if (/(^|\/)(src|app|pages|components|lib|server|api)\//.test(filePath)) {
+    return true;
+  }
+
+  return sourceExts.has(ext);
+}
+
+function findMemoryVault(cwd) {
+  const candidates = ['memory', '.claude/memory', '.codex/memory', '.github/memory'];
+  return candidates.find((candidate) => fs.existsSync(path.join(cwd, candidate)));
+}
+
+function isMemoryFile(filePath) {
+  return (
+    filePath.startsWith('memory/') ||
+    filePath.startsWith('.claude/memory/') ||
+    filePath.startsWith('.codex/memory/') ||
+    filePath.startsWith('.github/memory/')
+  );
+}
 
 let raw = '';
 process.stdin.resume();
 process.stdin.setEncoding('utf8');
-process.stdin.on('data', function(chunk) { raw += chunk; });
-process.stdin.on('end', function() {
+process.stdin.on('data', (chunk) => { raw += chunk; });
+process.stdin.on('end', () => {
   try {
-    const input = JSON.parse(raw);
-    const toolName = input.toolName || '';
-    const editTools = ['replace_string_in_file', 'multi_replace_string_in_file', 'create_file'];
+    const input = JSON.parse(raw || '{}');
+    const cwd = input.cwd || process.cwd();
+    const status = execFileSync('git', ['-C', cwd, 'status', '--porcelain', '--untracked-files=all'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
 
-    if (editTools.includes(toolName)) {
-      const filePath = (input.toolInput && input.toolInput.filePath) || '';
-      const inSrc = /[\/\\]src[\/\\]/.test(filePath);
-      const isChangeLog = /CHANGELOG|HISTORY|CHANGES/i.test(filePath);
-
-      if (inSrc && !isChangeLog) {
-        // Find which change log file exists in the workspace root
-        const cwd = process.cwd();
-        const candidates = ['CHANGELOG.md', 'HISTORY.md', 'CHANGES.md'];
-        const found = candidates.find(f => fs.existsSync(path.join(cwd, f)));
-
-        if (found) {
-          process.stdout.write(JSON.stringify({
-            systemMessage:
-              `Source file modified. Add an entry to ${found} under [Unreleased] (or equivalent) before finishing this task.`
-          }));
-          return;
-        }
-        // No change log file found — skip reminder silently
-      }
+    const changedFiles = parseChangedPaths(status);
+    if (!changedFiles.length) {
+      process.stdout.write('{}');
+      return;
     }
-  } catch (_) { /* invalid or missing stdin - output empty object below */ }
+
+    const changelogCandidates = ['CHANGELOG.md', 'HISTORY.md', 'CHANGES.md'];
+    const touchedSource = changedFiles.some(isSourceFile);
+    const touchedChangelog = changedFiles.some((filePath) => changelogCandidates.includes(filePath));
+    const memoryVault = findMemoryVault(cwd);
+    const touchedMemory = changedFiles.some(isMemoryFile);
+    const hasWorkToRecord = changedFiles.some((filePath) => !isMemoryFile(filePath) && !filePath.endsWith('/agent-arche.json'));
+    const messages = [];
+
+    if (touchedSource && !touchedChangelog) {
+      messages.push(
+        'Source files changed in this workspace, but no changelog file changed. ' +
+        'If this work should be recorded, add an [Unreleased] entry to CHANGELOG.md, HISTORY.md, or CHANGES.md before finishing.'
+      );
+    }
+
+    if (memoryVault && hasWorkToRecord && !touchedMemory) {
+      messages.push(
+        `Before finishing, update ${memoryVault}/ with what was done, including the summary, decisions, verification, and follow-ups.`
+      );
+    }
+
+    if (messages.length) {
+      process.stdout.write(JSON.stringify({ systemMessage: messages.join('\n\n') }));
+      return;
+    }
+  } catch (_) {
+    // Not a git repo, invalid hook input, or git unavailable - skip silently.
+  }
+
   process.stdout.write('{}');
 });

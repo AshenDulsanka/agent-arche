@@ -11,6 +11,6 @@ process.stdout.write(JSON.stringify({
     '(4) Take small, reversible actions. Before any destructive operation (delete files, drop data, force-push), confirm with the user. ' +
     '(5) Commit atomically — one logical change per commit with a conventional commit message. ' +
     '(6) Read CLAUDE.md before starting work to load project context. Update CLAUDE.md with significant decisions, patterns, and learnings after each session. ' +
-    '(7) Maintain the Obsidian memory vault at .claude/memory/. Read _MOC.md before starting work. Create decision/pattern/learning/review notes with [[wiki-links]] for every significant choice. Update the session note after each phase. Update _MOC.md when done. ' +
+    '(7) Maintain the Obsidian memory vault at memory/. Read memory/_MOC.md before starting work. Before finishing, update memory/ with what was done: summary, decisions, verification, follow-ups, and any new decision/pattern/learning/review notes with [[wiki-links]]. Update _MOC.md when done. ' +
     '(8) Load .claude/skills/caveman/SKILL.md now and apply caveman full mode before the first user-visible response. Drop articles, filler, hedging. Fragments OK. Short synonyms. Technical terms exact. Code blocks unchanged. Off only if user says "stop caveman" or "normal mode".'
 }));

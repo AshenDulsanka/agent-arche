@@ -1,8 +1,69 @@
 import path from "path";
 import { PACKAGE_ROOT, makeAgentTransform } from "./utils.js";
-import type { InstallScope, Subscription } from "./constants.js";
+import type { InstallScope, Platform, Subscription } from "./constants.js";
 import { NEXT_STEPS } from "./constants.js";
-import type { InstallPlan } from "./types.js";
+import type { DirPlanStep, InstallPlan } from "./types.js";
+
+const LEGACY_MEMORY_DIRS: Record<Platform, readonly string[]> = {
+  copilot: [".github/memory", ".claude/memory", ".codex/memory"],
+  claude: [".claude/memory", ".github/memory", ".codex/memory"],
+  codex: [".codex/memory", ".github/memory", ".claude/memory"],
+};
+
+function memoryStep(cwd: string, platform: Platform): DirPlanStep {
+  return {
+    label: "memory/",
+    src: path.join(PACKAGE_ROOT, "memory"),
+    destDir: path.join(cwd, "memory"),
+    skipIfExists: true,
+    legacyMemoryDirs: LEGACY_MEMORY_DIRS[platform],
+  };
+}
+
+const SKILLS_ONLY_NEXT_STEPS: Record<Platform, readonly string[]> = {
+  copilot: [
+    "Commit .github/skills/ to your repo",
+    "Ask Copilot Chat to use the relevant skill file for the task",
+  ],
+  claude: [
+    "Commit .claude/skills/ to your repo",
+    "Ask Claude Code to use the relevant skill file for the task",
+  ],
+  codex: [
+    "Commit .agents/skills/ to your repo",
+    "Ask Codex to use the relevant skill file for the task",
+  ],
+};
+
+const SKILLS_MEMORY_NEXT_STEPS: Record<Platform, readonly string[]> = {
+  copilot: [
+    "Commit .github/hooks/, .github/skills/, and memory/ to your repo",
+    "Ask Copilot Chat to use the relevant skill file for the task",
+    "Before finishing work, update the memory vault with what changed using the project-startup skill",
+  ],
+  claude: [
+    "Commit .claude/hooks/, .claude/skills/, .claude/settings.json, and memory/ to your repo",
+    "Ask Claude Code to use the relevant skill file for the task",
+    "Before finishing work, update the memory vault with what changed using the project-startup skill",
+  ],
+  codex: [
+    "Commit .codex/, .agents/skills/, and memory/ to your repo",
+    "Ask Codex to use the relevant skill file for the task",
+    "Before finishing work, update the memory vault with what changed using the project-startup skill",
+  ],
+};
+
+function getNextSteps(platform: Platform, scope: InstallScope): readonly string[] {
+  if (scope === "skills") {
+    return SKILLS_ONLY_NEXT_STEPS[platform];
+  }
+
+  if (scope === "skills-memory") {
+    return SKILLS_MEMORY_NEXT_STEPS[platform];
+  }
+
+  return NEXT_STEPS[platform];
+}
 
 export function getCopilotPlan(cwd: string, subscription: Subscription, scope: InstallScope): InstallPlan {
   const dest = path.join(cwd, ".github");
@@ -13,6 +74,12 @@ export function getCopilotPlan(cwd: string, subscription: Subscription, scope: I
     ? [
         { label: ".github/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
       ]
+    : scope === "skills-memory"
+    ? [
+        { label: ".github/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
+        { label: ".github/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
+        memoryStep(cwd, "copilot"),
+      ]
     : scope === "lean"
     ? [
         { label: ".github/agents/orchestrator.agent.md", src: path.join(src, "lean-agents", "orchestrator.agent.md"), destFile: path.join(dest, "agents", "orchestrator.agent.md") },
@@ -21,7 +88,7 @@ export function getCopilotPlan(cwd: string, subscription: Subscription, scope: I
         { label: ".github/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
         { label: ".github/instructions/", src: path.join(src, "instructions"), destDir: path.join(dest, "instructions") },
         { label: ".github/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
-        { label: ".github/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory"), skipIfExists: true },
+        memoryStep(cwd, "copilot"),
       ]
     : [
         { label: ".github/agents/", src: path.join(src, "agents"), destDir: path.join(dest, "agents"), transform: agentTransform },
@@ -29,14 +96,14 @@ export function getCopilotPlan(cwd: string, subscription: Subscription, scope: I
         { label: ".github/instructions/", src: path.join(src, "instructions"), destDir: path.join(dest, "instructions") },
         { label: ".github/prompts/", src: path.join(src, "prompts"), destDir: path.join(dest, "prompts") },
         { label: ".github/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
-        { label: ".github/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory"), skipIfExists: true },
+        memoryStep(cwd, "copilot"),
       ];
 
   return {
     dest,
     metaDir: dest,
     steps,
-    nextSteps: NEXT_STEPS.copilot,
+    nextSteps: getNextSteps("copilot", scope),
   };
 }
 
@@ -48,6 +115,13 @@ export function getClaudePlan(cwd: string, scope: InstallScope): InstallPlan {
     ? [
         { label: ".claude/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
       ]
+    : scope === "skills-memory"
+    ? [
+        { label: ".claude/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
+        { label: ".claude/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
+        memoryStep(cwd, "claude"),
+        { label: ".claude/settings.json", src: path.join(src, "settings.json"), destFile: path.join(dest, "settings.json") },
+      ]
     : scope === "lean"
     ? [
         { label: ".claude/agents/orchestrator.md", src: path.join(src, "lean-agents", "orchestrator.md"), destFile: path.join(dest, "agents", "orchestrator.md") },
@@ -57,7 +131,7 @@ export function getClaudePlan(cwd: string, scope: InstallScope): InstallPlan {
         { label: ".claude/commands/", src: path.join(src, "commands"), destDir: path.join(dest, "commands") },
         { label: ".claude/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
         { label: ".claude/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
-        { label: ".claude/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory"), skipIfExists: true },
+        memoryStep(cwd, "claude"),
         { label: ".claude/settings.json", src: path.join(src, "settings.json"), destFile: path.join(dest, "settings.json") },
         { label: "CLAUDE.md", src: path.join(src, "CLAUDE.lean.md"), destFile: path.join(cwd, "CLAUDE.md"), skipIfExists: true },
       ]
@@ -67,7 +141,7 @@ export function getClaudePlan(cwd: string, scope: InstallScope): InstallPlan {
         { label: ".claude/commands/", src: path.join(src, "commands"), destDir: path.join(dest, "commands") },
         { label: ".claude/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
         { label: ".claude/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(dest, "skills") },
-        { label: ".claude/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory"), skipIfExists: true },
+        memoryStep(cwd, "claude"),
         { label: ".claude/settings.json", src: path.join(src, "settings.json"), destFile: path.join(dest, "settings.json") },
         { label: "CLAUDE.md", src: path.join(src, "CLAUDE.md"), destFile: path.join(cwd, "CLAUDE.md"), skipIfExists: true },
       ];
@@ -76,7 +150,7 @@ export function getClaudePlan(cwd: string, scope: InstallScope): InstallPlan {
     dest,
     metaDir: dest,
     steps,
-    nextSteps: NEXT_STEPS.claude,
+    nextSteps: getNextSteps("claude", scope),
   };
 }
 
@@ -88,6 +162,14 @@ export function getCodexPlan(cwd: string, scope: InstallScope): InstallPlan {
     ? [
         { label: ".agents/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(cwd, ".agents", "skills") },
       ]
+    : scope === "skills-memory"
+    ? [
+        { label: ".codex/config.toml", src: path.join(src, "config.toml"), destFile: path.join(dest, "config.toml") },
+        { label: ".codex/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
+        memoryStep(cwd, "codex"),
+        { label: ".agents/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(cwd, ".agents", "skills") },
+        { label: ".codex/hooks.json", src: path.join(src, "hooks.json"), destFile: path.join(dest, "hooks.json") },
+      ]
     : scope === "lean"
     ? [
         { label: ".codex/agents/orchestrator.toml", src: path.join(src, "lean-agents", "orchestrator.toml"), destFile: path.join(dest, "agents", "orchestrator.toml") },
@@ -97,7 +179,7 @@ export function getCodexPlan(cwd: string, scope: InstallScope): InstallPlan {
         { label: ".codex/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
         { label: ".codex/rules/", src: path.join(src, "rules"), destDir: path.join(dest, "rules") },
         { label: ".codex/instructions/", src: path.join(src, "instructions"), destDir: path.join(dest, "instructions") },
-        { label: ".codex/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory"), skipIfExists: true },
+        memoryStep(cwd, "codex"),
         { label: ".agents/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(cwd, ".agents", "skills") },
         { label: ".codex/hooks.json", src: path.join(src, "hooks.json"), destFile: path.join(dest, "hooks.json") },
         { label: "AGENTS.md", src: path.join(src, "AGENTS.lean.md"), destFile: path.join(cwd, "AGENTS.md"), skipIfExists: true },
@@ -108,7 +190,7 @@ export function getCodexPlan(cwd: string, scope: InstallScope): InstallPlan {
         { label: ".codex/hooks/", src: path.join(src, "hooks"), destDir: path.join(dest, "hooks") },
         { label: ".codex/rules/", src: path.join(src, "rules"), destDir: path.join(dest, "rules") },
         { label: ".codex/instructions/", src: path.join(src, "instructions"), destDir: path.join(dest, "instructions") },
-        { label: ".codex/memory/", src: path.join(PACKAGE_ROOT, "memory"), destDir: path.join(dest, "memory"), skipIfExists: true },
+        memoryStep(cwd, "codex"),
         { label: ".agents/skills/", src: path.join(PACKAGE_ROOT, "skills"), destDir: path.join(cwd, ".agents", "skills") },
         { label: ".codex/hooks.json", src: path.join(src, "hooks.json"), destFile: path.join(dest, "hooks.json") },
         { label: "AGENTS.md", src: path.join(src, "AGENTS.md"), destFile: path.join(cwd, "AGENTS.md"), skipIfExists: true },
@@ -118,6 +200,6 @@ export function getCodexPlan(cwd: string, scope: InstallScope): InstallPlan {
     dest,
     metaDir: dest,
     steps,
-    nextSteps: NEXT_STEPS.codex,
+    nextSteps: getNextSteps("codex", scope),
   };
 }

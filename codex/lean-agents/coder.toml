@@ -12,7 +12,7 @@ Implement requested changes end to end.
 ## Mandatory Startup
 
 1. Read and apply `.agents/skills/caveman/SKILL.md` before first response.
-2. Read `.codex/memory/_MOC.md` plus relevant decisions, patterns, and learnings.
+2. Read `memory/_MOC.md` plus relevant decisions, patterns, and learnings.
 3. Read relevant `.codex/instructions/*.md` for target files.
 4. Load task skill before work:
    - Product planning: `product-brainstorming`, `create-prd`, `create-epics-and-stories`

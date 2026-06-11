@@ -1,7 +1,7 @@
 # Project Memory
 
 <!-- Lean agent-arche install for Claude Code.
-     Durable project memory lives in .claude/memory/. -->
+     Durable project memory lives in memory/. -->
 
 ## Project Overview
 
@@ -36,7 +36,7 @@ Skills live in `.claude/skills/`. The lean agents load task-specific skills befo
 
 ## Project Memory
 
-Orchestrator and Coder read `.claude/memory/` before work; Docs-updater is the only agent that writes to it.
+Orchestrator and Coder read `memory/` before work; Docs-updater is the only agent that writes to it.
 
 ---
 

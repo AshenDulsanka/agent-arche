@@ -14,6 +14,7 @@ import {
   sleep,
   copyDir,
   copyFile,
+  migrateLegacyMemoryVault,
 } from "./lib/utils.js";
 import { getCopilotPlan, getClaudePlan, getCodexPlan } from "./lib/plans.js";
 import { getFooterHints } from "./lib/hints.js";
@@ -65,7 +66,11 @@ function isSubscription(value: string): value is Subscription {
 }
 
 function isInstallScope(value: string): value is InstallScope {
-  return value === "orchestration" || value === "lean" || value === "skills";
+  return value === "orchestration" || value === "lean" || value === "skills-memory" || value === "skills";
+}
+
+function usesCopilotSubscription(scope: InstallScope, platform: Platform): boolean {
+  return platform === "copilot" && (scope === "orchestration" || scope === "lean");
 }
 
 interface AppProps {
@@ -120,7 +125,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     if (currentStep === "confirm") {
       resetPreparedState();
-      setStep(currentScope !== "skills" && currentPlatform === "copilot" ? "subscription" : "platform");
+      setStep(usesCopilotSubscription(currentScope, currentPlatform) ? "subscription" : "platform");
       return true;
     }
 
@@ -201,7 +206,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
   });
 
   const preparePlan = (nextScope: InstallScope, nextPlatform: Platform, nextSubscription: Subscription): void => {
-    const resolvedSubscription = nextScope !== "skills" && nextPlatform === "copilot" ? nextSubscription : "auto";
+    const resolvedSubscription = usesCopilotSubscription(nextScope, nextPlatform) ? nextSubscription : "auto";
 
     let nextPlan: InstallPlan;
     if      (nextPlatform === "copilot") nextPlan = getCopilotPlan(cwd, resolvedSubscription, nextScope);
@@ -212,7 +217,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
     setPlatform(nextPlatform);
     setSubscription(resolvedSubscription);
     setPlan(nextPlan);
-    setPreview(summarizePlan(nextPlan, nextPlatform, resolvedSubscription));
+    setPreview(summarizePlan(nextPlan, nextPlatform, resolvedSubscription, nextScope));
 
     const detected = readMeta(nextPlan.metaDir);
     setExisting(detected);
@@ -303,7 +308,14 @@ export function App({ force = false }: AppProps): React.ReactElement {
             continue;
           }
 
-          if (s.skipIfExists && fs.existsSync(s.destDir)) {
+          const migratedMemory = s.legacyMemoryDirs
+            ? migrateLegacyMemoryVault(cwd, s.destDir, s.legacyMemoryDirs)
+            : null;
+
+          if (migratedMemory) {
+            total += migratedMemory.count;
+            countMsg = `migrated from ${migratedMemory.from}`;
+          } else if (s.skipIfExists && fs.existsSync(s.destDir)) {
             countMsg = "skipped (already exists)";
           } else {
             const count = copyDir(s.src, s.destDir, s.transform);
@@ -354,7 +366,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
         sourceType:   "npm",
         scope,
         platform,
-        subscription: scope !== "skills" && platform === "copilot" ? subscription : undefined,
+        subscription: usesCopilotSubscription(scope, platform) ? subscription : undefined,
         hash:         nextHash ?? null,
       });
       setStep("done");
@@ -414,7 +426,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
                 return;
               }
 
-              if (scope !== "skills" && value === "copilot") {
+              if (usesCopilotSubscription(scope, value)) {
                 setPlatform(value);
                 setStep("subscription");
                 return;

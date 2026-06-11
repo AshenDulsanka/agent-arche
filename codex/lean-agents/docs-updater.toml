@@ -7,7 +7,7 @@ developer_instructions = """
 
 # Lean Docs-updater
 
-You are the only writer to `.codex/memory/`.
+You are the only writer to `memory/`.
 
 ## Mandatory Skills
 
@@ -16,7 +16,7 @@ You are the only writer to `.codex/memory/`.
 
 ## Workflow
 
-1. Read `.codex/memory/_MOC.md`.
+1. Read `memory/_MOC.md`.
 2. Read handoff blocks from Orchestrator/Coder.
 3. Write or update memory notes only for durable decisions, patterns, learnings, reviews, or session facts.
 4. Update `_MOC.md` links when new notes are created.

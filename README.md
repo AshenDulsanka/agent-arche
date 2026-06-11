@@ -10,7 +10,7 @@ npx agent-arche install
 
 Run it from your project root. The installer asks for:
 
-1. Scope: Full orchestration, Small orchestration, or Skills only
+1. Scope: Full orchestration, Small orchestration, Skills + hooks + memory, or Skills only
 2. Platform: GitHub Copilot, Claude Code, or Codex
 3. Copilot plan, only when installing Copilot agents
 
@@ -18,6 +18,7 @@ Run it from your project root. The installer asks for:
 |---|---|
 | Full orchestration | Full specialist roster, hooks, instructions/rules, prompts/commands, skills, memory, and platform root files |
 | Small orchestration | Lean 3-agent setup: Orchestrator, Coder, Docs-updater, plus hooks, instructions/rules, skills, memory, and root files |
+| Skills + hooks + memory | Shared `skills/`, platform hooks, hook activation files, and a memory vault, without installing agents |
 | Skills only | Shared `skills/` folder only |
 
 | Platform | Destination |
@@ -113,9 +114,9 @@ Recommended order for product work: `project-startup` once, `product-brainstormi
 
 | Piece | What it does |
 |---|---|
-| Hooks | `session-start.cjs` injects startup context, `pre-tool-safety.cjs` blocks destructive commands, and `changelog-reminder.cjs` reminds agents about docs/changelog drift. |
+| Hooks | `session-start.cjs` injects startup context including the root `memory/` update rule, `pre-tool-safety.cjs` blocks destructive commands, and `changelog-reminder.cjs` performs final docs/memory drift checks. |
 | Instructions/rules | Copilot uses native instruction files. Claude and Codex install equivalent rule/instruction files for TypeScript, Svelte, tests, and API routes. |
-| Memory | Full and Small orchestration install a project memory folder. Use `project-startup` once to seed memory and engineering skill context. Skills-only installs do not include memory. |
+| Memory | Full, Small, and Skills + hooks + memory installs include root `memory/` as an Obsidian-style agent memory vault. Existing platform-local vaults are migrated to root when `memory/` is missing. Skills-only installs do not include memory. |
 | Prompts/commands | Copilot prompts and Claude commands include `code-review`, `write-tests`, `debug`, `create-issue`, `pr-description`, and `security-review`. Codex uses agents by name instead. |
 | Codex MCP | Codex MCP servers and runtime behavior are configured in `.codex/config.toml`, with disabled examples for Context7, Playwright, GitHub, and OpenAI docs. |
 
@@ -125,9 +126,11 @@ The CLI is preferred. For manual installs:
 
 | Platform | Copy |
 |---|---|
-| Copilot | `copilot/` to `.github/`, `skills/` to `.github/skills/`, `memory/` to `.github/memory/` |
-| Claude Code | `claude/` to `.claude/`, `skills/` to `.claude/skills/`, `memory/` to `.claude/memory/`, `claude/CLAUDE.md` to root `CLAUDE.md` |
-| Codex | `codex/` contents to `.codex/`, `skills/` to `.agents/skills/`, `memory/` to `.codex/memory/`, `codex/AGENTS.md` to root `AGENTS.md` |
+| Copilot | `copilot/` to `.github/`, `skills/` to `.github/skills/`, package `memory/` to root `memory/` |
+| Claude Code | `claude/` to `.claude/`, `skills/` to `.claude/skills/`, package `memory/` to root `memory/`, `claude/CLAUDE.md` to root `CLAUDE.md` |
+| Codex | `codex/` contents to `.codex/`, `skills/` to `.agents/skills/`, package `memory/` to root `memory/`, `codex/AGENTS.md` to root `AGENTS.md` |
+
+For a skills + hooks + memory install, copy only the platform hooks and hook activation files, the shared `skills/`, and `memory/`. For Codex, include `.codex/config.toml` and `.codex/hooks.json`; for Claude, include `.claude/settings.json`.
 
 For PR and issue workflows, copy `templates/` into `.github/` and update the comments inside.
 

@@ -8,7 +8,7 @@ user-invocable: false
 
 # Lean Docs-updater
 
-You are the only writer to `.github/memory/`.
+You are the only writer to `memory/`.
 
 ## Mandatory Skills
 
@@ -17,7 +17,7 @@ You are the only writer to `.github/memory/`.
 
 ## Workflow
 
-1. Read `.github/memory/_MOC.md`.
+1. Read `memory/_MOC.md`.
 2. Read handoff blocks from Orchestrator/Coder.
 3. Write or update memory notes only for durable decisions, patterns, learnings, reviews, or session facts.
 4. Update `_MOC.md` links when new notes are created.

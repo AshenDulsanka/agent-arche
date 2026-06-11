@@ -32,7 +32,7 @@ export const PACKAGE_ROOT = path.join(__dirname, "../..");
 const NPM_REGISTRY_HOST = "registry.npmjs.org";
 const NPM_PACKAGE_NAME = "agent-arche";
 const SEMVER_LIKE = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
-const ALLOWED_DEST_DIRS = new Set([".github", ".claude", ".codex", ".agents"]);
+const ALLOWED_DEST_DIRS = new Set([".github", ".claude", ".codex", ".agents", "memory"]);
 const ALLOWED_DEST_FILES = new Set(["AGENTS.md", "CLAUDE.md"]);
 
 function isSubPath(parent: string, target: string): boolean {
@@ -106,6 +106,37 @@ export function copyFile(src: string, dest: string): void {
   fs.copyFileSync(src, dest);
 }
 
+export interface LegacyMemoryMigrationResult {
+  from: string;
+  count: number;
+}
+
+export function migrateLegacyMemoryVault(
+  cwd: string,
+  destDir: string,
+  legacyMemoryDirs: readonly string[]
+): LegacyMemoryMigrationResult | null {
+  if (fs.existsSync(destDir)) {
+    return null;
+  }
+
+  for (const legacyDir of legacyMemoryDirs) {
+    const sourceDir = path.join(cwd, legacyDir);
+    if (!fs.existsSync(sourceDir)) {
+      continue;
+    }
+
+    fs.mkdirSync(path.dirname(destDir), { recursive: true });
+    fs.renameSync(sourceDir, destDir);
+    return {
+      from: legacyDir.replace(/\\/g, "/"),
+      count: countDir(destDir),
+    };
+  }
+
+  return null;
+}
+
 // ─── JSON helpers ─────────────────────────────────────────────────────────────
 export function readPackageJson(): PackageJsonLike {
   const parsed = JSON.parse(fs.readFileSync(path.join(PACKAGE_ROOT, "package.json"), "utf8")) as Partial<PackageJsonLike>;
@@ -128,7 +159,7 @@ export function readMeta(dir: string): InstallMeta | null {
       source: typeof data.source === "string" ? data.source : "Unknown",
       sourceType: typeof data.sourceType === "string" ? data.sourceType : "Unknown",
       scope:
-        data.scope === "skills" || data.scope === "lean"
+        data.scope === "skills" || data.scope === "skills-memory" || data.scope === "lean"
           ? data.scope
           : "orchestration",
       platform: (data.platform as Platform) ?? "copilot",
@@ -319,7 +350,8 @@ export function makeAgentTransform(subscription: Subscription): ContentTransform
 export function summarizePlan(
   plan: { steps: Array<{ label: string; src: string; destDir?: string; destFile?: string }> } | null,
   platform: Platform,
-  subscription: Subscription
+  subscription: Subscription,
+  scope: InstallScope
 ): PlanSummary | null {
   if (!plan || !platform) return null;
   let total = 0;
@@ -339,9 +371,9 @@ export function summarizePlan(
       steps.push({ label: step.label, count: 1, kind: "file" });
     }
   }
-  const meta = PLATFORM_META[platform];
-  const notes = [...meta.capabilities] as string[];
-  if (platform === "copilot") {
+  const scopeMeta = INSTALL_SCOPE_META[scope];
+  const notes = [scopeMeta.summary, ...scopeMeta.details] as string[];
+  if (platform === "copilot" && (scope === "orchestration" || scope === "lean")) {
     notes.push(...SUBSCRIPTION_META[subscription].details);
   }
   return { total, steps, missing, notes };
@@ -356,7 +388,7 @@ export function getStepIndexForScope(step: string, platform: Platform, scope: In
       return true;
     }
 
-    return scope !== "skills" && platform === "copilot";
+    return platform === "copilot" && (scope === "orchestration" || scope === "lean");
   }) as Step[];
 
   const currentIndex = Math.max(visibleSteps.indexOf(normalizedStep), 0);

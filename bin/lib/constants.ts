@@ -35,7 +35,7 @@ export const PLATFORM_META = {
     note: "Good fit for terminal-first Claude workflows.",
   },
   codex: {
-    name: "Codex (beta)",
+    name: "Codex",
     short: "Codex",
     accent: "cyan",
     destination: ".codex/ + .agents/skills/ + AGENTS.md",
@@ -89,7 +89,7 @@ export const INSTALL_SCOPE_META = {
   orchestration: {
     label: "Full orchestration",
     accent: "green",
-    summary: "Install agents, hooks, instructions/rules, prompts/commands, skills, and memory.",
+    summary: "Install agents, hooks, instructions/rules, prompts/commands, skills, and root memory.",
     details: [
       "Best for first-time setup",
       "Includes all platform-specific orchestration files",
@@ -98,10 +98,19 @@ export const INSTALL_SCOPE_META = {
   lean: {
     label: "Small orchestration",
     accent: "yellow",
-    summary: "Install a 3-agent workflow, hooks, instructions/rules, skills, and memory.",
+    summary: "Install a 3-agent workflow, hooks, instructions/rules, skills, and root memory.",
     details: [
       "Orchestrator, Coder, and Docs-updater only",
       "Keeps memory support without the full specialist roster",
+    ],
+  },
+  "skills-memory": {
+    label: "Skills + hooks + memory",
+    accent: "magenta",
+    summary: "Install shared skills, safety hooks, and root memory without agents.",
+    details: [
+      "No agents, prompts, rules/instructions, or root agent docs",
+      "Hooks remind the assistant to update memory before finishing",
     ],
   },
   skills: {
@@ -135,18 +144,18 @@ export const STEP_LABELS = {
 // ─── Next steps per platform ──────────────────────────────────────────────────
 export const NEXT_STEPS = {
   copilot: [
-    "Commit .github/ to your repo",
+    "Commit .github/ and memory/ to your repo",
     "Open Copilot Chat and use @Orchestrator to start",
     "Run startup: ask Orchestrator to use the project-startup skill",
   ],
   claude: [
-    "Commit .claude/ and CLAUDE.md to your repo",
+    "Commit .claude/, CLAUDE.md, and memory/ to your repo",
     "Run claude to start Claude Code",
     "Use @orchestrator agent to begin",
     "Run startup: ask Orchestrator to use the project-startup skill",
   ],
   codex: [
-    "Commit .codex/ and AGENTS.md to your repo",
+    "Commit .codex/, .agents/skills/, AGENTS.md, and memory/ to your repo",
     "Run codex from the repo root and ask it to use the orchestrator agent",
     "Run startup: ask the orchestrator agent to use the project-startup skill",
   ],

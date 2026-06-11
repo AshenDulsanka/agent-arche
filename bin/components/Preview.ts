@@ -69,7 +69,9 @@ function ConfirmBar({ force }: ConfirmBarProps): React.ReactElement {
 export function InstallPreview({ scope, platform, subscription, plan, preview, force, onConfirm, compact }: InstallPreviewProps): React.ReactElement {
   const meta = PLATFORM_META[platform];
   const scopeMeta = INSTALL_SCOPE_META[scope];
-  const subMeta = scope !== "skills" && platform === "copilot" ? SUBSCRIPTION_META[subscription] : null;
+  const subMeta = platform === "copilot" && (scope === "orchestration" || scope === "lean")
+    ? SUBSCRIPTION_META[subscription]
+    : null;
 
   return h(
     Box,

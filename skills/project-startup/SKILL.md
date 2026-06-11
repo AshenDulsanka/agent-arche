@@ -1,6 +1,6 @@
 ---
 name: project-startup
-description: First-run project setup for agent-arche. Analyzes a new codebase, seeds the installed memory vault, and configures docs/agents issue tracker, triage label, and domain-doc context for the engineering skills. Use immediately after installing Full or Small orchestration, or when startup context is missing.
+description: First-run project setup for agent-arche. Analyzes a new codebase, seeds the installed root memory vault, and configures docs/agents issue tracker, triage label, and domain-doc context for the engineering skills. Use immediately after installing Full or Small orchestration, Skills + hooks + memory, or when startup context is missing.
 argument-hint: "[path to project root, or 'current project']"
 user-invocable: true
 ---
@@ -30,11 +30,12 @@ Before doing setup work, inspect the repo and decide what is already done.
 
 Check in this order:
 
-1. `.github/memory/`
-2. `.claude/memory/`
-3. `.codex/memory/`
+1. `memory/`
+2. Legacy `.github/memory/`
+3. Legacy `.claude/memory/`
+4. Legacy `.codex/memory/`
 
-If more than one exists, use the one matching the active assistant platform when obvious. Otherwise tell the user what you found and ask which vault should be seeded.
+Use `memory/` as the canonical vault. If a legacy platform-local vault exists and `memory/` does not, move the legacy vault to `memory/` before seeding. If multiple legacy vaults exist and no root vault exists, tell the user what you found and ask which vault should become `memory/`.
 
 Treat memory bootstrap as already done only when the selected `{memoryDir}/_MOC.md` exists and has real project-specific content, not just placeholders.
 

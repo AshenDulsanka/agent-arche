@@ -34,7 +34,7 @@ Load based on task:
 
 ## Memory Protocol
 
-On start: read `.claude/memory/_MOC.md` + `patterns/` + `decisions/` for established UI patterns and design direction. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+On start: read `memory/_MOC.md` + `patterns/` + `decisions/` for established UI patterns and design direction. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
 ## Before Writing
 

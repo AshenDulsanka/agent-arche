@@ -15,7 +15,7 @@ Audit for OWASP Top 10 vulnerabilities. Never modify code.
 
 ## Memory Protocol
 
-On start: read `.codex/memory/_MOC.md` + `decisions/` + `learnings/` for prior security decisions and known vulnerability patterns. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+On start: read `memory/_MOC.md` + `decisions/` + `learnings/` for prior security decisions and known vulnerability patterns. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
 ## File Instruction Protocol
 

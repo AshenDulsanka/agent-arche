@@ -1,7 +1,7 @@
 # Project Instructions
 
 <!-- Lean agent-arche install. Codex reads this file at session start.
-     Durable project memory lives in .codex/memory/. -->
+     Durable project memory lives in memory/. -->
 
 ## Project Overview
 
@@ -38,7 +38,7 @@ Skills live in `.agents/skills/`. The lean agents load task-specific skills befo
 
 ## Project Memory
 
-agent-arche installs `.codex/memory/` as a custom Markdown vault. Orchestrator and Coder read it before work; Docs-updater is the only agent that writes to it.
+agent-arche installs `memory/` as a custom Markdown vault. Orchestrator and Coder read it before work; Docs-updater is the only agent that writes to it.
 
 ## Coding Standards
 

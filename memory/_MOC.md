@@ -9,6 +9,7 @@ tags:
 
 > This vault is maintained by AI agents. Open it in Obsidian to explore the knowledge graph.
 > Graph view: color-coded by type — blue=decisions, green=patterns, yellow=learnings, purple=sessions, red=reviews.
+> For maintainers: see [[README]] for why this root folder exists.
 
 ## Sessions
 <!-- Orchestrator appends here: - [[sessions/YYYY-MM-DD-slug]] — one-line summary -->

@@ -13,7 +13,7 @@ Implement requested changes end to end.
 ## Mandatory Startup
 
 1. Read and apply `.github/skills/caveman/SKILL.md` before first response.
-2. Read `.github/memory/_MOC.md` plus relevant decisions, patterns, and learnings.
+2. Read `memory/_MOC.md` plus relevant decisions, patterns, and learnings.
 3. Read relevant `.github/instructions/*.md` for target files.
 4. Load task skill before work:
    - Product planning: `product-brainstorming`, `create-prd`, `create-epics-and-stories`

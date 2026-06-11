@@ -17,7 +17,7 @@ Write and execute E2E tests for critical user flows using Playwright.
 
 ## Memory Protocol
 
-On start: read `.github/memory/_MOC.md` + `learnings/` for testing gotchas, flaky selectors, and setup quirks. Do not write to memory — include a **Handoff** block in output for Docs-updater.
+On start: read `memory/_MOC.md` + `learnings/` for testing gotchas, flaky selectors, and setup quirks. Do not write to memory — include a **Handoff** block in output for Docs-updater.
 
 ## Testing Approach
 

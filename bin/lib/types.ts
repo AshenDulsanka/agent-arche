@@ -14,6 +14,7 @@ export interface DirPlanStep extends BasePlanStep {
   destDir: string;
   destFile?: never;
   transform?: ContentTransform | null;
+  legacyMemoryDirs?: readonly string[];
 }
 
 export interface FilePlanStep extends BasePlanStep {

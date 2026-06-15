@@ -4,7 +4,7 @@ description: Compact the current conversation into a handoff document for anothe
 argument-hint: "What will the next session be used for?"
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS - not the current workspace.
+Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the `/memory/handoff` directory of the current workspace, if that folder is not there make sure to create it in `/docs/handoff` and delete it after the task is done.
 
 Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
 

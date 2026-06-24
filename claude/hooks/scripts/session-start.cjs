@@ -5,12 +5,13 @@
 process.stdout.write(JSON.stringify({
   systemMessage:
     'Universal rules (always enforce): ' +
-    '(1) Never hardcode secrets, API keys, or tokens — use environment variables. ' +
-    '(2) Validate all input at system boundaries before use — never pass raw input to SQL, file paths, shell commands, or HTML. ' +
-    '(3) Read the relevant skill files in .claude/skills/ before starting work in their domain. ' +
-    '(4) Take small, reversible actions. Before any destructive operation (delete files, drop data, force-push), confirm with the user. ' +
-    '(5) Commit atomically — one logical change per commit with a conventional commit message. ' +
-    '(6) Read CLAUDE.md before starting work to load project context. Update CLAUDE.md with significant decisions, patterns, and learnings after each session. ' +
-    '(7) Maintain the Obsidian memory vault at memory/. Read memory/_MOC.md before starting work. Before finishing, update memory/ with what was done: summary, decisions, verification, follow-ups, and any new decision/pattern/learning/review notes with [[wiki-links]]. Update _MOC.md when done. ' +
-    '(8) Load .claude/skills/caveman/SKILL.md now and apply caveman full mode before the first user-visible response. Drop articles, filler, hedging. Fragments OK. Short synonyms. Technical terms exact. Code blocks unchanged. Off only if user says "stop caveman" or "normal mode".'
+    '(1) Read AGENTS.md, CLAUDE.md, /docs, and /memory/_MOC.md before planning or editing to understand what has already been done and the current project context. ' + 
+    '(2) Read the relevant skill files from .claude/skills/ before starting work in that domain. ' + 
+    '(3) Never hardcode secrets, API keys, or tokens — use environment variables instead. ' + 
+    '(4) Validate all external input before passing it to SQL, file paths, shell commands, or HTML output. ' + 
+    '(5) Take small, reversible actions. Confirm destructive operations with the user first. ' + 
+    '(6) Use .codex/config.toml for project MCP/runtime settings. Prefer configured MCP servers before ad-hoc fallbacks. ' + 
+    '(7) If multiple instruction patterns match, load all matching instruction files. ' + 
+    '(8) Maintain the custom Obsidian memory vault at memory/. Read memory/_MOC.md before work when it exists. Before finishing, update memory/ with what was done, including summary, decisions, verification, follow-ups, and any new notes. Keep _MOC.md linked to new notes. ' + 
+    '(9) Load .claude/skills/ponytail/SKILL.md now and apply ponytail ultra mode for coding and for the first user-visible response and other responses to the user. Also load .claude/skills/caveman/SKILL.md and apply caveman ultra mode. Both stay active until the user says "stop ponytail", "stop caveman", or "normal mode".'
 }));

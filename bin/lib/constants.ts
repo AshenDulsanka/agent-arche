@@ -12,6 +12,17 @@ export const MODELS = {
 
 // ─── Platform definitions ─────────────────────────────────────────────────────
 export const PLATFORM_META = {
+  codex: {
+    name: "Codex (Recommended)",
+    short: "Codex",
+    accent: "cyan",
+    destination: ".codex/ + .agents/skills/ + AGENTS.md",
+    capabilities: [
+      "Agents, hooks, rules, config, and instruction globs",
+      "Shared skills folder plus project-root AGENTS.md context",
+    ],
+    note: "Strong choice for MCP-enabled Codex sessions.",
+  },
   copilot: {
     name: "GitHub Copilot",
     short: "Copilot",
@@ -33,17 +44,6 @@ export const PLATFORM_META = {
       "Project-root CLAUDE.md for persistent team context",
     ],
     note: "Good fit for terminal-first Claude workflows.",
-  },
-  codex: {
-    name: "Codex",
-    short: "Codex",
-    accent: "cyan",
-    destination: ".codex/ + .agents/skills/ + AGENTS.md",
-    capabilities: [
-      "Agents, hooks, rules, config, and instruction globs",
-      "Shared skills folder plus project-root AGENTS.md context",
-    ],
-    note: "Strong choice for MCP-enabled Codex sessions.",
   },
 } as const;
 
@@ -86,6 +86,15 @@ export const SUBSCRIPTION_META = {
 
 // ─── Install scope definitions ───────────────────────────────────────────────
 export const INSTALL_SCOPE_META = {
+  "skills-memory": {
+    label: "Skills + hooks + memory (Recommended)",
+    accent: "magenta",
+    summary: "Install shared skills, safety hooks, and root memory without agents.",
+    details: [
+      "No agents, prompts, rules/instructions, or root agent docs",
+      "Hooks remind the assistant to update memory before finishing",
+    ],
+  },
   orchestration: {
     label: "Full orchestration",
     accent: "green",
@@ -102,15 +111,6 @@ export const INSTALL_SCOPE_META = {
     details: [
       "Orchestrator, Coder, and Docs-updater only",
       "Keeps memory support without the full specialist roster",
-    ],
-  },
-  "skills-memory": {
-    label: "Skills + hooks + memory",
-    accent: "magenta",
-    summary: "Install shared skills, safety hooks, and root memory without agents.",
-    details: [
-      "No agents, prompts, rules/instructions, or root agent docs",
-      "Hooks remind the assistant to update memory before finishing",
     ],
   },
   skills: {
@@ -146,18 +146,18 @@ export const NEXT_STEPS = {
   copilot: [
     "Commit .github/ and memory/ to your repo",
     "Open Copilot Chat and use @Orchestrator to start",
-    "Run startup: ask Orchestrator to use the project-startup skill",
+    "Run startup: ask Orchestrator to use the project-startup skill and remove skills that are not needed for your workflow",
   ],
   claude: [
     "Commit .claude/, CLAUDE.md, and memory/ to your repo",
     "Run claude to start Claude Code",
     "Use @orchestrator agent to begin",
-    "Run startup: ask Orchestrator to use the project-startup skill",
+    "Run startup: ask Orchestrator to use the project-startup skill and remove skills that are not needed for your workflow",
   ],
   codex: [
     "Commit .codex/, .agents/skills/, AGENTS.md, and memory/ to your repo",
     "Run codex from the repo root and ask it to use the orchestrator agent",
-    "Run startup: ask the orchestrator agent to use the project-startup skill",
+    "Run startup: ask the orchestrator agent to use the project-startup skill and remove skills that are not needed for your workflow",
   ],
 } as const;
 

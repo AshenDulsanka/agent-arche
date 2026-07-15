@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Review"
+  short_description: "Threat-model and test security-sensitive changes"
+  default_prompt: "Review this security-sensitive change and report evidence-backed findings."

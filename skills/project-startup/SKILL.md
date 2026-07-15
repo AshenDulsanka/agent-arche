@@ -1,8 +1,6 @@
 ---
 name: project-startup
-description: First-run project setup for agent-arche. Analyzes a new codebase, seeds the installed root memory vault, and configures docs/agents issue tracker, triage label, and domain-doc context for the engineering skills. Use immediately after installing Full or Small orchestration, Skills + hooks + memory, or when startup context is missing.
-argument-hint: "[path to project root, or 'current project']"
-user-invocable: true
+description: First-run setup for agent-arche projects. Analyze a codebase, seed repo memory when the installed workspace includes it, and configure docs/agents issue-tracker, triage-label, and domain context used by chained engineering skills. Use after installation or when that context is missing; in Skills-only workspaces, skip memory and configure only the available project context.
 ---
 
 # Project Startup Skill
@@ -13,7 +11,7 @@ This is the single first-run entry point for a newly installed agent-arche proje
 
 It does two jobs in one skill folder:
 
-1. Analyze the codebase, interview the user only for missing context, and seed durable project memory with decisions, patterns, learnings, and a feature index.
+1. In memory-capable installs, analyze the codebase, interview the user only for missing context, and seed durable project memory with decisions, patterns, learnings, and a feature index. Skip this job in Skills-only installs.
 2. Configure the engineering skill context in `docs/agents/` so skills know this repo's issue tracker workflow, triage label vocabulary, and domain documentation layout.
 
 Do not split this flow into separate public skills. Keep startup discoverable as one action.
@@ -28,7 +26,11 @@ Before doing setup work, inspect the repo and decide what is already done.
 
 ### 0.1 Resolve memory vault
 
-Check in this order:
+First determine the workspace flavor from `.codex/agent-arche.json` when available, otherwise from the installed directories. Skills + hooks + memory is memory-capable. Skills only is not. Treat legacy Full or Small metadata as Skills + hooks + memory.
+
+For Skills only, mark memory bootstrap as not applicable and continue to the engineering-context check. Do not create `memory/`.
+
+For a memory-capable workspace, check in this order:
 
 1. `memory/`
 2. Legacy `.codex/memory/`
@@ -282,7 +284,7 @@ Summarize what is present and missing. Then walk through only decisions that are
 
 **Section A - Issue tracker**
 
-Explain that the issue tracker is where issues live for this repo. Skills like `triage`, `review`, `handoff`, and product planning handoffs need to know whether to call a tracker CLI, write a repo-local markdown file, or follow another workflow.
+Explain that the issue tracker is where issues live for this repo. Skills such as `to-spec`, `to-tickets`, `code-review`, and `handoff` need to know whether to call a tracker CLI, write a repo-local markdown file, or follow another workflow.
 
 Default posture:
 
@@ -294,7 +296,7 @@ For local markdown, always ask for the base directory and file naming pattern un
 
 **Section B - Triage label vocabulary**
 
-Explain that triage moves issues through a state machine and needs the actual label strings configured for this repo.
+Explain that spec and ticket workflows need the actual tracker label strings configured for this repo.
 
 Canonical roles:
 
@@ -374,7 +376,7 @@ After startup, summarize:
 ## Project Startup Complete
 
 ### Memory Bootstrap
-- Status: created / already present / skipped with reason
+- Status: created / already present / not applicable for Skills only / skipped with reason
 - Memory vault: {memoryDir}
 - Notes created: X decisions, X patterns, X learnings, X features
 
@@ -398,3 +400,5 @@ Anything unresolved or intentionally deferred.
 - Every memory note must have complete YAML frontmatter and a `## Related` section with at least one `[[wiki-link]]`.
 - File names: `lowercase-kebab-case.md`. ADRs: `ADR-NNN-slug.md`.
 - Tags must reflect the domain: `#auth`, `#api`, `#ui`, `#database`, `#performance`, `#security`, `#testing`, etc.
+
+This skill replaces the legacy external setup flow. Never tell users to run a missing setup skill.

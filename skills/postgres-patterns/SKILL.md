@@ -2,9 +2,10 @@
 name: postgres-patterns
 description: >-
   PostgreSQL database patterns for query optimization, schema design, indexing, and
-  security. Use when writing SQL or migrations, designing schemas, troubleshooting slow
-  queries, implementing Row Level Security, tuning connection pooling, or reviewing
-  database changes. Based on Supabase-leaning Postgres practice.
+  security. Use only when PostgreSQL is confirmed in the codebase or explicitly named by
+  the user, and the task involves SQL, migrations, schemas, slow queries, Row Level
+  Security, indexes, or connection pooling. Do not trigger for generic data work or a
+  different database. Based on Supabase-leaning Postgres practice.
 ---
 
 # PostgreSQL Patterns

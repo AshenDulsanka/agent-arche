@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Startup"
+  short_description: "Configure project context for agent-arche skills"
+  default_prompt: "Set up agent-arche context for the current project without overwriting existing conventions."

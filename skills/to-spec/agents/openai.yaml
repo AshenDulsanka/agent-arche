@@ -1,0 +1,7 @@
+interface:
+  display_name: "Conversation to Spec"
+  short_description: "Synthesize the current discussion into a project spec"
+  default_prompt: "Turn this conversation into a spec, then show me the draft before publishing it."
+
+policy:
+  allow_implicit_invocation: false

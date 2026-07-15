@@ -1,8 +1,6 @@
 ---
 name: seo
-description: Implements and audits SEO for any website — technical foundation (sitemap, crawl, prerendering), metadata (title/description/OG/Twitter), structured data (JSON-LD), Core Web Vitals, on-page alignment, internal linking, and off-page authority signals. Use when building page metadata, adding schema markup, auditing search visibility, improving SERP CTR, or setting up a new site's SEO foundation.
-argument-hint: "[page, feature, or site area to optimize]"
-user-invocable: true
+description: Implement or audit search-specific website behavior: crawlability, sitemap and canonical rules, page metadata, structured data, search performance, Core Web Vitals, and internal linking. Use only when SEO/search visibility is requested or directly affected; do not trigger for generic frontend or performance work.
 ---
 
 # SEO Skill

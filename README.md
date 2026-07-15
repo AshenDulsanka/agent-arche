@@ -1,6 +1,6 @@
 # agent-arche
 
-Multi-platform AI agent orchestration for GitHub Copilot, Claude Code, and Codex. It installs specialist agents, shared skills, memory templates, hooks, and project instructions.
+Codex agent orchestration that installs specialist agents, shared skills, memory templates, hooks, and project instructions.
 
 ## Install
 
@@ -8,32 +8,20 @@ Multi-platform AI agent orchestration for GitHub Copilot, Claude Code, and Codex
 npx agent-arche install
 ```
 
-Run it from your project root. The installer asks for:
-
-1. Scope: Full orchestration, Small orchestration, Skills + hooks + memory, or Skills only
-2. Platform: GitHub Copilot, Claude Code, or Codex
-3. Copilot plan, only when installing Copilot agents
+Run it from your project root. The installer asks for a scope: Full orchestration, Small orchestration, Skills + hooks + memory, or Skills only.
 
 | Scope | Installs |
 |---|---|
-| Full orchestration | Full specialist roster, hooks, instructions/rules, prompts/commands, skills, memory, and platform root files |
+| Full orchestration | Full specialist roster, hooks, instructions/rules, skills, memory, and root files |
 | Small orchestration | Lean 3-agent setup: Orchestrator, Coder, Docs-updater, plus hooks, instructions/rules, skills, memory, and root files |
-| Skills + hooks + memory | Shared `skills/`, platform hooks, hook activation files, and a memory vault, without installing agents |
+| Skills + hooks + memory | Shared `skills/`, Codex hooks, hook activation files, and a memory vault, without installing agents |
 | Skills only | Shared `skills/` folder only |
 
-| Platform | Destination |
-|---|---|
-| GitHub Copilot | `.github/` |
-| Claude Code | `.claude/` plus root `CLAUDE.md` |
-| Codex | `.codex/`, `.agents/skills/`, plus root `AGENTS.md` |
+Files are installed into `.codex/`, `.agents/skills/`, root `memory/`, and root `AGENTS.md`, depending on the selected scope.
 
 After installing Full or Small orchestration, run the project startup flow once:
 
-| Platform | Prompt |
-|---|---|
-| GitHub Copilot | `@Orchestrator use the project-startup skill on this project` |
-| Claude Code | `Use the orchestrator agent to run the project-startup skill on this project` |
-| Codex | `Use the orchestrator agent to run the project-startup skill on this project` |
+`run the project-startup skill on this project`
 
 Update later with:
 
@@ -115,28 +103,23 @@ Recommended order for product work: `project-startup` once, `product-brainstormi
 | Piece | What it does |
 |---|---|
 | Hooks | `session-start.cjs` injects startup context including the root `memory/` update rule, `pre-tool-safety.cjs` blocks destructive commands, and `changelog-reminder.cjs` performs final docs/memory drift checks. |
-| Instructions/rules | Copilot uses native instruction files. Claude and Codex install equivalent rule/instruction files for TypeScript, Svelte, tests, and API routes. |
+| Instructions/rules | Codex installs rule and instruction files for TypeScript, Svelte, tests, and API routes. |
 | Memory | Full, Small, and Skills + hooks + memory installs include root `memory/` as an Obsidian-style agent memory vault. Existing platform-local vaults are migrated to root when `memory/` is missing. Skills-only installs do not include memory. |
-| Prompts/commands | Copilot prompts and Claude commands include `code-review`, `write-tests`, `debug`, `create-issue`, `pr-description`, and `security-review`. Codex uses agents by name instead. |
-| Codex MCP | Codex MCP servers and runtime behavior are configured in `.codex/config.toml`, with disabled examples for Context7, Playwright, GitHub, and OpenAI docs. |
+| Agent commands | Codex uses the installed agents by name. |
+| Codex MCP | Codex MCP servers and runtime behavior are configured in `.codex/config.toml`, with disabled examples for Context7, Playwright, and OpenAI docs. |
 
 ## Manual Setup
 
 The CLI is preferred. For manual installs:
 
-| Platform | Copy |
-|---|---|
-| Copilot | `copilot/` to `.github/`, `skills/` to `.github/skills/`, package `memory/` to root `memory/` |
-| Claude Code | `claude/` to `.claude/`, `skills/` to `.claude/skills/`, package `memory/` to root `memory/`, `claude/CLAUDE.md` to root `CLAUDE.md` |
-| Codex | `codex/` contents to `.codex/`, `skills/` to `.agents/skills/`, package `memory/` to root `memory/`, `codex/AGENTS.md` to root `AGENTS.md` |
+Copy `codex/` contents to `.codex/`, `skills/` to `.agents/skills/`, package `memory/` to root `memory/`, and `codex/AGENTS.md` to root `AGENTS.md`.
 
-For a skills + hooks + memory install, copy only the platform hooks and hook activation files, the shared `skills/`, and `memory/`. For Codex, include `.codex/config.toml` and `.codex/hooks.json`; for Claude, include `.claude/settings.json`.
+For a skills + hooks + memory install, copy the Codex hooks and hook activation files, shared `skills/`, `memory/`, `.codex/config.toml`, and `.codex/hooks.json`.
 
 For PR and issue workflows, copy `templates/` into `.github/` and update the comments inside.
 
 ## Notes
 
-- Copilot installs adjust agent models by subscription: Student replaces Claude models with Copilot GPT, Pro replaces Opus-only agents with Sonnet, and Pro+ keeps the configured roster.
 - Verify published package integrity with `npm view agent-arche dist.integrity` and compare it to `agent-arche.json` in the installed platform folder.
 
 ## Credits
@@ -148,7 +131,6 @@ Built on top of excellent open-source work:
 | [cyxzdev/Uncodixfy](https://github.com/cyxzdev/Uncodixfy/blob/main/SKILL.md) | Design and UI skill inspiration |
 | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Foundation for the `ui-audit`, `ui-optimize`, `critique`, `animate` steps inside the design skill |
 | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | `gsap`, `redesign`, `soft`, `minimalist`, `brutalist`, `stitch`, `output`, and other quality-focused steps inside the design skill |
-| [anthropics/claude-code frontend-design](https://github.com/anthropics/claude-code/blob/main/plugins/frontend-design/skills/frontend-design/SKILL.md) | Frontend design skill patterns |
 | [mattpocock/skills](https://github.com/mattpocock/skills) | `grill-me`, `grill-with-docs`, `tdd`,  `improve-codebase-architecture`, `diagnose`, `handoff`, `prototype`, `review`, `triage`, and `setup-matt-pocock-skills` that is used inside the project startup skills |
 | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | `caveman`, and `caveman-compress`  communication skills |
 | [BMad](https://github.com/bmad-code-org/bmad-method) | `bmad-brainstorming`, `bmad-create-prd`, and `bmad-create-epics-and-stories` skills |

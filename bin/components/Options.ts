@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Box, Text, useInput } from "ink";
 import { COPY } from "../lib/constants.js";
-import { getPlatformOptions, getScopeOptions, getSubscriptionOptions } from "../lib/utils.js";
+import { getScopeOptions } from "../lib/utils.js";
 import { Section } from "./Layout.js";
 import type { HintItem, OptionItem } from "../lib/types.js";
-import type { InstallScope, Platform, Subscription } from "../lib/constants.js";
+import type { InstallScope } from "../lib/constants.js";
 
 const h = React.createElement;
 
@@ -12,7 +12,6 @@ const h = React.createElement;
 interface KeyHintsProps {
   hints: readonly HintItem[];
 }
-
 interface CompactOptionListProps {
   options: OptionItem[];
   activeIndex: number;
@@ -26,13 +25,6 @@ interface OptionListProps {
   compact?: boolean;
 }
 
-interface PlatformCardsProps {
-  value: Platform;
-  onSubmit: (value: string) => void;
-  onChange?: (value: Platform) => void;
-  compact: boolean;
-}
-
 interface ScopeStepProps {
   value: InstallScope;
   onSubmit: (value: string) => void;
@@ -40,28 +32,8 @@ interface ScopeStepProps {
   compact: boolean;
 }
 
-interface SubscriptionStepProps {
-  value: Subscription;
-  onSubmit: (value: string) => void;
-  compact: boolean;
-}
-
-function asPlatform(value: string): Platform | null {
-  if (value === "copilot" || value === "claude" || value === "codex") {
-    return value;
-  }
-  return null;
-}
-
 function asScope(value: string): InstallScope | null {
   if (value === "orchestration" || value === "lean" || value === "skills-memory" || value === "skills") {
-    return value;
-  }
-  return null;
-}
-
-function asSubscription(value: string): Subscription | null {
-  if (value === "auto" || value === "student" || value === "pro" || value === "pro+") {
     return value;
   }
   return null;
@@ -190,24 +162,6 @@ export function OptionList({ options, value, onChange, onSubmit, compact = false
   );
 }
 
-// ─── PlatformCards ────────────────────────────────────────────────────────────
-export function PlatformCards({ value, onSubmit, onChange, compact }: PlatformCardsProps): React.ReactElement {
-  const [current, setCurrent] = useState(value || "copilot");
-  const platformOptions = useMemo(() => getPlatformOptions(), []);
-  const handleChange = (next: string): void => {
-    const parsed = asPlatform(next);
-    if (parsed) {
-      setCurrent(parsed);
-      onChange?.(parsed);
-    }
-  };
-  return h(
-    Section,
-    { eyebrow: COPY.platform.eyebrow, title: COPY.platform.title },
-    h(OptionList, { options: platformOptions, value: current, onChange: handleChange, onSubmit, compact })
-  );
-}
-
 // ─── ScopeStep ────────────────────────────────────────────────────────────────
 export function ScopeStep({ value, onSubmit, onChange, compact }: ScopeStepProps): React.ReactElement {
   const [current, setCurrent] = useState<InstallScope>(value || "orchestration");
@@ -224,22 +178,5 @@ export function ScopeStep({ value, onSubmit, onChange, compact }: ScopeStepProps
     Section,
     { eyebrow: COPY.scope.eyebrow, title: COPY.scope.title },
     h(OptionList, { options: scopeOptions, value: current, onChange: handleChange, onSubmit, compact })
-  );
-}
-
-// ─── SubscriptionStep ─────────────────────────────────────────────────────────
-export function SubscriptionStep({ value, onSubmit, compact }: SubscriptionStepProps): React.ReactElement {
-  const [current, setCurrent] = useState(value || "auto");
-  const subscriptionOptions = useMemo(() => getSubscriptionOptions(), []);
-  const handleChange = (next: string): void => {
-    const parsed = asSubscription(next);
-    if (parsed) {
-      setCurrent(parsed);
-    }
-  };
-  return h(
-    Section,
-    { eyebrow: COPY.subscription.eyebrow, title: COPY.subscription.title },
-    h(OptionList, { options: subscriptionOptions, value: current, onChange: handleChange, onSubmit, compact })
   );
 }

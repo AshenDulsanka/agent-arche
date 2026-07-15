@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Box, Text, useApp, useInput } from "ink";
 import fs from "fs";
-import { COPY, type InstallScope, type Platform, type Subscription } from "./lib/constants.js";
+import { COPY, type InstallScope, type Platform } from "./lib/constants.js";
 import {
   readPackageJson,
   readMeta,
@@ -16,11 +16,11 @@ import {
   copyFile,
   migrateLegacyMemoryVault,
 } from "./lib/utils.js";
-import { getCopilotPlan, getClaudePlan, getCodexPlan } from "./lib/plans.js";
+import { getCodexPlan } from "./lib/plans.js";
 import { getFooterHints } from "./lib/hints.js";
 import { Frame, Section } from "./components/Layout.js";
 import { Header } from "./components/Header.js";
-import { KeyHints, PlatformCards, ScopeStep, SubscriptionStep } from "./components/Options.js";
+import { KeyHints, ScopeStep } from "./components/Options.js";
 import { InstallPreview, ExistingInstallView, UpToDateView, UpdateMissingView } from "./components/Preview.js";
 import { ProgressView } from "./components/Progress.js";
 import { SuccessView } from "./components/Success.js";
@@ -57,20 +57,8 @@ function useCompactLayout() {
   };
 }
 
-function isPlatform(value: string): value is Platform {
-  return value === "copilot" || value === "claude" || value === "codex";
-}
-
-function isSubscription(value: string): value is Subscription {
-  return value === "auto" || value === "student" || value === "pro" || value === "pro+";
-}
-
 function isInstallScope(value: string): value is InstallScope {
   return value === "orchestration" || value === "lean" || value === "skills-memory" || value === "skills";
-}
-
-function usesCopilotSubscription(scope: InstallScope, platform: Platform): boolean {
-  return platform === "copilot" && (scope === "orchestration" || scope === "lean");
 }
 
 interface AppProps {
@@ -86,8 +74,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
   const [step,           setStep]           = useState<AppStep>("scope");
   const [scope,          setScope]          = useState<InstallScope>("orchestration");
-  const [platform,       setPlatform]       = useState<Platform>("copilot");
-  const [subscription,   setSubscription]   = useState<Subscription>("auto");
+  const platform: Platform = "codex";
   const [plan,           setPlan]           = useState<InstallPlan | null>(null);
   const [existing,       setExisting]       = useState<InstallMeta | null>(null);
   const [aborted,        setAborted]        = useState(false);
@@ -112,20 +99,10 @@ export function App({ force = false }: AppProps): React.ReactElement {
     setTimeout(() => exit(), 100);
   };
 
-  const goBack = (currentStep: AppStep, currentScope: InstallScope, currentPlatform: Platform): boolean => {
-    if (currentStep === "subscription") {
-      setStep("platform");
-      return true;
-    }
-
-    if (currentStep === "platform") {
-      setStep("scope");
-      return true;
-    }
-
+  const goBack = (currentStep: AppStep): boolean => {
     if (currentStep === "confirm") {
       resetPreparedState();
-      setStep(usesCopilotSubscription(currentScope, currentPlatform) ? "subscription" : "platform");
+      setStep("scope");
       return true;
     }
 
@@ -162,7 +139,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     if (step === "confirm") {
       if (isEscape) {
-        const movedBack = goBack(step, scope, platform);
+        const movedBack = goBack(step);
         if (movedBack) {
           lockEscape();
         }
@@ -192,7 +169,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
         return;
       }
 
-      const movedBack = goBack(step, scope, platform);
+      const movedBack = goBack(step);
       if (movedBack) {
         lockEscape();
         return;
@@ -205,24 +182,17 @@ export function App({ force = false }: AppProps): React.ReactElement {
     }
   });
 
-  const preparePlan = (nextScope: InstallScope, nextPlatform: Platform, nextSubscription: Subscription): void => {
-    const resolvedSubscription = usesCopilotSubscription(nextScope, nextPlatform) ? nextSubscription : "auto";
-
-    let nextPlan: InstallPlan;
-    if      (nextPlatform === "copilot") nextPlan = getCopilotPlan(cwd, resolvedSubscription, nextScope);
-    else if (nextPlatform === "claude")  nextPlan = getClaudePlan(cwd, nextScope);
-    else                                  nextPlan = getCodexPlan(cwd, nextScope);
+  const preparePlan = (nextScope: InstallScope): void => {
+    const nextPlan: InstallPlan = getCodexPlan(cwd, nextScope);
 
     setScope(nextScope);
-    setPlatform(nextPlatform);
-    setSubscription(resolvedSubscription);
     setPlan(nextPlan);
-    setPreview(summarizePlan(nextPlan, nextPlatform, resolvedSubscription, nextScope));
+    setPreview(summarizePlan(nextPlan, nextScope));
 
     const detected = readMeta(nextPlan.metaDir);
     setExisting(detected);
 
-    if (detected && detected.platform === nextPlatform && detected.scope === nextScope && !force) {
+    if (detected && detected.platform === platform && detected.scope === nextScope && !force) {
       setStep("existing");
       setTimeout(() => exit(), 100);
       return;
@@ -250,8 +220,6 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
       setExisting(detected.meta);
       setScope(detected.meta.scope);
-      setPlatform(detected.platform);
-      setSubscription(detected.subscription);
 
       const npmLatest = await fetchNpmLatestVersion();
       if (cancelled) {
@@ -268,7 +236,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
       }
 
       setUpdateChecking(false);
-      preparePlan(detected.meta.scope, detected.platform, detected.subscription);
+      preparePlan(detected.meta.scope);
     };
 
     resolveUpdateFlow();
@@ -366,7 +334,6 @@ export function App({ force = false }: AppProps): React.ReactElement {
         sourceType:   "npm",
         scope,
         platform,
-        subscription: usesCopilotSubscription(scope, platform) ? subscription : undefined,
         hash:         nextHash ?? null,
       });
       setStep("done");
@@ -375,7 +342,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
 
     runInstall();
     return () => { cancelled = true; };
-  }, [pkg.version, plan, platform, step, exit, scope, subscription]);
+  }, [pkg.version, plan, platform, step, exit, scope]);
 
   return h(
     Box,
@@ -383,7 +350,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
     h(
       Frame,
       null,
-      h(Header, { version: pkg.version, force, cwd, step, scope, platform, compact, showSteps: !force }),
+      h(Header, { version: pkg.version, force, cwd, step, compact, showSteps: !force }),
 
       aborted
         ? h(Section, { eyebrow: COPY.cancelled.eyebrow, title: COPY.cancelled.title },
@@ -411,41 +378,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
               }
 
               setScope(value);
-              setStep("platform");
-            },
-          })
-        : null,
-
-      !aborted && !force && step === "platform"
-        ? h(PlatformCards, {
-            value: platform,
-            compact,
-            onChange: setPlatform,
-            onSubmit: (value: string) => {
-              if (!isPlatform(value)) {
-                return;
-              }
-
-              if (usesCopilotSubscription(scope, value)) {
-                setPlatform(value);
-                setStep("subscription");
-                return;
-              }
-
-              preparePlan(scope, value, "auto");
-            },
-          })
-        : null,
-
-      !aborted && !force && step === "subscription"
-        ? h(SubscriptionStep, {
-            value: subscription,
-            compact,
-            onSubmit: (value: string) => {
-              if (!isSubscription(value)) {
-                return;
-              }
-              preparePlan(scope, "copilot", value);
+              preparePlan(value);
             },
           })
         : null,
@@ -466,7 +399,6 @@ export function App({ force = false }: AppProps): React.ReactElement {
         ? h(InstallPreview, {
             scope,
             platform,
-            subscription,
             plan,
             preview,
             force,

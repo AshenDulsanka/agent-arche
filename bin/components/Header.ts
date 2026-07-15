@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Text } from "ink";
 import path from "path";
-import { COPY, STEP_LABELS, type InstallScope, type Platform, type Step } from "../lib/constants.js";
+import { COPY, STEP_LABELS, type Step } from "../lib/constants.js";
 import { getStepIndexForScope, formatMode } from "../lib/utils.js";
 
 const h = React.createElement;
@@ -16,8 +16,6 @@ interface HeaderProps {
   force: boolean;
   cwd: string;
   step: string;
-  scope: InstallScope;
-  platform: Platform;
   compact: boolean;
   showSteps: boolean;
 }
@@ -40,8 +38,8 @@ function StepIndicator({ visibleSteps, currentIndex }: StepIndicatorProps): Reac
   );
 }
 
-export function Header({ version, force, cwd, step, scope, platform, compact, showSteps }: HeaderProps): React.ReactElement {
-  const stepInfo = getStepIndexForScope(step, platform, scope);
+export function Header({ version, force, cwd, step, compact, showSteps }: HeaderProps): React.ReactElement {
+  const stepInfo = getStepIndexForScope(step);
 
   return h(
     Box,

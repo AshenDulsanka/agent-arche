@@ -1,10 +1,8 @@
 {
   "name": "agent-arche",
   "version": "1.3.7",
-  "description": "Multi-platform AI agent orchestration for GitHub Copilot, Claude Code, and Codex",
+  "description": "Codex agent orchestration with specialist agents, shared skills, hooks, and project memory",
   "keywords": [
-    "github-copilot",
-    "claude-code",
     "codex",
     "ai-agents",
     "orchestration",
@@ -33,8 +31,6 @@
     "prepack": "npm run clean && npm run build:dist"
   },
   "files": [
-    "copilot/",
-    "claude/",
     "codex/",
     "skills/",
     "memory/",

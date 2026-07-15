@@ -1,6 +1,6 @@
 ## What changed
 <!-- Describe what this PR does. Be specific — "Added email validation to contact form" not "fixed stuff".
-     Copilot: summarise the diff in bullet points. -->
+     Summarise the diff in bullet points. -->
 
 - 
 
@@ -14,7 +14,7 @@ Closes #TODO
 
 ## How to test
 <!-- Step-by-step instructions for a reviewer to verify the changes work.
-     Copilot: write steps based on what was changed. -->
+     Write steps based on what was changed. -->
 
 1. 
 2. 

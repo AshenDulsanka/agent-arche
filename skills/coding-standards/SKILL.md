@@ -5,7 +5,7 @@ description: Use when writing or reviewing code in any language. Covers typed-la
 
 # Coding Standards
 
-> Before reviewing, read `copilot-instructions.md` / `AGENTS.md` / `CLAUDE.md` to identify the project's language, framework, and version. Adapt stack-specific rules accordingly.
+> Before reviewing, read `AGENTS.md` to identify the project's language, framework, and version. Adapt stack-specific rules accordingly.
 
 ## Typed Language Rules (apply only when project uses the language)
 

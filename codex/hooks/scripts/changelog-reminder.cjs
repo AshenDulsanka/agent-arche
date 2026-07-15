@@ -34,7 +34,7 @@ function isSourceFile(filePath) {
 }
 
 function findMemoryVault(cwd) {
-  const candidates = ['memory', '.codex/memory', '.github/memory', '.claude/memory'];
+  const candidates = ['memory', '.codex/memory'];
   return candidates.find((candidate) => {
     try {
       return require('fs').existsSync(path.join(cwd, candidate));
@@ -47,9 +47,7 @@ function findMemoryVault(cwd) {
 function isMemoryFile(filePath) {
   return (
     filePath.startsWith('memory/') ||
-    filePath.startsWith('.codex/memory/') ||
-    filePath.startsWith('.github/memory/') ||
-    filePath.startsWith('.claude/memory/')
+    filePath.startsWith('.codex/memory/')
   );
 }
 

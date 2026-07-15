@@ -19,7 +19,7 @@ function showVersion() {
 
 function showHelp() {
   console.log(`
-  ◆ agent-arche — Multi-platform AI agent orchestration
+  ◆ agent-arche - Codex agent orchestration
 
   Usage
     npx agent-arche             Install files for your AI assistant
@@ -28,10 +28,8 @@ function showHelp() {
     npx agent-arche --version   Print version
     npx agent-arche --help      Show this message
 
-  Supported platforms
-    GitHub Copilot  ->  .github/
-    Claude Code     ->  .claude/ + CLAUDE.md
-    Codex       ->  .codex/ + .agents/skills/ + AGENTS.md
+  Install destination
+    Codex  ->  .codex/ + .agents/skills/ + AGENTS.md
 
   What gets installed
     agents/         Specialist AI agent definitions (full) or 3-agent lean set
@@ -42,7 +40,7 @@ function showHelp() {
     rules/          Extra Codex safety rules
 
   Install scopes
-    Full orchestration   All bundled agents, hooks, skills, root memory, prompts/rules
+    Full orchestration   All bundled agents, hooks, skills, root memory, instructions/rules
     Small orchestration  Orchestrator + Coder + Docs-updater, skills, root memory
     Skills + hooks + memory
                          Shared skills plus hooks and root memory, no agents

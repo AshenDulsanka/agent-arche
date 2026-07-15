@@ -17,7 +17,7 @@ assignees: ""
 
 
 ## Steps to reproduce
-<!-- Be as specific as possible. Copilot needs this to find the root cause. -->
+<!-- Be as specific as possible so the root cause can be found. -->
 
 1. Go to ...
 2. Click / enter / submit ...

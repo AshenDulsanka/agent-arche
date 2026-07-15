@@ -31,9 +31,7 @@ Before doing setup work, inspect the repo and decide what is already done.
 Check in this order:
 
 1. `memory/`
-2. Legacy `.github/memory/`
-3. Legacy `.claude/memory/`
-4. Legacy `.codex/memory/`
+2. Legacy `.codex/memory/`
 
 Use `memory/` as the canonical vault. If a legacy platform-local vault exists and `memory/` does not, move the legacy vault to `memory/` before seeding. If multiple legacy vaults exist and no root vault exists, tell the user what you found and ask which vault should become `memory/`.
 
@@ -46,7 +44,7 @@ Engineering context is complete only when all are true:
 - `docs/agents/issue-tracker.md` exists
 - `docs/agents/triage-labels.md` exists
 - `docs/agents/domain.md` exists
-- At least one existing root instruction file (`AGENTS.md` or `CLAUDE.md`) has an `## Agent skills` block
+- The root `AGENTS.md` file has an `## Agent skills` block
 
 If both memory and engineering context are complete, report that startup is already configured and stop.
 
@@ -62,9 +60,7 @@ Explore the project autonomously before asking the user anything. This prevents 
 
 Read in this order, skipping files that do not exist:
 
-- `.github/copilot-instructions.md` - tech stack, conventions, constraints
 - `AGENTS.md` - Codex project instructions, if present
-- `CLAUDE.md` - Claude project memory/context, if present
 - `README.md` - purpose, setup, feature overview
 - `package.json` / `pyproject.toml` / `Cargo.toml` - dependencies, scripts
 - `src/` or `app/` top-level - folder structure
@@ -273,7 +269,7 @@ Do not invent hidden workflow directories or conventions. If a repo does not alr
 Look at the current repo. Read whatever exists; do not assume:
 
 - `git remote -v` and `.git/config`
-- `AGENTS.md` and `CLAUDE.md` at the repo root
+- `AGENTS.md` at the repo root
 - `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/`
@@ -335,9 +331,7 @@ Let them edit before writing.
 Pick instruction files to edit:
 
 - If `AGENTS.md` exists, edit it.
-- If `CLAUDE.md` exists, edit it too.
-- If both exist, keep the same `## Agent skills` block in both files.
-- If neither exists, ask the user which one to create.
+- If it does not exist, ask the user before creating it.
 
 Never create a new instruction file when a repo already has one. Work with the file or files already there.
 
@@ -387,7 +381,7 @@ After startup, summarize:
 ### Engineering Skill Context
 - Status: created / already present / skipped with reason
 - Files: docs/agents/issue-tracker.md, docs/agents/triage-labels.md, docs/agents/domain.md
-- Instruction files updated: AGENTS.md and/or CLAUDE.md
+- Instruction file updated: AGENTS.md
 
 ### What Agents Now Know
 Brief paragraph on what future agents will load before work.

@@ -170,7 +170,7 @@ Use these personas to evaluate interfaces from different user perspectives. Sele
 
 ## Project-Specific Personas
 
-For products with a documented user base, generate project-specific personas from your `copilot-instructions.md` Design Context. These should supplement (not replace) the core 5 personas above.
+For products with a documented user base, generate project-specific personas from the Design Context in `AGENTS.md`. These should supplement (not replace) the core 5 personas above.
 
 A project-specific persona includes:
 - Real job title and workflow context

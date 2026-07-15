@@ -4,15 +4,11 @@ import https from "https";
 import { fileURLToPath } from "url";
 import {
   INSTALL_SCOPE_META,
-  PLATFORM_META,
-  SUBSCRIPTION_META,
   META_FILE,
-  MODELS,
   STEP_ORDER,
   type InstallScope,
   type Platform,
   type Step,
-  type Subscription,
 } from "./constants.js";
 import type {
   ContentTransform,
@@ -32,8 +28,8 @@ export const PACKAGE_ROOT = path.join(__dirname, "../..");
 const NPM_REGISTRY_HOST = "registry.npmjs.org";
 const NPM_PACKAGE_NAME = "agent-arche";
 const SEMVER_LIKE = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
-const ALLOWED_DEST_DIRS = new Set([".github", ".claude", ".codex", ".agents", "memory"]);
-const ALLOWED_DEST_FILES = new Set(["AGENTS.md", "CLAUDE.md"]);
+const ALLOWED_DEST_DIRS = new Set([".codex", ".agents", "memory"]);
+const ALLOWED_DEST_FILES = new Set(["AGENTS.md"]);
 
 function isSubPath(parent: string, target: string): boolean {
   const rel = path.relative(parent, target);
@@ -105,7 +101,6 @@ export function copyFile(src: string, dest: string): void {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.copyFileSync(src, dest);
 }
-
 export interface LegacyMemoryMigrationResult {
   from: string;
   count: number;
@@ -162,14 +157,7 @@ export function readMeta(dir: string): InstallMeta | null {
         data.scope === "skills" || data.scope === "skills-memory" || data.scope === "lean"
           ? data.scope
           : "orchestration",
-      platform: (data.platform as Platform) ?? "copilot",
-      subscription:
-        data.subscription === "auto" ||
-        data.subscription === "student" ||
-        data.subscription === "pro" ||
-        data.subscription === "pro+"
-          ? data.subscription
-          : undefined,
+      platform: "codex",
       hash: typeof data.hash === "string" ? data.hash : null,
     };
   } catch {
@@ -184,8 +172,6 @@ export function writeMeta(dir: string, fields: InstallMeta): void {
 
 export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
   const candidates: Array<{ platform: Platform; metaDir: string }> = [
-    { platform: "copilot", metaDir: path.join(cwd, ".github") },
-    { platform: "claude", metaDir: path.join(cwd, ".claude") },
     { platform: "codex", metaDir: path.join(cwd, ".codex") },
   ];
 
@@ -195,14 +181,11 @@ export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
       continue;
     }
 
-    const platform = meta.platform ?? candidate.platform;
-    const subscription = platform === "copilot" ? (meta.subscription ?? "auto") : "auto";
-
     return {
-      platform,
-      subscription,
+      platform: candidate.platform,
       meta: {
         ...meta,
+        platform: candidate.platform,
         scope: meta.scope ?? "orchestration",
       },
       metaDir: candidate.metaDir,
@@ -313,47 +296,16 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 export function formatMode(force: boolean): "update" | "install" {
   return force ? "update" : "install";
-}
-
-// ─── Agent transform ──────────────────────────────────────────────────────────
-export function makeAgentTransform(subscription: Subscription): ContentTransform | null {
-  if (subscription === "auto") {
-    return (content: string) => {
-      const modelList = [MODELS.OPUS, MODELS.SONNET, MODELS.GPT5, MODELS.CODEX, MODELS.GEMINI];
-      let transformed = content;
-      for (const model of modelList) {
-        transformed = transformed.replace(new RegExp(escapeRegex(model), "g"), MODELS.AUTO);
-      }
-      return transformed;
-    };
-  }
-
-  if (subscription === "student") {
-    return (content: string) =>
-      content
-        .replace(new RegExp(escapeRegex(MODELS.OPUS), "g"), MODELS.GPT5)
-        .replace(new RegExp(escapeRegex(MODELS.SONNET), "g"), MODELS.CODEX);
-  }
-  if (subscription === "pro") {
-    return (content: string) => content.replace(new RegExp(escapeRegex(MODELS.OPUS), "g"), MODELS.SONNET);
-  }
-  return null;
 }
 
 // ─── Plan helpers ─────────────────────────────────────────────────────────────
 export function summarizePlan(
   plan: { steps: Array<{ label: string; src: string; destDir?: string; destFile?: string }> } | null,
-  platform: Platform,
-  subscription: Subscription,
   scope: InstallScope
 ): PlanSummary | null {
-  if (!plan || !platform) return null;
+  if (!plan) return null;
   let total = 0;
   const steps: PlanSummary["steps"] = [];
   const missing: string[] = [];
@@ -373,23 +325,14 @@ export function summarizePlan(
   }
   const scopeMeta = INSTALL_SCOPE_META[scope];
   const notes = [scopeMeta.summary, ...scopeMeta.details] as string[];
-  if (platform === "copilot" && (scope === "orchestration" || scope === "lean")) {
-    notes.push(...SUBSCRIPTION_META[subscription].details);
-  }
   return { total, steps, missing, notes };
 }
 
-export function getStepIndexForScope(step: string, platform: Platform, scope: InstallScope): HeaderStepInfo {
+export function getStepIndexForScope(step: string): HeaderStepInfo {
   const normalized = step === "existing" || step === "confirm" ? "preview" : step;
   const normalizedStep: Step = STEP_ORDER.includes(normalized as Step) ? (normalized as Step) : "scope";
 
-  const visibleSteps = STEP_ORDER.filter((s) => {
-    if (s !== "subscription") {
-      return true;
-    }
-
-    return platform === "copilot" && (scope === "orchestration" || scope === "lean");
-  }) as Step[];
+  const visibleSteps = [...STEP_ORDER] as Step[];
 
   const currentIndex = Math.max(visibleSteps.indexOf(normalizedStep), 0);
   return { visibleSteps, currentIndex };
@@ -397,27 +340,6 @@ export function getStepIndexForScope(step: string, platform: Platform, scope: In
 
 export function getScopeOptions(): OptionItem[] {
   return Object.entries(INSTALL_SCOPE_META).map(([value, meta]) => ({
-    value,
-    label: meta.label,
-    accent: meta.accent,
-    description: meta.summary,
-    details: meta.details,
-  }));
-}
-
-export function getPlatformOptions(): OptionItem[] {
-  return Object.entries(PLATFORM_META).map(([value, meta]) => ({
-    value,
-    label: meta.name,
-    accent: meta.accent,
-    description: meta.destination,
-    details: meta.capabilities,
-    note: meta.note,
-  }));
-}
-
-export function getSubscriptionOptions(): OptionItem[] {
-  return Object.entries(SUBSCRIPTION_META).map(([value, meta]) => ({
     value,
     label: meta.label,
     accent: meta.accent,

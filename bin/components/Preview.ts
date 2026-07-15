@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Text } from "ink";
 import path from "path";
-import { INSTALL_SCOPE_META, PLATFORM_META, SUBSCRIPTION_META, META_FILE, COPY, type InstallScope, type Platform, type Subscription } from "../lib/constants.js";
+import { INSTALL_SCOPE_META, PLATFORM_META, META_FILE, COPY, type InstallScope, type Platform } from "../lib/constants.js";
 import { Section } from "./Layout.js";
 import type { ConfirmHandler, InstallMeta, InstallPlan, PlanSummary } from "../lib/types.js";
 
@@ -21,7 +21,6 @@ interface ConfirmBarProps {
 interface InstallPreviewProps {
   scope: InstallScope;
   platform: Platform;
-  subscription: Subscription;
   plan: InstallPlan;
   preview: PlanSummary;
   force: boolean;
@@ -66,12 +65,9 @@ function ConfirmBar({ force }: ConfirmBarProps): React.ReactElement {
 }
 
 // ─── InstallPreview ───────────────────────────────────────────────────────────
-export function InstallPreview({ scope, platform, subscription, plan, preview, force, onConfirm, compact }: InstallPreviewProps): React.ReactElement {
+export function InstallPreview({ scope, platform, plan, preview, force, onConfirm, compact }: InstallPreviewProps): React.ReactElement {
   const meta = PLATFORM_META[platform];
   const scopeMeta = INSTALL_SCOPE_META[scope];
-  const subMeta = platform === "copilot" && (scope === "orchestration" || scope === "lean")
-    ? SUBSCRIPTION_META[subscription]
-    : null;
 
   return h(
     Box,
@@ -84,9 +80,6 @@ export function InstallPreview({ scope, platform, subscription, plan, preview, f
         { borderStyle: "round", borderColor: meta.accent, paddingX: 1, paddingY: 0, flexDirection: "column" },
         h(InfoLine, { label: COPY.labels.installScope, value: scopeMeta.label, valueColor: scopeMeta.accent }),
         h(InfoLine, { label: COPY.labels.platform, value: meta.name, valueColor: meta.accent }),
-        subMeta
-          ? h(InfoLine, { label: COPY.labels.copilotPlan, value: subMeta.label, valueColor: subMeta.accent })
-          : null,
         h(InfoLine, { label: COPY.labels.destination, value: meta.destination }),
         h(InfoLine, { label: COPY.labels.installUnits, value: `${preview.total} files across ${preview.steps.length} targets` }),
         h(InfoLine, { label: COPY.labels.metadata, value: path.join(plan.metaDir, META_FILE) })

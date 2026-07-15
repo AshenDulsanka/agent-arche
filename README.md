@@ -1,6 +1,6 @@
 # agent-arche
 
-Codex agent orchestration that installs specialist agents, shared skills, memory templates, hooks, and project instructions.
+A Codex skills harness with reusable engineering workflows, optional safety hooks, and project memory (obsidian memory).
 
 ## Install
 
@@ -8,20 +8,14 @@ Codex agent orchestration that installs specialist agents, shared skills, memory
 npx agent-arche install
 ```
 
-Run it from your project root. The installer asks for a scope: Full orchestration, Small orchestration, Skills + hooks + memory, or Skills only.
+Run it from the project root and choose a scope:
 
 | Scope | Installs |
 |---|---|
-| Full orchestration | Full specialist roster, hooks, instructions/rules, skills, memory, and root files |
-| Small orchestration | Lean 3-agent setup: Orchestrator, Coder, Docs-updater, plus hooks, instructions/rules, skills, memory, and root files |
-| Skills + hooks + memory | Shared `skills/`, Codex hooks, hook activation files, and a memory vault, without installing agents |
-| Skills only | Shared `skills/` folder only |
+| Skills + hooks + memory | Skills, hooks, activation/config files, and memory |
+| Skills only | `.agents/skills/` plus `.agents/agent-arche.json` install metadata |
 
-Files are installed into `.codex/`, `.agents/skills/`, root `memory/`, and root `AGENTS.md`, depending on the selected scope.
-
-After installing Full or Small orchestration, run the project startup flow once:
-
-`run the project-startup skill on this project`
+After installation, run `project-startup` once. In Skills-only workspaces it configures only available project context and does not create a memory vault.
 
 Update later with:
 
@@ -29,109 +23,110 @@ Update later with:
 npx agent-arche update
 ```
 
-## Orchestration
+## Skill Model
 
-Full orchestration uses specialist agents. Small orchestration keeps the same skills and memory model but routes most work through Coder and Docs-updater.
+The skills use progressive disclosure: Codex sees concise names and descriptions first, then reads a full `SKILL.md` only when its trigger matches. The default engineering chain is:
 
-| Agent | Full orchestration purpose | Small orchestration |
-|---|---|---|
-| Orchestrator | Classifies work, confirms the agent pipeline, delegates, and never edits files directly | Same coordinator, lower-token routing |
-| Planner | Researches the repo and creates implementation plans | Folded into Coder or Orchestrator |
-| Researcher | Investigates prior art, docs, issues, CVEs, and unknown libraries | Folded into Coder |
-| Coder | Implements code and unit tests | Main executor |
-| Designer | Handles UI/UX implementation and visual direction | Folded into Coder with `design` |
-| Code-reviewer | Reviews code quality, conventions, TypeScript, and maintainability | Folded into Coder or direct skill use |
-| Security-auditor | Reviews auth, routes, secrets, injection, SSRF, file I/O, and OWASP risks | Folded into Coder or direct skill use |
-| UX-reviewer | Reviews accessibility, usability, interaction, and visual quality | Folded into Coder with `design` |
-| Tester | Writes and runs Playwright flows | Folded into Coder |
-| Docs-updater | Updates memory, docs, changelogs, commit text, and PR text | Same docs and memory owner |
+```text
+request/spec/ticket
+  -> implement
+     -> tdd                 when a useful behavior seam exists
+     -> design              for UI/UX work
+     -> postgres-patterns   only for confirmed PostgreSQL work
+     -> seo                 only for search-specific work
+     -> security-review     only for trust-boundary changes
+  -> code-review            after non-trivial edits
+  -> git or handoff         only when requested
+```
 
-Common full pipelines:
+Other entry paths:
 
-| Work | Pipeline |
-|---|---|
-| New feature | Planner -> Researcher -> Coder + Designer -> Code-reviewer + Security-auditor + UX-reviewer -> Tester -> Docs-updater |
-| Bug fix | Planner -> Coder -> Code-reviewer -> Tester -> Docs-updater |
-| UI change | Designer -> Code-reviewer + UX-reviewer -> Docs-updater |
-| Architecture review | Planner with `improve-codebase-architecture` -> Docs-updater |
+```text
+existing plan -> grill-with-docs -> to-spec -> to-tickets -> implement
+broken behavior -> diagnosing-bugs -> implement -> code-review
+architecture friction -> improve-codebase-architecture -> codebase-design -> grill-with-docs
+```
+
+Chaining is conditional. It never authorizes automatic commits, pushes, PRs, external issue creation, or sub-agent spawning.
 
 ## Skill Routing
 
-The public skill surface is the set of top-level folders under `skills/` that contain `SKILL.md`. Design subflows live inside `skills/design/`, and caveman compression lives inside `skills/caveman/`.
+| Skill | Trigger |
+|---|---|
+| `project-startup` | First run or missing `docs/agents/` context; seeds memory only in memory-capable scopes |
+| `implement` | Any requested code change; central router and completion workflow |
+| `diagnosing-bugs` | Broken, failing, throwing, flaky, or slow behavior that needs root-cause diagnosis |
+| `tdd` | Test-first work or behavior changes with a useful public seam |
+| `code-review` | Branch, PR, commit-range, or working-tree review; post-implementation quality gate |
+| `security-review` | Auth, authorization, secrets, untrusted input, routes, SQL, files/uploads, redirects, SSRF, serialization, payments, sensitive data, or explicit vulnerability audit |
+| `grill-with-docs` | Pressure-test a plan against existing code and documented decisions |
+| `to-spec` | Explicitly synthesize the current discussion into a spec; implicit invocation is disabled |
+| `to-tickets` | Split approved work into independently verifiable vertical tickets |
+| `codebase-design` | Design deep modules, interfaces, seams, and test surfaces |
+| `improve-codebase-architecture` | Find and explore architecture-deepening opportunities |
+| `design` | UI/UX direction, implementation, redesign, audit, motion, and performance |
+| `postgres-patterns` | Confirmed PostgreSQL schemas, SQL, migrations, RLS, indexes, pooling, or query plans |
+| `seo` | Crawlability, metadata, structured data, search performance, web vitals, and internal linking |
+| `git` | Branch, commit, PR, squash, or release-ready Git work |
+| `handoff` | Compact continuation context for another session or person |
+| `karpathy-guidelines` | Default implementation and review guardrails for assumptions, scope, simplicity, and verification |
+| `caveman` | Explicit compressed communication mode |
 
-| Work type | Full owner | Small owner | Skills |
-|---|---|---|---|
-| Bootstrap and memory | Orchestrator, Planner | Orchestrator | `project-startup`, `caveman` |
-| Product planning | Planner | Orchestrator or Coder | `product-brainstorming`, `create-prd`, `create-epics-and-stories` |
-| Planning pressure tests | Planner, Coder | Orchestrator or Coder | `grill-me`, `grill-with-docs`, `triage` |
-| Implementation and debugging | Coder, Tester | Coder | `diagnose`, `tdd`, `prototype`, `handoff` |
-| Architecture and review | Planner, Code-reviewer | Coder | `improve-codebase-architecture`, `review` |
-| Code standards | Coder, Code-reviewer | Coder | `coding-standards`, `karpathy-guidelines`, `api-design`, `postgres-patterns`, `seo` |
-| UI/UX | Designer, UX-reviewer | Coder | `design` |
-| Git and PRs | Coder, Code-reviewer, Docs-updater | Coder or Docs-updater | `git` |
+`api-design` and `coding-standards` were removed. Their generic rules overlapped repo instructions, `implement`, `code-review`, and `security-review`, while loading extra context on common tasks. API shape should follow the project's actual conventions; trust-boundary checks belong in the security workflow.
 
-Recommended order for product work: `project-startup` once, `product-brainstorming`, `create-prd`, then `create-epics-and-stories`.
+## Security
 
-## Skills
+`security-review` is a portable, evidence-first workflow. It scopes assets and trust boundaries, selects only applicable OWASP-style threats, runs safe local proofs, and separates confirmed vulnerabilities from defense-in-depth suggestions.
 
-| Skill | Purpose | Example request |
-|---|---|---|
-| `api-design` | Shapes REST APIs, validation, pagination, error envelopes, status codes, URL design, and API security checks. | "Design the endpoint shape and error responses for this checkout API." |
-| `caveman` | Compressed communication mode and context-file compression workflow via `steps/compress.md`. | "Use compressed mode" or "compress AGENTS.md with caveman." |
-| `coding-standards` | General code quality rules for TypeScript, naming, file organization, imports, errors, and forbidden patterns. | "Review this module against our coding standards." |
-| `create-epics-and-stories` | Turns a PRD into low-dependency epics, stories, acceptance criteria, and build slices. | "Break this PRD into epics and stories for the dev team." |
-| `create-prd` | Creates a PRD through a guided workflow and reusable template. | "Create the PRD for this product idea." |
-| `design` | Consolidated UI/UX skill for product-fit direction, implementation, redesign, animation, GSAP, styles, audits, critique, optimization, Stitch, and full-output flows. | "Build a polished settings page and audit the checkout flow." |
-| `diagnose` | Debug loop for reproduce, isolate, hypothesize, instrument, fix, and regression-test work. | "Diagnose this flaky login test with evidence." |
-| `git` | Branch naming, commit conventions, PR standards, and PR body guidance. | "Create the branch name, commits, and PR body for this change." |
-| `grill-me` | Pressure-tests a greenfield idea before code or docs exist. | "Interrogate this idea before I start building." |
-| `grill-with-docs` | Pressure-tests plans against existing code and docs, then records decisions as context or ADRs. | "Stress-test this plan against the current architecture docs." |
-| `handoff` | Produces compact continuation context for another agent, person, or session. | "Create a handoff for the next agent." |
-| `improve-codebase-architecture` | Finds shallow modules and architecture friction, then proposes deeper module boundaries and reports. | "Find shallow modules in this subsystem and propose refactors." |
-| `karpathy-guidelines` | Coding-agent behavior guardrails: keep changes surgical, avoid overengineering, expose assumptions, and verify results. | "Keep this refactor surgical and call out assumptions before editing." |
-| `postgres-patterns` | PostgreSQL schema, query, migration, indexing, RLS, pooling, and review patterns. | "Review this migration for indexes, RLS, and query performance." |
-| `product-brainstorming` | Structured product ideation using guided creative techniques and output organization. | "Help me brainstorm the first version of this product." |
-| `project-startup` | First-run setup that bootstraps memory and configures `docs/agents/` issue tracker, labels, and domain-doc conventions. | "Run the project startup flow for this repo." |
-| `prototype` | Builds disposable logic or UI experiments to answer a product or technical question quickly. | "Prototype this workflow before we commit to the architecture." |
-| `review` | Reviews a branch, PR, or diff against standards, specs, risks, and missing tests. | "Review this PR using the engineering review skill." |
-| `seo` | SEO execution plan for technical foundation, metadata, structured data, Core Web Vitals, linking, and monitoring. | "Prepare this marketing page for search and sharing." |
-| `tdd` | Guides red-green-refactor work with support for deep modules, interfaces, mocks, and refactoring candidates. | "Implement this parser with TDD." |
-| `triage` | Moves issues through canonical states and can produce ready-for-agent briefs. | "Move issue 42 to ready-for-agent with an agent brief." |
+The skill does not claim an entire application is secure from a partial diff review and does not authorize testing production or third-party systems.
+
+## Codex Files
+
+Codex automatically discovers durable instructions from:
+
+- global `~/.codex/AGENTS.md` or `AGENTS.override.md`;
+- project `AGENTS.md` or `AGENTS.override.md`, walking from repo root to the current directory;
+- fallback filenames explicitly listed in `project_doc_fallback_filenames`.
+
+`.codex/instructions.md` is not a special auto-discovered filename. This package does not create a parallel instruction system. Put durable project rules in `AGENTS.md`; use nested `AGENTS.md` or `AGENTS.override.md` for subtree-specific rules.
+
+Each skill must contain `SKILL.md` with `name` and `description`. `agents/openai.yaml` is optional. Use it when UI metadata, invocation policy, or tool dependencies add value; it is not required just because the skill runs in Codex. This repo uses it selectively, including disabling implicit invocation for `to-spec`.
+
+Project-scoped runtime settings, MCP servers, hooks, model defaults, and sandbox behavior belong in `.codex/config.toml`, not in skill prose.
 
 ## Runtime Pieces
 
-| Piece | What it does |
+| Piece | Purpose |
 |---|---|
-| Hooks | `session-start.cjs` injects startup context including the root `memory/` update rule, `pre-tool-safety.cjs` blocks destructive commands, and `changelog-reminder.cjs` performs final docs/memory drift checks. |
-| Instructions/rules | Codex installs rule and instruction files for TypeScript, Svelte, tests, and API routes. |
-| Memory | Full, Small, and Skills + hooks + memory installs include root `memory/` as an Obsidian-style agent memory vault. Existing platform-local vaults are migrated to root when `memory/` is missing. Skills-only installs do not include memory. |
-| Agent commands | Codex uses the installed agents by name. |
-| Codex MCP | Codex MCP servers and runtime behavior are configured in `.codex/config.toml`, with disabled examples for Context7, Playwright, and OpenAI docs. |
+| Hooks | Compact session context and a narrow pre-command blocklist for catastrophic shell operations |
+| Memory | Repo-local durable decisions and patterns for the Skills + hooks + memory scope |
+| `.codex/config.toml` | Codex runtime and disabled MCP examples without committed secrets |
+
+The hook bundle uses `SessionStart` for low-cost durable context and `PreToolUse` only for destructive shell blocking. It deliberately avoids per-prompt and post-tool hooks. Project hooks run only in trusted projects and changed hook definitions must be reviewed in Codex with `/hooks`.
+
+## Validate
+
+```bash
+npm run check
+```
+
+The check typechecks the installer. Skill structure should be reviewed when skills are added or renamed.
 
 ## Manual Setup
 
-The CLI is preferred. For manual installs:
+For Skills only, copy `skills/` to `.agents/skills/`. For Skills + hooks + memory, also copy `codex/config.toml`, `codex/hooks.json`, `codex/hooks/`, and `memory/` to their matching project paths.
 
-Copy `codex/` contents to `.codex/`, `skills/` to `.agents/skills/`, package `memory/` to root `memory/`, and `codex/AGENTS.md` to root `AGENTS.md`.
+The CLI is preferred because it applies the correct workspace-flavor boundaries.
 
-For a skills + hooks + memory install, copy the Codex hooks and hook activation files, shared `skills/`, `memory/`, `.codex/config.toml`, and `.codex/hooks.json`.
-
-For PR and issue workflows, copy `templates/` into `.github/` and update the comments inside.
-
-## Notes
-
-- Verify published package integrity with `npm view agent-arche dist.integrity` and compare it to `agent-arche.json` in the installed platform folder.
+Older Full or Small installations are migrated to the Skills + hooks + memory scope in package metadata. Updates stop managing custom-agent, instruction, rule, and generated `AGENTS.md` files; existing project copies are left untouched so local customizations are never deleted automatically.
 
 ## Credits
 
 Built on top of excellent open-source work:
 
-| Repo | What we took from it |
-|---|---|
-| [cyxzdev/Uncodixfy](https://github.com/cyxzdev/Uncodixfy/blob/main/SKILL.md) | Design and UI skill inspiration |
-| [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Foundation for the `ui-audit`, `ui-optimize`, `critique`, `animate` steps inside the design skill |
-| [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | `gsap`, `redesign`, `soft`, `minimalist`, `brutalist`, `stitch`, `output`, and other quality-focused steps inside the design skill |
-| [mattpocock/skills](https://github.com/mattpocock/skills) | `grill-me`, `grill-with-docs`, `tdd`,  `improve-codebase-architecture`, `diagnose`, `handoff`, `prototype`, `review`, `triage`, and `setup-matt-pocock-skills` that is used inside the project startup skills |
-| [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | `caveman`, and `caveman-compress`  communication skills |
-| [BMad](https://github.com/bmad-code-org/bmad-method) | `bmad-brainstorming`, `bmad-create-prd`, and `bmad-create-epics-and-stories` skills |
-| [Akindu23/my-agent-skills](https://github.com/Akindu23/my-agent-skills) | `karapathy-guidelines`, `postgres-patterns` skills |
+Some of the referenced skills have been adapted, renamed, combined, or otherwise updated to fit this Codex harness. They may therefore differ from their upstream versions; the links below credit the original projects and inspiration rather than implying that every skill remains an unchanged copy.
+
+- [mattpocock/skills](https://github.com/mattpocock/skills): engineering workflow and deep-module skills.
+- [cyxzdev/Uncodixfy](https://github.com/cyxzdev/Uncodixfy), [pbakaus/impeccable](https://github.com/pbakaus/impeccable), and [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill): design workflows.
+- [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman): compressed communication.
+- [Akindu23/my-agent-skills](https://github.com/Akindu23/my-agent-skills): Karpathy-style guardrails and PostgreSQL patterns.

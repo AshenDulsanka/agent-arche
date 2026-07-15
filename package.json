@@ -1,13 +1,12 @@
 {
   "name": "agent-arche",
-  "version": "1.3.7",
-  "description": "Codex agent orchestration with specialist agents, shared skills, hooks, and project memory",
+  "version": "1.3.8",
+  "description": "Codex skills with optional hooks and project memory",
   "keywords": [
     "codex",
-    "ai-agents",
-    "orchestration",
-    "agents",
-    "skills"
+    "skills",
+    "hooks",
+    "memory"
   ],
   "homepage": "https://github.com/AshenDulsanka/agent-arche#readme",
   "repository": {
@@ -25,10 +24,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check": "npm run typecheck",
     "start": "tsx bin/cli.ts",
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "build:dist": "tsc -p tsconfig.build.json",
-    "prepack": "npm run clean && npm run build:dist"
+    "prepack": "npm run check && npm run clean && npm run build:dist"
   },
   "files": [
     "codex/",

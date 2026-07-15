@@ -5,10 +5,10 @@ export const PLATFORM_META = {
     name: "Codex",
     short: "Codex",
     accent: "cyan",
-    destination: ".codex/ + .agents/skills/ + AGENTS.md",
+    destination: ".agents/skills/ with optional .codex/ hooks and memory/",
     capabilities: [
-      "Agents, hooks, rules, config, and instruction globs",
-      "Shared skills folder plus project-root AGENTS.md context",
+      "Shared Codex skills with progressive disclosure",
+      "Optional safety hooks, runtime config, and repo-local memory",
     ],
     note: "Built for MCP-enabled Codex sessions.",
   },
@@ -18,28 +18,10 @@ export const INSTALL_SCOPE_META = {
   "skills-memory": {
     label: "Skills + hooks + memory (Recommended)",
     accent: "magenta",
-    summary: "Install shared skills, safety hooks, and root memory without agents.",
+    summary: "Install shared skills, safety hooks, runtime config, and root memory.",
     details: [
-      "No agents, rules/instructions, or root agent docs",
+      "No custom-agent, instruction, rule, or root AGENTS.md templates",
       "Hooks remind the assistant to update memory before finishing",
-    ],
-  },
-  orchestration: {
-    label: "Full orchestration",
-    accent: "green",
-    summary: "Install agents, hooks, instructions, rules, skills, and root memory.",
-    details: [
-      "Best for first-time setup",
-      "Includes all Codex orchestration files",
-    ],
-  },
-  lean: {
-    label: "Small orchestration",
-    accent: "yellow",
-    summary: "Install a 3-agent workflow, hooks, instructions, skills, and root memory.",
-    details: [
-      "Orchestrator, Coder, and Docs-updater only",
-      "Keeps memory support without the full specialist roster",
     ],
   },
   skills: {
@@ -47,7 +29,7 @@ export const INSTALL_SCOPE_META = {
     accent: "cyan",
     summary: "Install only shared skills into .agents/skills/.",
     details: [
-      "No agents, hooks, instructions, rules, or memory",
+      "No hooks, runtime config, or memory",
       "Great for lightweight skill updates",
     ],
   },
@@ -66,14 +48,6 @@ export const STEP_LABELS = {
   done: "Done",
 } as const;
 
-export const NEXT_STEPS = {
-  codex: [
-    "Commit .codex/, .agents/skills/, AGENTS.md, and memory/ to your repo",
-    "Run codex from the repo root and ask it to use the orchestrator agent",
-    "Run startup: ask the orchestrator agent to use the project-startup skill and remove skills that are not needed for your workflow",
-  ],
-} as const;
-
 export const PRIMARY_COMMANDS = {
   codex: "codex",
 } as const;
@@ -81,7 +55,7 @@ export const PRIMARY_COMMANDS = {
 export const COPY = {
   app: {
     name: "agent-arche",
-    tagline: "Codex agent orchestration for terminal-first teams.",
+    tagline: "Codex skills, hooks, and project memory for terminal-first teams.",
   },
   scope: {
     eyebrow: "Install mode",

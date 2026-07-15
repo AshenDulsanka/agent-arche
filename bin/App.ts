@@ -58,7 +58,7 @@ function useCompactLayout() {
 }
 
 function isInstallScope(value: string): value is InstallScope {
-  return value === "orchestration" || value === "lean" || value === "skills-memory" || value === "skills";
+  return value === "skills-memory" || value === "skills";
 }
 
 interface AppProps {
@@ -73,7 +73,7 @@ export function App({ force = false }: AppProps): React.ReactElement {
   const escapeLockUntil = useRef(0);
 
   const [step,           setStep]           = useState<AppStep>("scope");
-  const [scope,          setScope]          = useState<InstallScope>("orchestration");
+  const [scope,          setScope]          = useState<InstallScope>("skills-memory");
   const platform: Platform = "codex";
   const [plan,           setPlan]           = useState<InstallPlan | null>(null);
   const [existing,       setExisting]       = useState<InstallMeta | null>(null);

@@ -3,12 +3,8 @@ sandbox_mode = "workspace-write"
 web_search = "live"
 project_doc_fallback_filenames = ["AGENTS.md"]
 
-[agents]
-max_threads = 6
-max_depth = 2
-
 [features]
-# Hooks are currently disabled on Windows, but keeping this enabled makes the same project work on macOS/Linux without extra setup.
+# Hooks are enabled by default in Codex; keep this explicit for portable installs.
 hooks = true
 
 # Optional MCP servers

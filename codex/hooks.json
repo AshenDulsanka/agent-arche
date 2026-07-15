@@ -2,12 +2,14 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
             "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/scripts/session-start.cjs\"",
-            "statusMessage": "Loading session context"
+            "commandWindows": "powershell -NoProfile -Command \"node (Join-Path (git rev-parse --show-toplevel) '.codex/hooks/scripts/session-start.cjs')\"",
+            "timeout": 10,
+            "statusMessage": "Loading project workflow"
           }
         ]
       }
@@ -19,18 +21,9 @@
           {
             "type": "command",
             "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/scripts/pre-tool-safety.cjs\"",
-            "statusMessage": "Checking command safety"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/scripts/changelog-reminder.cjs\"",
-            "statusMessage": "Checking changelog reminders"
+            "commandWindows": "powershell -NoProfile -Command \"node (Join-Path (git rev-parse --show-toplevel) '.codex/hooks/scripts/pre-tool-safety.cjs')\"",
+            "timeout": 5,
+            "statusMessage": "Checking destructive command policy"
           }
         ]
       }

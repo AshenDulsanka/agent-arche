@@ -19,7 +19,7 @@ function showVersion() {
 
 function showHelp() {
   console.log(`
-  ◆ agent-arche - Codex agent orchestration
+  ◆ agent-arche - Codex skills and project context
 
   Usage
     npx agent-arche             Install files for your AI assistant
@@ -29,22 +29,17 @@ function showHelp() {
     npx agent-arche --help      Show this message
 
   Install destination
-    Codex  ->  .codex/ + .agents/skills/ + AGENTS.md
+    Codex  ->  .agents/skills/ with optional .codex/ hooks and memory/
 
   What gets installed
-    agents/         Specialist AI agent definitions (full) or 3-agent lean set
     config.toml     Codex runtime and MCP server configuration
-    skills/         Domain knowledge reference files
+    skills/         Reusable task workflows and references
     hooks/          Safety hooks (session-start, pre-tool, changelog)
-    instructions/   File-type guidance that Codex agents load by matching globs
-    rules/          Extra Codex safety rules
 
   Install scopes
-    Full orchestration   All bundled agents, hooks, skills, root memory, instructions/rules
-    Small orchestration  Orchestrator + Coder + Docs-updater, skills, root memory
     Skills + hooks + memory
-                         Shared skills plus hooks and root memory, no agents
-    Skills only          Shared skills only, no memory or agents
+                         Shared skills plus hooks, config, and root memory
+    Skills only          Shared skills only, without hooks or memory
 
   Verify integrity
     npm view agent-arche dist.integrity

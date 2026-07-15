@@ -33,7 +33,7 @@ interface ScopeStepProps {
 }
 
 function asScope(value: string): InstallScope | null {
-  if (value === "orchestration" || value === "lean" || value === "skills-memory" || value === "skills") {
+  if (value === "skills-memory" || value === "skills") {
     return value;
   }
   return null;
@@ -164,7 +164,7 @@ export function OptionList({ options, value, onChange, onSubmit, compact = false
 
 // ─── ScopeStep ────────────────────────────────────────────────────────────────
 export function ScopeStep({ value, onSubmit, onChange, compact }: ScopeStepProps): React.ReactElement {
-  const [current, setCurrent] = useState<InstallScope>(value || "orchestration");
+  const [current, setCurrent] = useState<InstallScope>(value || "skills-memory");
   const scopeOptions = useMemo(() => getScopeOptions(), []);
   const handleChange = (next: string): void => {
     const parsed = asScope(next);

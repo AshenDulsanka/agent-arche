@@ -29,7 +29,6 @@ const NPM_REGISTRY_HOST = "registry.npmjs.org";
 const NPM_PACKAGE_NAME = "agent-arche";
 const SEMVER_LIKE = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
 const ALLOWED_DEST_DIRS = new Set([".codex", ".agents", "memory"]);
-const ALLOWED_DEST_FILES = new Set(["AGENTS.md"]);
 
 function isSubPath(parent: string, target: string): boolean {
   const rel = path.relative(parent, target);
@@ -58,7 +57,7 @@ export function isAllowedInstallPath(cwd: string, targetPath: string): boolean {
     return true;
   }
 
-  return ALLOWED_DEST_FILES.has(first) && rel === first;
+  return false;
 }
 
 // ─── File system helpers ──────────────────────────────────────────────────────
@@ -153,10 +152,7 @@ export function readMeta(dir: string): InstallMeta | null {
       installedAt: typeof data.installedAt === "string" ? data.installedAt : "Unknown",
       source: typeof data.source === "string" ? data.source : "Unknown",
       sourceType: typeof data.sourceType === "string" ? data.sourceType : "Unknown",
-      scope:
-        data.scope === "skills" || data.scope === "skills-memory" || data.scope === "lean"
-          ? data.scope
-          : "orchestration",
+      scope: data.scope === "skills" ? "skills" : "skills-memory",
       platform: "codex",
       hash: typeof data.hash === "string" ? data.hash : null,
     };
@@ -173,6 +169,7 @@ export function writeMeta(dir: string, fields: InstallMeta): void {
 export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
   const candidates: Array<{ platform: Platform; metaDir: string }> = [
     { platform: "codex", metaDir: path.join(cwd, ".codex") },
+    { platform: "codex", metaDir: path.join(cwd, ".agents") },
   ];
 
   for (const candidate of candidates) {
@@ -186,7 +183,7 @@ export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
       meta: {
         ...meta,
         platform: candidate.platform,
-        scope: meta.scope ?? "orchestration",
+        scope: meta.scope ?? "skills-memory",
       },
       metaDir: candidate.metaDir,
     };

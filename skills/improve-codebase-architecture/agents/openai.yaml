@@ -1,0 +1,4 @@
+interface:
+  display_name: "Improve Codebase Architecture"
+  short_description: "Find and explain high-leverage architecture improvements"
+  default_prompt: "Use $improve-codebase-architecture to find the strongest deepening opportunities."

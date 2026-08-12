@@ -1,5 +1,11 @@
 # Personas Reference
 
+## Contents
+
+- [Five core testing personas](#five-core-testing-personas)
+- [Persona selection guide](#persona-selection-guide)
+- [Project-specific personas](#project-specific-personas)
+
 ## Five Core Testing Personas
 
 Use these personas to evaluate interfaces from different user perspectives. Select 2–3 relevant personas for each critique.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grill With Docs"
+  short_description: "Pressure-test plans against code and decisions"
+  default_prompt: "Use $grill-with-docs to pressure-test this plan against the project evidence."

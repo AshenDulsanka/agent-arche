@@ -1,5 +1,14 @@
 Analyze a feature and strategically add animations and micro-interactions that enhance understanding, provide feedback, and create delight.
 
+## Contents
+
+- [Motion scope](#motion-scope)
+- [Assess opportunities](#assess-animation-opportunities)
+- [Plan strategy](#plan-animation-strategy)
+- [Implement](#implement-animations)
+- [Technical implementation](#technical-implementation)
+- [Verify quality](#verify-quality)
+
 ---
 
 ## Motion Scope

@@ -7,7 +7,7 @@ description: Break a plan, spec, or the current conversation into a set of trace
 
 Break a plan, spec, or conversation into a set of **tickets** — tracer-bullet vertical slices, each declaring the tickets that **block** it.
 
-The issue tracker and triage label vocabulary should be documented under `docs/agents/`. If that context is missing, load `project-startup` first.
+The issue tracker and triage label vocabulary should be documented under `docs/agents/`. If that context is missing, load `project-startup` only when it is installed; otherwise ask only for the tracker destination and label vocabulary needed to publish.
 
 ## Process
 
@@ -103,4 +103,4 @@ The end-to-end behaviour this ticket makes work, from the user's perspective —
 
 In either form, avoid specific file paths or code snippets — they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts — not a working demo, just the important bits.
 
-Work the frontier one ticket at a time with the `implement` skill. Use a fresh context or a `handoff` when a ticket approaches the context limit.
+Work the frontier one ticket at a time with `implement` when it is installed, or with the same scoped edit-and-verify loop directly. Use a fresh context or `handoff` when that skill is installed and a ticket approaches the context limit; otherwise write a compact temporary continuation note outside the repository.

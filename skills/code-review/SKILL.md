@@ -27,11 +27,11 @@ Verify the ref, inspect the commit list, include relevant uncommitted changes, a
 ## 2. Load evidence
 
 - Read `AGENTS.md`, applicable nested instructions, and relevant contribution or architecture docs.
-- Load `karpathy-guidelines` for scope discipline, assumptions, simplicity, surgical changes, and verification quality.
-- Read the originating issue, spec, PRD, acceptance criteria, or user request. If tracker context is required but `docs/agents/issue-tracker.md` is missing, use `project-startup`.
+- If installed, load `karpathy-guidelines` for scope discipline, assumptions, simplicity, surgical changes, and verification quality. Otherwise apply those review checks directly.
+- Read the originating issue, spec, PRD, acceptance criteria, or user request. If tracker context is required but `docs/agents/issue-tracker.md` is missing, use `project-startup` only when it is installed; otherwise ask only for the missing tracker fact needed by this review.
 - Inspect affected callers, tests, schemas, and sibling paths when the same failure could recur.
-- Load `postgres-patterns` only for confirmed PostgreSQL changes.
-- Load `security-review` only for auth, authorization, secrets, untrusted input, routes, SQL, file I/O, uploads, redirects, external calls, serialization, payments, or sensitive data.
+- Load `postgres-patterns` only when it is installed and the change is confirmed PostgreSQL work.
+- Load `security-review` only when it is installed and the change touches auth, authorization, secrets, untrusted input, routes, SQL, file I/O, uploads, redirects, external calls, serialization, payments, or sensitive data. If it is not installed, keep security-sensitive observations bounded and recommend a dedicated security review rather than claiming one was performed.
 
 ## 3. Standards axis
 

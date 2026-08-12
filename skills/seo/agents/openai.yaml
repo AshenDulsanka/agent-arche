@@ -1,0 +1,4 @@
+interface:
+  display_name: "SEO"
+  short_description: "Improve crawlability, metadata, and search performance"
+  default_prompt: "Use $seo to audit and improve this site search behavior."

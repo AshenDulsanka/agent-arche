@@ -1,5 +1,13 @@
 Deliver expert-level design critique through structured heuristic evaluation and cognitive load analysis.
 
+## Contents
+
+- [Preparation](#mandatory-preparation)
+- [Gather context](#step-1-gather-context)
+- [Dual assessment](#step-2-dual-assessment)
+- [Combined report](#step-3-combined-report)
+- [Questions and actions](#step-4-ask-targeted-questions)
+
 ## Mandatory Preparation
 
 1. Read `steps/direction.md` to understand the intended product, audience, tone, motion level, and fit criteria.

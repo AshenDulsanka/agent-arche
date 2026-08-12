@@ -1,0 +1,4 @@
+interface:
+  display_name: "PostgreSQL Patterns"
+  short_description: "Apply safe PostgreSQL schema and query patterns"
+  default_prompt: "Use $postgres-patterns to review this PostgreSQL change."

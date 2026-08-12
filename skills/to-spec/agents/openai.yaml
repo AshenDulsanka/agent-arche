@@ -1,7 +1,7 @@
 interface:
   display_name: "Conversation to Spec"
-  short_description: "Synthesize the current discussion into a project spec"
-  default_prompt: "Turn this conversation into a spec, then show me the draft before publishing it."
+  short_description: "Synthesize an approved project specification"
+  default_prompt: "Use $to-spec to turn this conversation into a reviewable specification draft."
 
 policy:
   allow_implicit_invocation: false

@@ -1,5 +1,13 @@
 Identify and fix performance issues to create faster, smoother user experiences.
 
+## Contents
+
+- [Assess issues](#assess-performance-issues)
+- [Optimization strategy](#optimization-strategy)
+- [Core Web Vitals](#core-web-vitals-optimization)
+- [Monitoring](#performance-monitoring)
+- [Verification](#verify-improvements)
+
 ## Assess Performance Issues
 
 Understand current performance and identify problems:

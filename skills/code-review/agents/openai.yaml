@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Review code against standards and requirements"
+  default_prompt: "Use $code-review to review this change against standards and requirements."

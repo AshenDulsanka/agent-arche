@@ -131,6 +131,6 @@ Required before declaring done:
 - [ ] Throwaway prototypes deleted (or moved to a clearly-marked debug location)
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message — so the next debugger learns
 
-**Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling), hand off to `improve-codebase-architecture` with the specifics. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.
+**Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling), hand off to `improve-codebase-architecture` with the specifics when that skill is installed; otherwise record the bounded architectural recommendation in the result. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.
 
-For an authorized fix, follow the `implement` workflow from the regression-test step onward. Load `security-review` when the root cause or fix touches a trust boundary. Finish with `code-review` for non-trivial changes. Do not commit unless the user requested it.
+For an authorized fix, follow the `implement` workflow from the regression-test step onward when it is installed; otherwise continue with the same scoped edit-and-verify loop directly. Load `security-review` when it is installed and the root cause or fix touches a trust boundary. Finish with `code-review` for non-trivial changes when it is installed, or perform a focused Standards and Spec pass directly. Do not commit unless the user requested it.

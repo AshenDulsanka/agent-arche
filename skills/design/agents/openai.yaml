@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Design"
+  short_description: "Design, implement, and critique product interfaces"
+  default_prompt: "Use $design to improve this interface while preserving the product context."

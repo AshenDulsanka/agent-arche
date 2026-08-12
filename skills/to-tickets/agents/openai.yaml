@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec to Tickets"
+  short_description: "Split planned work into verifiable vertical tickets"
+  default_prompt: "Use $to-tickets to split this approved plan into verifiable vertical tickets."

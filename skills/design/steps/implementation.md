@@ -4,6 +4,19 @@
 
 # Design Skill — Anti-Codex + High-Agency
 
+## Contents
+
+- [Direction](#0a-direction-first)
+- [Design thinking](#2-design-thinking-before-any-code)
+- [Architecture and conventions](#3-technical-architecture--conventions)
+- [Color and theme](#4-color--theme-system)
+- [Engineering directives](#5-design-engineering-directives)
+- [Motion](#6-motion--animation)
+- [Banned patterns](#7-hard-no--banned-patterns)
+- [Performance](#8-performance-guardrails)
+- [Creative patterns](#10-the-creative-arsenal)
+- [Pre-flight checklist](#12-final-pre-flight-checklist)
+
 ---
 
 ## 0A. DIRECTION FIRST

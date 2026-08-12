@@ -5,6 +5,15 @@ description: Use when writing or reviewing commit messages. Covers type prefixes
 
 # Commit Message Conventions
 
+## Contents
+
+- [Format and types](#format)
+- [Scopes](#scopes)
+- [Subject rules](#subject-line-rules)
+- [Breaking changes](#breaking-changes)
+- [Body and footer](#body)
+- [Examples](#examples)
+
 All commits in this repository must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 ## Format

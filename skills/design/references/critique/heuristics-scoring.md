@@ -1,5 +1,11 @@
 # Heuristics Scoring Reference
 
+## Contents
+
+- [Scoring rubric](#nielsens-10-usability-heuristics--scoring-rubric)
+- [Total score interpretation](#total-score-interpretation)
+- [Issue severity scale](#issue-severity-scale)
+
 ## Nielsen's 10 Usability Heuristics — Scoring Rubric
 
 Score each heuristic 0–4. Total is out of 40.

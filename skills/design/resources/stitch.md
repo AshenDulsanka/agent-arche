@@ -1,5 +1,14 @@
 # Stitch Design Taste — Semantic Design System Skill
 
+## Contents
+
+- [Overview and prerequisites](#overview)
+- [Goal](#the-goal)
+- [Analysis and synthesis](#analysis--synthesis-instructions)
+- [Output format](#output-format-designmd-structure)
+- [Best practices](#best-practices)
+- [Common pitfalls](#common-pitfalls-to-avoid)
+
 ## Overview
 This skill generates `DESIGN.md` files optimized for Google Stitch screen generation. It translates the battle-tested anti-slop frontend engineering directives into Stitch's native semantic design language — descriptive, natural-language rules paired with precise values that Stitch's AI agent can interpret to produce premium, non-generic interfaces.
 

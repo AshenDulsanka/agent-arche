@@ -1,5 +1,12 @@
 Systematically score and identify quality issues across five dimensions to create an actionable improvement plan.
 
+## Contents
+
+- [Audit framework](#audit-framework)
+- [Severity scale](#severity-scale)
+- [Scoring table](#scoring-table)
+- [Report structure](#audit-report-structure)
+
 ## Audit Framework
 
 Score the UI across five dimensions, each 0–4:

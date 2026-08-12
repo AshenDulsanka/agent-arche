@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Handoff"
+  short_description: "Create compact continuation context for another agent"
+  default_prompt: "Use $handoff to preserve only the unfinished context another agent needs."

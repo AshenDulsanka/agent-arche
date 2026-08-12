@@ -2,6 +2,14 @@
 
 # Redesign Skill
 
+## Contents
+
+- [Workflow](#how-this-works)
+- [Design audit](#design-audit)
+- [Upgrade techniques](#upgrade-techniques)
+- [Fix priority](#fix-priority)
+- [Rules](#rules)
+
 ## How This Works
 
 When applied to an existing project, follow this sequence:

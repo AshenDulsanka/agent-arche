@@ -1,0 +1,7 @@
+interface:
+  display_name: "Caveman Mode"
+  short_description: "Use an explicit ultra-concise response mode"
+  default_prompt: "Use $caveman to answer this in concise caveman mode."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Workflow"
+  short_description: "Create clean branches, commits, and pull requests"
+  default_prompt: "Use $git to prepare the requested Git change with repository conventions."

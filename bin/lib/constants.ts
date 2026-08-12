@@ -66,7 +66,37 @@ export const SKILL_GROUPS = {
   ],
 } as const;
 
-const CORE_DEFAULT_SKILLS = [
+export const PROJECT_TYPE_META = {
+  "full-stack": {
+    label: "Full-stack",
+    summary: "Frontend and backend work in the same project.",
+  },
+  backend: {
+    label: "Backend",
+    summary: "APIs, services, data, or infrastructure without a frontend surface.",
+  },
+  frontend: {
+    label: "Frontend",
+    summary: "UI-focused project without backend-specific workflows.",
+  },
+  general: {
+    label: "General / other",
+    summary: "CLI, library, tooling, documentation, or mixed non-web work.",
+  },
+} as const;
+
+export const PROJECT_STAGE_META = {
+  established: {
+    label: "Established project",
+    summary: "Already has code, conventions, or an agent harness.",
+  },
+  greenfield: {
+    label: "Greenfield project",
+    summary: "New or unconfigured project that benefits from startup context.",
+  },
+} as const;
+
+const CORE_RECOMMENDED_SKILLS = [
   "implement",
   "diagnosing-bugs",
   "tdd",
@@ -77,13 +107,23 @@ const CORE_DEFAULT_SKILLS = [
   "handoff",
 ] as const;
 
-export const DEFAULT_SKILLS_BY_SCOPE = {
-  skills: [...CORE_DEFAULT_SKILLS],
-  "skills-hooks": [...CORE_DEFAULT_SKILLS],
-  "skills-memory": [...CORE_DEFAULT_SKILLS, "project-startup"],
+const PROJECT_TYPE_RECOMMENDATIONS = {
+  "full-stack": ["design", "seo", "postgres-patterns"],
+  backend: ["postgres-patterns"],
+  frontend: ["design", "seo"],
+  general: [],
+} as const satisfies Record<ProjectType, readonly string[]>;
+
+const PROJECT_STAGE_RECOMMENDATIONS = {
+  established: [],
+  greenfield: ["project-startup"],
+} as const satisfies Record<ProjectStage, readonly string[]>;
+
+const SCOPE_RECOMMENDATIONS = {
+  skills: [],
+  "skills-hooks": [],
+  "skills-memory": [],
   orchestration: [
-    ...CORE_DEFAULT_SKILLS,
-    "project-startup",
     "to-spec",
     "to-tickets",
     "grill-with-docs",
@@ -92,8 +132,23 @@ export const DEFAULT_SKILLS_BY_SCOPE = {
   ],
 } as const satisfies Record<InstallScope, readonly string[]>;
 
+export function recommendedSkills(
+  scope: InstallScope,
+  projectType: ProjectType,
+  projectStage: ProjectStage,
+): string[] {
+  return [...new Set([
+    ...CORE_RECOMMENDED_SKILLS,
+    ...PROJECT_TYPE_RECOMMENDATIONS[projectType],
+    ...PROJECT_STAGE_RECOMMENDATIONS[projectStage],
+    ...SCOPE_RECOMMENDATIONS[scope],
+  ])];
+}
+
 export const ORCHESTRATION_SKILL = "orchestrate";
 export const SELECTABLE_SKILLS = Object.values(SKILL_GROUPS).flatMap((group) => group.map((skill) => skill.value));
 
 export type Platform = "codex";
 export type InstallScope = keyof typeof INSTALL_SCOPE_META;
+export type ProjectType = keyof typeof PROJECT_TYPE_META;
+export type ProjectStage = keyof typeof PROJECT_STAGE_META;

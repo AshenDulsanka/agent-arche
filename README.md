@@ -8,7 +8,7 @@ A selective Codex engineering harness: install only the skills a project needs, 
 npx agent-arche install
 ```
 
-The interactive CLI first selects a scope, then presents grouped skills. Backend-only, frontend-only, established, and greenfield projects can therefore install different surfaces.
+The interactive CLI first selects an installation scope, then asks for the project type and stage. Those answers determine which grouped skills are initially checked; the user can still select or deselect anything before installation.
 
 | Scope | Installs | Runtime posture |
 |---|---|---|
@@ -25,21 +25,28 @@ The installation metadata always lives at `.codex/agent-arche.json`, including S
 
 ```bash
 npx agent-arche --skills-only --select-skills=implement,git --yes
+npx agent-arche --skills-hooks --project-type=backend --project-stage=established --yes
 npx agent-arche --skills-hooks --select-skills=implement,design,code-review --yes
 npx agent-arche --skills-memory --all-skills --yes
 npx agent-arche --orchestration --select-skills=implement,security-review --yes
 ```
 
-The skill step opens with a scope-aware recommended set checked. Users can deselect any recommendation or select additional frontend, backend, planning, architecture, and delivery skills before installation. `--yes` accepts that scope's recommendations when no explicit selection is supplied.
+The skill step opens with recommendations computed from the installation scope, project type, and project stage. Users can deselect any recommendation or select additional frontend, backend, planning, architecture, and delivery skills before installation. `--yes` accepts the computed recommendations when no explicit skill selection is supplied.
 
-| Scope | Initially checked |
+The selector keeps a fixed-height, cursor-following viewport. Use `↑`/`↓` to move, `←`/`→` to collapse or expand groups, `Space` to toggle a skill or group, `Enter` to confirm, and `Esc` to cancel.
+
+| Input | Recommendation effect |
 |---|---|
-| Skills only | Core implementation, diagnosis, testing, review, security, Git, and handoff skills |
-| Skills + hooks | Same focused core set |
-| Skills + hooks + memory | Core set plus `project-startup` for initializing durable project context |
-| Full orchestration | Memory defaults plus planning and architecture skills used by complex delegated work |
+| Every project | Core implementation, diagnosis, testing, review, security, Git, and handoff skills |
+| Full-stack | Adds frontend design, SEO, and PostgreSQL workflows |
+| Backend | Adds PostgreSQL workflows; leaves frontend skills unchecked |
+| Frontend | Adds design and SEO workflows; leaves backend-specific skills unchecked |
+| General / other | Keeps only the applicable core set |
+| Greenfield | Adds `project-startup` |
+| Established | Leaves `project-startup` unchecked |
+| Full orchestration | Adds planning and architecture workflows used by delegated work |
 
-Framework-specific skills such as `design`, `seo`, and `postgres-patterns` remain opt-in because the installation scope cannot reliably infer a project's technology stack.
+These are checkbox defaults, not locked bundles. Use `--project-type` and `--project-stage` for non-interactive profile selection, or `--select-skills` to override recommendations with an exact set.
 
 Update the files managed by the recorded scope and skill selection with:
 

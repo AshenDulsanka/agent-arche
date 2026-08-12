@@ -51,12 +51,18 @@ Metadata always uses `.codex/agent-arche.json`. Skills remain in `.agents/skills
 
 ## Skill selection profiles
 
-The installer uses scope-aware recommendations only as checkbox defaults:
+The installer combines three inputs into checkbox defaults:
+
+```text
+installation scope + project type + project stage -> recommended skills
+```
 
 - Skills-only and Skills + hooks start with the focused engineering core.
 - Memory also checks `project-startup`, which the user can deselect for an established project.
 - Full orchestration also checks planning and architecture skills used by complex delegated work.
-- Frontend, SEO, and PostgreSQL skills remain unchecked until the user selects them because scope alone does not reveal the project stack.
+- Project type selects the relevant frontend/backend domain workflows.
+- Project stage adds `project-startup` only for greenfield projects.
+- The user can still select or deselect every recommendation before installation.
 
 Every checkbox remains editable. Explicit `--select-skills` input replaces the profile, while `--yes` accepts it. Full orchestration adds its non-selectable `orchestrate` routing skill after selection.
 

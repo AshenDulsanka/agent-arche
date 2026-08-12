@@ -6,7 +6,6 @@ import {
   intro,
   isCancel,
   log,
-  groupMultiselect,
   note,
   outro,
   select,
@@ -14,15 +13,20 @@ import {
 } from "@clack/prompts";
 import pc from "picocolors";
 import {
-  DEFAULT_SKILLS_BY_SCOPE,
   INSTALL_SCOPE_META,
   ORCHESTRATION_SKILL,
+  PROJECT_STAGE_META,
+  PROJECT_TYPE_META,
   SELECTABLE_SKILLS,
   SKILL_GROUPS,
+  recommendedSkills,
   type InstallScope,
   type Platform,
+  type ProjectStage,
+  type ProjectType,
 } from "./lib/constants.js";
 import { getCodexPlan } from "./lib/plans.js";
+import { skillMultiselect, skillSelectorCancel } from "./lib/skill-selector.js";
 import type { InstallMeta, InstallPlan, InstallStepResult } from "./lib/types.js";
 import {
   copyDir,
@@ -44,6 +48,8 @@ export interface AppOptions {
   force?: boolean;
   yes?: boolean;
   scope?: InstallScope;
+  projectType?: ProjectType;
+  projectStage?: ProjectStage;
   selectedSkills?: readonly string[];
 }
 
@@ -102,6 +108,34 @@ async function chooseScope(initialScope?: InstallScope): Promise<InstallScope | 
   return stopOnCancel(answer) ? null : answer;
 }
 
+async function chooseProjectType(initialType?: ProjectType): Promise<ProjectType | null> {
+  if (initialType) return initialType;
+  const answer = await select<ProjectType>({
+    message: "What kind of project is this?",
+    initialValue: "full-stack",
+    options: Object.entries(PROJECT_TYPE_META).map(([value, meta]) => ({
+      value: value as ProjectType,
+      label: meta.label,
+      hint: meta.summary,
+    })),
+  });
+  return stopOnCancel(answer) ? null : answer;
+}
+
+async function chooseProjectStage(initialStage?: ProjectStage): Promise<ProjectStage | null> {
+  if (initialStage) return initialStage;
+  const answer = await select<ProjectStage>({
+    message: "What stage is the project in?",
+    initialValue: "established",
+    options: Object.entries(PROJECT_STAGE_META).map(([value, meta]) => ({
+      value: value as ProjectStage,
+      label: meta.label,
+      hint: meta.summary,
+    })),
+  });
+  return stopOnCancel(answer) ? null : answer;
+}
+
 function normalizeSkills(skills: readonly string[]): string[] {
   if (skills.includes("*")) return [...SELECTABLE_SKILLS];
   const allowed = new Set<string>(SELECTABLE_SKILLS);
@@ -110,10 +144,12 @@ function normalizeSkills(skills: readonly string[]): string[] {
 
 async function chooseSkills(
   scope: InstallScope,
+  projectType: ProjectType,
+  projectStage: ProjectStage,
   initialSkills?: readonly string[],
   yes = false,
 ): Promise<string[] | null> {
-  const defaults = DEFAULT_SKILLS_BY_SCOPE[scope];
+  const defaults = recommendedSkills(scope, projectType, projectStage);
   if (initialSkills) {
     const normalized = normalizeSkills(initialSkills);
     const unknown = initialSkills.filter((skill) => (
@@ -126,22 +162,21 @@ async function chooseSkills(
   }
   if (yes) return [...defaults];
 
-  const options = Object.fromEntries(
-    Object.entries(SKILL_GROUPS).map(([group, skills]) => [
-      group,
-      skills.map((skill) => ({ ...skill })),
-    ]),
-  );
-  const answer = await groupMultiselect<string>({
-    message: `Which skills should this project install? Recommended for ${INSTALL_SCOPE_META[scope].label} are checked.`,
-    options,
-    initialValues: [...defaults],
+  const answer = await skillMultiselect({
+    message: `Select skills for ${INSTALL_SCOPE_META[scope].label}`,
+    items: Object.entries(SKILL_GROUPS).flatMap(([group, skills]) => (
+      skills.map((skill) => ({ ...skill, group }))
+    )),
+    initialSelected: defaults,
     required: true,
-    selectableGroups: true,
-    groupSpacing: 1,
+    maxVisible: 14,
   });
 
-  return stopOnCancel(answer) ? null : normalizeSkills(answer);
+  if (answer === skillSelectorCancel) {
+    cancel("No files were changed.");
+    return null;
+  }
+  return normalizeSkills(answer as string[]);
 }
 
 function sameSkills(left: readonly string[], right: readonly string[]): boolean {
@@ -259,6 +294,8 @@ export async function runApp({
   force = false,
   yes = false,
   scope: requestedScope,
+  projectType: requestedProjectType,
+  projectStage: requestedProjectStage,
   selectedSkills: requestedSkills,
 }: AppOptions = {}): Promise<number> {
   const cwd = process.cwd();
@@ -267,6 +304,8 @@ export async function runApp({
   intro(`${pc.bgCyan(pc.black(" agent-arche "))} ${pc.dim(`v${pkg.version}`)}`);
 
   let scope = requestedScope;
+  let projectType = requestedProjectType;
+  let projectStage = requestedProjectStage;
   let selectedSkills = requestedSkills ? [...requestedSkills] : undefined;
   if (force) {
     const update = await resolveUpdate(cwd);
@@ -276,9 +315,17 @@ export async function runApp({
   } else {
     scope = await chooseScope(scope) ?? undefined;
     if (!scope) return 0;
+    if (!selectedSkills) {
+      projectType = await chooseProjectType(projectType) ?? undefined;
+      if (!projectType) return 0;
+      projectStage = await chooseProjectStage(projectStage) ?? undefined;
+      if (!projectStage) return 0;
+    }
   }
 
-  selectedSkills = await chooseSkills(scope, selectedSkills, yes) ?? undefined;
+  projectType ??= "general";
+  projectStage ??= "established";
+  selectedSkills = await chooseSkills(scope, projectType, projectStage, selectedSkills, yes) ?? undefined;
   if (!selectedSkills || selectedSkills.length === 0) return 0;
 
   if (scope === "orchestration") {

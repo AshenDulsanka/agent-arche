@@ -2,7 +2,7 @@
 
 import { runApp } from "./App.js";
 import { readPackageJson } from "./lib/utils.js";
-import type { InstallScope } from "./lib/constants.js";
+import type { InstallScope, ProjectStage, ProjectType } from "./lib/constants.js";
 
 function showHelp(): void {
   console.log(`
@@ -17,6 +17,8 @@ Options
   --skills-hooks         Selected skills plus hooks and context tools
   --skills-memory        Selected skills, hooks, context tools, and memory
   --orchestration        Full multi-agent orchestration (high usage)
+  --project-type=<type>  full-stack, backend, frontend, or general
+  --project-stage=<type> established or greenfield
   --select-skills=a,b    Install an explicit comma-separated skill set
   --all-skills           Install every selectable skill
   -y, --yes              Accept the selected scope's recommended skills
@@ -26,6 +28,7 @@ Options
 Examples
   npx agent-arche
   npx agent-arche --skills-only
+  npx agent-arche --skills-hooks --project-type=backend --project-stage=established
   npx agent-arche --skills-hooks --select-skills=implement,design,git
   npx agent-arche --orchestration
   npx agent-arche update
@@ -54,6 +57,8 @@ const unknownFlag = args.find((arg) => (
   arg.startsWith("-")
   && !knownFlags.has(arg)
   && !arg.startsWith("--select-skills=")
+  && !arg.startsWith("--project-type=")
+  && !arg.startsWith("--project-stage=")
 ));
 const scopeFlags = ["--skills-only", "--skills-hooks", "--skills-memory", "--orchestration"]
   .filter((flag) => args.includes(flag));
@@ -70,6 +75,20 @@ function requestedSkills(): string[] | undefined {
   const explicit = args.find((arg) => arg.startsWith("--select-skills="));
   if (!explicit) return args.includes("--all-skills") ? ["*"] : undefined;
   return explicit.slice("--select-skills=".length).split(",").map((skill) => skill.trim()).filter(Boolean);
+}
+
+function requestedProjectType(): ProjectType | undefined {
+  const value = args.find((arg) => arg.startsWith("--project-type="))?.slice("--project-type=".length);
+  if (!value) return undefined;
+  if (["full-stack", "backend", "frontend", "general"].includes(value)) return value as ProjectType;
+  throw new Error(`Unknown project type: ${value}`);
+}
+
+function requestedProjectStage(): ProjectStage | undefined {
+  const value = args.find((arg) => arg.startsWith("--project-stage="))?.slice("--project-stage=".length);
+  if (!value) return undefined;
+  if (["established", "greenfield"].includes(value)) return value as ProjectStage;
+  throw new Error(`Unknown project stage: ${value}`);
 }
 
 if (args.includes("--version") || args.includes("-v")) {
@@ -89,12 +108,14 @@ if (args.includes("--version") || args.includes("-v")) {
   console.error("Run npx agent-arche --help for usage.");
   process.exitCode = 1;
 } else {
-  runApp({
+  Promise.resolve().then(() => runApp({
     force: command === "update",
     yes: args.includes("--yes") || args.includes("-y"),
     scope: requestedScope(),
+    projectType: requestedProjectType(),
+    projectStage: requestedProjectStage(),
     selectedSkills: requestedSkills(),
-  }).then(
+  })).then(
     (code) => {
       process.exitCode = code;
     },

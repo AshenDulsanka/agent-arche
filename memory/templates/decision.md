@@ -1,35 +1,32 @@
 ---
+id: DEC-NNN
 title: "{{title}}"
-date: {{date}}
-type: decision
+kind: decision
 status: active
-agent: {{agent}}
-task: "{{task}}"
+date: {{date}}
+summary: "{{one-sentence decision}}"
 tags:
   - decision
-aliases: []
+paths: []
+symbols: []
+supersedes: []
+last_verified_commit: ""
 ---
 
 # {{title}}
 
-## Context
-What is the situation that requires a decision? What problem does this solve?
-
-## Options Considered
-
-### Option A — {{name}}
-- **Pros:**
-- **Cons:**
-
-### Option B — {{name}}
-- **Pros:**
-- **Cons:**
-
 ## Decision
-What was chosen and the rationale behind it.
 
-## Consequences
-What changes as a result of this decision? What does it make easier or harder?
+{{decision}}
 
-## Related
-- [[sessions/YYYY-MM-DD-slug]] — session where this was decided
+## Why
+
+{{reason and rejected alternative}}
+
+## Revisit When
+
+{{observable trigger}}
+
+## Evidence
+
+- `path/to/file`

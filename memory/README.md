@@ -1,9 +1,17 @@
-# Agent Memory Vault
+# Agent memory vault
 
-This folder is for agentic development context.
+This vault stores durable project knowledge, not a transcript of every coding session.
 
-agent-arche treats `memory/` as an Obsidian-style Markdown vault for durable project knowledge: decisions, implementation patterns, learnings, reviews, feature notes, and session summaries. Agents read it before work and update it before finishing so future Codex sessions can share the same project memory.
+- `manifest.md` is the fixed-size project overview.
+- `cards/`, `decisions/`, `patterns/`, `learnings/`, and `features/` hold durable facts.
+- `handoff/` may hold active continuation state.
+- `sessions/`, `reviews/`, and `archive/` are cold history and are not retrieved by default.
+- `_MOC.md` is a fixed-size human/Obsidian map. Agents must not load it as task context.
 
-This is not application runtime data, user content, or generated build output. Keep it in version control when your team wants AI assistants to share project context.
+Retrieve context with:
 
-Start with `_MOC.md` as the map of contents.
+```bash
+node .codex/context/context.cjs query --task "<request>" --paths "<known paths>"
+```
+
+Create or update memory only when work adds a durable decision, constraint, reusable pattern, recurring gotcha, or explicit handoff. Routine fixes and facts already obvious from code need no note.

@@ -1,33 +1,23 @@
 ---
-title: "{{title}}"
+id: REV-{{date}}-NNN
+title: "{{review title}}"
+kind: review
+status: cold
 date: {{date}}
-type: review
-status: active
-agent: {{agent}}
-task: "{{task}}"
+summary: "{{one-sentence review result}}"
 tags:
   - review
-aliases: []
+paths: []
 ---
 
-# {{title}}
+# {{review title}}
 
 ## Scope
-What was reviewed — files, feature area, change type.
+
+{{reviewed range}}
 
 ## Findings
 
-### Critical / High
-<!-- List only findings worth remembering long-term -->
+{{evidence-backed findings}}
 
-### Medium / Low
-<!-- List only findings worth remembering long-term -->
-
-## Overall Status
-**Approved** / **Changes Required** / **Rejected**
-
-## Patterns to Follow
-Links to the correct approaches for the issues raised.
-
-## Related
-- [[sessions/YYYY-MM-DD-slug]] — session this review belongs to
+Reviews are cold history. Promote only durable decisions or recurring gotchas into active cards.

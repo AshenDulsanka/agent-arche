@@ -1,28 +1,27 @@
 ---
-title: "{{learning}}"
-date: {{date}}
-type: learning
+id: LRN-NNN
+title: "{{title}}"
+kind: learning
 status: active
-agent: {{agent}}
-task: "{{task}}"
+date: {{date}}
+summary: "{{one-sentence recurring gotcha}}"
 tags:
   - learning
-aliases: []
+paths: []
+symbols: []
+last_verified_commit: ""
 ---
 
-# {{learning}}
+# {{title}}
 
-## What Happened
-The situation or task where this was discovered.
+## Signal
 
-## Root Cause
-Why it happened — the underlying reason.
+{{observable failure or confusion}}
 
-## Fix / Workaround
-What solved it or how to work around it.
+## Cause
 
-## Prevention
-How to avoid this in the future. What to check before doing X.
+{{verified cause}}
 
-## Related
-- [[sessions/YYYY-MM-DD-slug]] — session where this was discovered
+## Response
+
+{{smallest reliable fix or check}}

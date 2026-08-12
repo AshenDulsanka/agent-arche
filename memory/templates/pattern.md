@@ -1,31 +1,27 @@
 ---
-title: "{{pattern-name}}"
-date: {{date}}
-type: pattern
+id: PAT-NNN
+title: "{{title}}"
+kind: pattern
 status: active
-agent: {{agent}}
+date: {{date}}
+summary: "{{one-sentence reusable pattern}}"
 tags:
   - pattern
-aliases: []
+paths: []
+symbols: []
+last_verified_commit: ""
 ---
 
-# {{pattern-name}}
+# {{title}}
 
-## When to Use
-Conditions and context where this pattern applies.
+## Pattern
 
-## Implementation
+{{pattern and when it applies}}
 
-```typescript
-// the pattern
-```
+## Evidence
 
-## Example in Codebase
-`path/to/example/file.ts` — describe what it demonstrates.
+- `path/to/file:line`
 
-## Anti-Patterns
-What NOT to do and why.
+## Avoid
 
-## Related
-- [[decisions/ADR-NNN-slug]] — why this pattern was adopted
-- [[sessions/YYYY-MM-DD-slug]] — session where this was established
+{{project-specific counter-pattern}}

@@ -1,43 +1,26 @@
 ---
-title: "{{task-name}}"
-date: {{date}}
-type: session
+id: SES-{{date}}-NNN
+title: "{{short handoff title}}"
+kind: handoff
 status: active
-agent: orchestrator
-task: "{{task}}"
+date: {{date}}
+summary: "{{one-sentence continuation state}}"
 tags:
-  - session
-aliases: []
+  - handoff
+paths: []
 ---
 
-# {{task-name}}
+# {{short handoff title}}
 
-## Objective
-What was the user's verbatim request?
+Use only when another session needs state that is not already captured by an issue, plan, commit, diff, or durable card.
 
-## Pipeline
-`Agent A → Agent B → Agent C`
+## Continue From
 
-## Decisions Made
-<!-- Link every decision note created during this session -->
+{{current state and exact next action}}
 
-## Changes Made
-| File | Change | Agent |
-|------|--------|-------|
-| `path/to/file` | description | coder |
+## Evidence
 
-## Issues Found
-| Severity | Finding | Agent | Resolution |
-|----------|---------|-------|------------|
+- Commit/diff: {{reference}}
+- Checks: {{commands and results}}
 
-## Patterns Established
-<!-- Link any new pattern notes -->
-
-## Learnings
-<!-- Link any new learning notes -->
-
-## Reviews
-<!-- Link any review notes created -->
-
-## Related
-<!-- Link to the feature this session belongs to, if any -->
+Archive or delete after the continuation is complete.

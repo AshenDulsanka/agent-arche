@@ -5,17 +5,14 @@ import { fileURLToPath } from "url";
 import {
   INSTALL_SCOPE_META,
   META_FILE,
-  STEP_ORDER,
+  SELECTABLE_SKILLS,
   type InstallScope,
   type Platform,
-  type Step,
 } from "./constants.js";
 import type {
   ContentTransform,
   DetectedInstall,
-  HeaderStepInfo,
   InstallMeta,
-  OptionItem,
   PackageJsonLike,
   PlanSummary,
 } from "./types.js";
@@ -147,14 +144,22 @@ export function readMeta(dir: string): InstallMeta | null {
     if (typeof data.version !== "string") {
       return null;
     }
+    const rawScope = data.scope as string | undefined;
+    const scope: InstallScope = rawScope && rawScope in INSTALL_SCOPE_META
+      ? rawScope as InstallScope
+      : "skills-memory";
+    const selectedSkills = Array.isArray(data.selectedSkills)
+      ? data.selectedSkills.filter((skill): skill is string => typeof skill === "string")
+      : [...SELECTABLE_SKILLS];
     return {
       version: data.version,
       installedAt: typeof data.installedAt === "string" ? data.installedAt : "Unknown",
       source: typeof data.source === "string" ? data.source : "Unknown",
       sourceType: typeof data.sourceType === "string" ? data.sourceType : "Unknown",
-      scope: data.scope === "skills" ? "skills" : "skills-memory",
+      scope,
       platform: "codex",
       hash: typeof data.hash === "string" ? data.hash : null,
+      selectedSkills,
     };
   } catch {
     return null;
@@ -183,7 +188,7 @@ export function detectInstalledPlatform(cwd: string): DetectedInstall | null {
       meta: {
         ...meta,
         platform: candidate.platform,
-        scope: meta.scope ?? "skills-memory",
+        scope: meta.scope,
       },
       metaDir: candidate.metaDir,
     };
@@ -289,18 +294,9 @@ export function fetchNpmLatestVersion(): Promise<string | null> {
 }
 
 // ─── Misc helpers ─────────────────────────────────────────────────────────────
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export function formatMode(force: boolean): "update" | "install" {
-  return force ? "update" : "install";
-}
-
 // ─── Plan helpers ─────────────────────────────────────────────────────────────
 export function summarizePlan(
   plan: { steps: Array<{ label: string; src: string; destDir?: string; destFile?: string }> } | null,
-  scope: InstallScope
 ): PlanSummary | null {
   if (!plan) return null;
   let total = 0;
@@ -320,27 +316,5 @@ export function summarizePlan(
       steps.push({ label: step.label, count: 1, kind: "file" });
     }
   }
-  const scopeMeta = INSTALL_SCOPE_META[scope];
-  const notes = [scopeMeta.summary, ...scopeMeta.details] as string[];
-  return { total, steps, missing, notes };
-}
-
-export function getStepIndexForScope(step: string): HeaderStepInfo {
-  const normalized = step === "existing" || step === "confirm" ? "preview" : step;
-  const normalizedStep: Step = STEP_ORDER.includes(normalized as Step) ? (normalized as Step) : "scope";
-
-  const visibleSteps = [...STEP_ORDER] as Step[];
-
-  const currentIndex = Math.max(visibleSteps.indexOf(normalizedStep), 0);
-  return { visibleSteps, currentIndex };
-}
-
-export function getScopeOptions(): OptionItem[] {
-  return Object.entries(INSTALL_SCOPE_META).map(([value, meta]) => ({
-    value,
-    label: meta.label,
-    accent: meta.accent,
-    description: meta.summary,
-    details: meta.details,
-  }));
+  return { total, steps, missing };
 }

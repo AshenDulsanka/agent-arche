@@ -1,6 +1,4 @@
-import type { InstallScope, Platform, Step } from "./constants.js";
-
-export type AppStep = Step | "existing" | "confirm" | "up-to-date" | "update-missing";
+import type { InstallScope, Platform } from "./constants.js";
 
 export type ContentTransform = (content: string, srcPath: string) => string;
 
@@ -30,6 +28,7 @@ export interface InstallPlan {
   metaDir: string;
   steps: PlanStep[];
   nextSteps: readonly string[];
+  selectedSkills: readonly string[];
 }
 
 export interface InstallMeta {
@@ -40,6 +39,7 @@ export interface InstallMeta {
   scope: InstallScope;
   platform: Platform;
   hash: string | null;
+  selectedSkills: string[];
 }
 
 export interface DetectedInstall {
@@ -58,21 +58,6 @@ export interface PlanSummary {
   total: number;
   steps: PlanSummaryStep[];
   missing: string[];
-  notes: string[];
-}
-
-export interface OptionItem {
-  value: string;
-  label: string;
-  accent: string;
-  description: string;
-  details?: readonly string[];
-  note?: string;
-}
-
-export interface HintItem {
-  label: string;
-  value: string;
 }
 
 export interface InstallStepResult {
@@ -80,18 +65,6 @@ export interface InstallStepResult {
   msg: string;
 }
 
-export interface HeaderStepInfo {
-  visibleSteps: Step[];
-  currentIndex: number;
-}
-
 export interface PackageJsonLike {
   version: string;
-}
-
-export type ConfirmHandler = (confirmed: boolean) => void;
-
-export interface PreparePlanInput {
-  scope: InstallScope;
-  platform: Platform;
 }

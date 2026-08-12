@@ -1,73 +1,107 @@
 #!/usr/bin/env node
 
-import React from "react";
-import { render } from "ink";
-import readline from "readline";
-import { App } from "./App.js";
+import { runApp } from "./App.js";
 import { readPackageJson } from "./lib/utils.js";
+import type { InstallScope } from "./lib/constants.js";
 
-const h = React.createElement;
-
-// ─── Entry point ─────────────────────────────────────────────────────────────
-// All logic lives in App.js and bin/lib / bin/components.
-// Edit bin/lib/constants.js to change any visible UI text.
-
-function showVersion() {
-  const pkg = readPackageJson();
-  console.log(pkg.version);
-}
-
-function showHelp() {
+function showHelp(): void {
   console.log(`
-  ◆ agent-arche - Codex skills and project context
+agent-arche - Selective Codex skills, context, memory, and orchestration
 
-  Usage
-    npx agent-arche             Install files for your AI assistant
-    npx agent-arche install     Same as above
-    npx agent-arche update      Update to latest (overwrites existing files)
-    npx agent-arche --version   Print version
-    npx agent-arche --help      Show this message
+Usage
+  npx agent-arche [install] [options]
+  npx agent-arche update [options]
 
-  Install destination
-    Codex  ->  .agents/skills/ with optional .codex/ hooks and memory/
+Options
+  --skills-only          Selected skills only
+  --skills-hooks         Selected skills plus hooks and context tools
+  --skills-memory        Selected skills, hooks, context tools, and memory
+  --orchestration        Full multi-agent orchestration (high usage)
+  --select-skills=a,b    Install an explicit comma-separated skill set
+  --all-skills           Install every selectable skill
+  -y, --yes              Accept the selected scope's recommended skills
+  -v, --version          Print the installed CLI version
+  -h, --help             Show this help
 
-  What gets installed
-    config.toml     Codex runtime and MCP server configuration
-    skills/         Reusable task workflows and references
-    hooks/          Safety hooks (session-start, pre-tool, changelog)
+Examples
+  npx agent-arche
+  npx agent-arche --skills-only
+  npx agent-arche --skills-hooks --select-skills=implement,design,git
+  npx agent-arche --orchestration
+  npx agent-arche update
 
-  Install scopes
-    Skills + hooks + memory
-                         Shared skills plus hooks, config, and root memory
-    Skills only          Shared skills only, without hooks or memory
-
-  Verify integrity
-    npm view agent-arche dist.integrity
-    Compare with hash in agent-arche.json inside your install directory.
-
-  Source
-    https://github.com/AshenDulsanka/agent-arche
+Source
+  https://github.com/AshenDulsanka/agent-arche
 `);
 }
 
-const [, , command] = process.argv;
+const args = process.argv.slice(2);
+const command = args.find((arg) => !arg.startsWith("-")) ?? "install";
+const knownFlags = new Set([
+  "-h",
+  "--help",
+  "-v",
+  "--version",
+  "-y",
+  "--yes",
+  "--skills-only",
+  "--skills-hooks",
+  "--skills-memory",
+  "--orchestration",
+  "--all-skills",
+]);
+const unknownFlag = args.find((arg) => (
+  arg.startsWith("-")
+  && !knownFlags.has(arg)
+  && !arg.startsWith("--select-skills=")
+));
+const scopeFlags = ["--skills-only", "--skills-hooks", "--skills-memory", "--orchestration"]
+  .filter((flag) => args.includes(flag));
 
-if (command === "--version" || command === "-v") {
-  showVersion();
-  process.exit(0);
-} else if (command === "--help" || command === "-h" || command === "help") {
+function requestedScope(): InstallScope | undefined {
+  if (args.includes("--skills-only")) return "skills";
+  if (args.includes("--skills-hooks")) return "skills-hooks";
+  if (args.includes("--skills-memory")) return "skills-memory";
+  if (args.includes("--orchestration")) return "orchestration";
+  return undefined;
+}
+
+function requestedSkills(): string[] | undefined {
+  const explicit = args.find((arg) => arg.startsWith("--select-skills="));
+  if (!explicit) return args.includes("--all-skills") ? ["*"] : undefined;
+  return explicit.slice("--select-skills=".length).split(",").map((skill) => skill.trim()).filter(Boolean);
+}
+
+if (args.includes("--version") || args.includes("-v")) {
+  console.log(readPackageJson().version);
+} else if (args.includes("--help") || args.includes("-h") || command === "help") {
   showHelp();
-  process.exit(0);
-} else if (command === undefined || command === "install" || command === "update") {
-  const force = command === "update";
-  readline.emitKeypressEvents(process.stdin);
-  if (process.stdin.isTTY) process.stdin.setRawMode(true);
-  // waitUntilExit() ensures process.exit is called once ink unmounts,
-  // so the CLI exits automatically after install, cancel, or 'n'.
-  const { waitUntilExit } = render(h(App, { force }));
-  waitUntilExit().then(() => process.exit(0));
+} else if (unknownFlag) {
+  console.error(`Unknown option: ${unknownFlag}`);
+  console.error("Run npx agent-arche --help for usage.");
+  process.exitCode = 1;
+} else if (scopeFlags.length > 1) {
+  console.error(`Choose one install scope, not: ${scopeFlags.join(", ")}`);
+  console.error("Run npx agent-arche --help for usage.");
+  process.exitCode = 1;
+} else if (command !== "install" && command !== "update") {
+  console.error(`Unknown command: ${command}`);
+  console.error("Run npx agent-arche --help for usage.");
+  process.exitCode = 1;
 } else {
-  console.error(`\n  ✗ Unknown command: ${command}`);
-  console.error("  Run npx agent-arche --help for usage.\n");
-  process.exit(1);
+  runApp({
+    force: command === "update",
+    yes: args.includes("--yes") || args.includes("-y"),
+    scope: requestedScope(),
+    selectedSkills: requestedSkills(),
+  }).then(
+    (code) => {
+      process.exitCode = code;
+    },
+    (error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`Installation failed: ${message}`);
+      process.exitCode = 1;
+    },
+  );
 }

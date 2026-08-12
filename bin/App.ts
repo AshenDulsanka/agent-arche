@@ -1,424 +1,324 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Box, Text, useApp, useInput } from "ink";
 import fs from "fs";
-import { COPY, type InstallScope, type Platform } from "./lib/constants.js";
+import path from "path";
 import {
-  readPackageJson,
-  readMeta,
+  cancel,
+  confirm,
+  intro,
+  isCancel,
+  log,
+  groupMultiselect,
+  note,
+  outro,
+  select,
+  spinner,
+} from "@clack/prompts";
+import pc from "picocolors";
+import {
+  DEFAULT_SKILLS_BY_SCOPE,
+  INSTALL_SCOPE_META,
+  ORCHESTRATION_SKILL,
+  SELECTABLE_SKILLS,
+  SKILL_GROUPS,
+  type InstallScope,
+  type Platform,
+} from "./lib/constants.js";
+import { getCodexPlan } from "./lib/plans.js";
+import type { InstallMeta, InstallPlan, InstallStepResult } from "./lib/types.js";
+import {
+  copyDir,
+  copyFile,
   detectInstalledPlatform,
-  writeMeta,
-  summarizePlan,
   fetchNpmHash,
   fetchNpmLatestVersion,
   isAllowedInstallPath,
-  sleep,
-  copyDir,
-  copyFile,
   migrateLegacyMemoryVault,
+  readMeta,
+  readPackageJson,
+  summarizePlan,
+  writeMeta,
 } from "./lib/utils.js";
-import { getCodexPlan } from "./lib/plans.js";
-import { getFooterHints } from "./lib/hints.js";
-import { Frame, Section } from "./components/Layout.js";
-import { Header } from "./components/Header.js";
-import { KeyHints, ScopeStep } from "./components/Options.js";
-import { InstallPreview, ExistingInstallView, UpToDateView, UpdateMissingView } from "./components/Preview.js";
-import { ProgressView } from "./components/Progress.js";
-import { SuccessView } from "./components/Success.js";
-import { Spinner } from "@inkjs/ui";
-import type {
-  AppStep,
-  InstallPlan,
-  InstallMeta,
-  InstallStepResult,
-  PlanSummary,
-} from "./lib/types.js";
 
-const h = React.createElement;
+const platform: Platform = "codex";
 
-function useCompactLayout() {
-  const read = () => ({
-    width:  process.stdout.columns ?? 120,
-    height: process.stdout.rows    ?? 30,
-  });
-  const [dims, setDims] = useState(read);
-
-  useEffect(() => {
-    const update = () => setDims(read());
-    process.stdout.on("resize", update);
-    return () => {
-      process.stdout.off("resize", update);
-    };
-  }, []);
-
-  return {
-    width:   dims.width,
-    height:  dims.height,
-    compact: dims.height < 40,
-  };
-}
-
-function isInstallScope(value: string): value is InstallScope {
-  return value === "skills-memory" || value === "skills";
-}
-
-interface AppProps {
+export interface AppOptions {
   force?: boolean;
+  yes?: boolean;
+  scope?: InstallScope;
+  selectedSkills?: readonly string[];
 }
 
-export function App({ force = false }: AppProps): React.ReactElement {
-  const { exit } = useApp();
-  const { compact } = useCompactLayout();
-  const pkg = useMemo(() => readPackageJson(), []);
-  const cwd = process.cwd();
-  const escapeLockUntil = useRef(0);
+function stopOnCancel(value: unknown): value is symbol {
+  if (!isCancel(value)) return false;
+  cancel("No files were changed.");
+  return true;
+}
 
-  const [step,           setStep]           = useState<AppStep>("scope");
-  const [scope,          setScope]          = useState<InstallScope>("skills-memory");
-  const platform: Platform = "codex";
-  const [plan,           setPlan]           = useState<InstallPlan | null>(null);
-  const [existing,       setExisting]       = useState<InstallMeta | null>(null);
-  const [aborted,        setAborted]        = useState(false);
-  const [installSteps,   setInstallSteps]   = useState<InstallStepResult[]>([]);
-  const [currentStepIdx, setCurrentStepIdx] = useState(-1);
-  const [totalFiles,     setTotalFiles]     = useState(0);
-  const [hash,           setHash]           = useState<string | null>(null);
-  const [fetchingHash,   setFetchingHash]   = useState(false);
-  const [missing,        setMissing]        = useState<string[]>([]);
-  const [preview,        setPreview]        = useState<PlanSummary | null>(null);
-  const [updateChecking, setUpdateChecking] = useState(force);
-  const [latestVersion,  setLatestVersion]  = useState<string | null>(null);
+function relativeTarget(cwd: string, target: string): string {
+  const relative = path.relative(cwd, target).replace(/\\/g, "/");
+  return relative || ".";
+}
 
-  const resetPreparedState = () => {
-    setPlan(null);
-    setPreview(null);
-    setExisting(null);
-  };
+function formatPlan(plan: InstallPlan): string {
+  const preview = summarizePlan(plan);
+  if (!preview) return "Nothing to install.";
 
-  const abortInstall = () => {
-    setAborted(true);
-    setTimeout(() => exit(), 100);
-  };
-
-  const goBack = (currentStep: AppStep): boolean => {
-    if (currentStep === "confirm") {
-      resetPreparedState();
-      setStep("scope");
-      return true;
-    }
-
-    return false;
-  };
-
-  const lockEscape = () => {
-    escapeLockUntil.current = Date.now() + 250;
-  };
-
-  useInput((input, key) => {
-    const isEscape = key.escape || input === "\u001B";
-
-    if (isEscape && Date.now() < escapeLockUntil.current) {
-      return;
-    }
-
-    // Block all input while the update check async is in flight
-    if (force && updateChecking) {
-      if (input === "q" || input === "Q" || isEscape) {
-        exit();
-      }
-      return;
-    }
-
-    if (input === "q" || input === "Q") {
-      if (step === "done" || step === "existing" || step === "up-to-date" || step === "update-missing") {
-        exit();
-        return;
-      }
-      abortInstall();
-      return;
-    }
-
-    if (step === "confirm") {
-      if (isEscape) {
-        const movedBack = goBack(step);
-        if (movedBack) {
-          lockEscape();
-        }
-        return;
-      }
-      if (key.return || input === "y" || input === "Y") {
-        setStep("install");
-        return;
-      }
-      if (input === "n" || input === "N") {
-        abortInstall();
-        return;
-      }
-      return;
-    }
-
-    if (isEscape) {
-      if (step === "install") {
-        abortInstall();
-        lockEscape();
-        return;
-      }
-
-      if (step === "scope") {
-        abortInstall();
-        lockEscape();
-        return;
-      }
-
-      const movedBack = goBack(step);
-      if (movedBack) {
-        lockEscape();
-        return;
-      }
-
-      if (!movedBack && step !== "done" && step !== "existing" && step !== "up-to-date" && step !== "update-missing") {
-        abortInstall();
-        lockEscape();
-      }
-    }
+  const targets = preview.steps.map((step) => {
+    const unit = step.count === 1 ? "file" : "files";
+    return `${pc.cyan("◆")} ${step.label} ${pc.dim(`(${step.count} ${unit})`)}`;
   });
 
-  const preparePlan = (nextScope: InstallScope): void => {
-    const nextPlan: InstallPlan = getCodexPlan(cwd, nextScope);
+  if (preview.missing.length > 0) {
+    targets.push(pc.yellow(`Missing: ${preview.missing.join(", ")}`));
+  }
 
-    setScope(nextScope);
-    setPlan(nextPlan);
-    setPreview(summarizePlan(nextPlan, nextScope));
+  return targets.join("\n");
+}
 
-    const detected = readMeta(nextPlan.metaDir);
-    setExisting(detected);
+function formatResults(results: InstallStepResult[]): string {
+  return results
+    .map((result) => `${pc.green("◆")} ${result.label} ${pc.dim(result.msg)}`)
+    .join("\n");
+}
 
-    if (detected && detected.platform === platform && detected.scope === nextScope && !force) {
-      setStep("existing");
-      setTimeout(() => exit(), 100);
-      return;
-    }
+function showExisting(existing: InstallMeta): void {
+  log.warn(`Agent Arche v${existing.version} is already installed with this scope.`);
+  note("Run npx agent-arche update to replace the installed files.", "Existing installation");
+  outro("No files were changed.");
+}
 
-    setStep("confirm");
-  };
+async function chooseScope(initialScope?: InstallScope): Promise<InstallScope | null> {
+  if (initialScope) return initialScope;
 
-  useEffect(() => {
-    if (!force) {
-      return;
-    }
+  const answer = await select<InstallScope>({
+    message: "What do you want to install?",
+    initialValue: "skills-memory",
+    options: Object.entries(INSTALL_SCOPE_META).map(([value, meta]) => ({
+      value: value as InstallScope,
+      label: meta.label,
+      hint: meta.summary,
+    })),
+  });
 
-    let cancelled = false;
+  return stopOnCancel(answer) ? null : answer;
+}
 
-    const resolveUpdateFlow = async () => {
-      const detected = detectInstalledPlatform(cwd);
+function normalizeSkills(skills: readonly string[]): string[] {
+  if (skills.includes("*")) return [...SELECTABLE_SKILLS];
+  const allowed = new Set<string>(SELECTABLE_SKILLS);
+  return [...new Set(skills.filter((skill) => allowed.has(skill)))];
+}
 
-      if (!detected) {
-        setUpdateChecking(false);
-        setStep("update-missing");
-        setTimeout(() => exit(), 1200);
-        return;
-      }
+async function chooseSkills(
+  scope: InstallScope,
+  initialSkills?: readonly string[],
+  yes = false,
+): Promise<string[] | null> {
+  const defaults = DEFAULT_SKILLS_BY_SCOPE[scope];
+  if (initialSkills) {
+    const normalized = normalizeSkills(initialSkills);
+    const unknown = initialSkills.filter((skill) => (
+      skill !== "*"
+      && !(scope === "orchestration" && skill === ORCHESTRATION_SKILL)
+      && !normalized.includes(skill)
+    ));
+    if (unknown.length > 0) throw new Error(`Unknown skill selection: ${unknown.join(", ")}`);
+    return normalized;
+  }
+  if (yes) return [...defaults];
 
-      setExisting(detected.meta);
-      setScope(detected.meta.scope);
-
-      const npmLatest = await fetchNpmLatestVersion();
-      if (cancelled) {
-        return;
-      }
-
-      if (npmLatest) {
-        setLatestVersion(npmLatest);
-        if (detected.meta.version === npmLatest) {
-          setUpdateChecking(false);
-          setStep("up-to-date");
-          return;
-        }
-      }
-
-      setUpdateChecking(false);
-      preparePlan(detected.meta.scope);
-    };
-
-    resolveUpdateFlow();
-    return () => {
-      cancelled = true;
-    };
-  }, [cwd, force, exit]);
-
-  useEffect(() => {
-    if (step !== "install" || !plan) return;
-
-    let cancelled = false;
-
-    const runInstall = async () => {
-      const results: InstallStepResult[] = [];
-      let total = 0;
-      const missingItems: string[] = [];
-
-      for (let i = 0; i < plan.steps.length; i++) {
-        if (cancelled) return;
-        setCurrentStepIdx(i);
-        const s = plan.steps[i];
-
-        if (!s.src || !fs.existsSync(s.src)) {
-          missingItems.push(s.label);
-          continue;
-        }
-
-        await sleep(250);
-
-        let countMsg = "";
-        if ("destDir" in s && s.destDir) {
-          if (!isAllowedInstallPath(cwd, s.destDir)) {
-            countMsg = "blocked (unsafe path)";
-            results.push({ label: s.label, msg: countMsg });
-            setInstallSteps([...results]);
-            continue;
-          }
-
-          const migratedMemory = s.legacyMemoryDirs
-            ? migrateLegacyMemoryVault(cwd, s.destDir, s.legacyMemoryDirs)
-            : null;
-
-          if (migratedMemory) {
-            total += migratedMemory.count;
-            countMsg = `migrated from ${migratedMemory.from}`;
-          } else if (s.skipIfExists && fs.existsSync(s.destDir)) {
-            countMsg = "skipped (already exists)";
-          } else {
-            const count = copyDir(s.src, s.destDir, s.transform);
-            total += count;
-            countMsg = `${count} file${count === 1 ? "" : "s"}`;
-          }
-        } else if ("destFile" in s && s.destFile) {
-          if (!isAllowedInstallPath(cwd, s.destFile)) {
-            countMsg = "blocked (unsafe path)";
-            results.push({ label: s.label, msg: countMsg });
-            setInstallSteps([...results]);
-            continue;
-          }
-
-          if (s.skipIfExists && fs.existsSync(s.destFile)) {
-            countMsg = "skipped (already exists)";
-          } else {
-            copyFile(s.src, s.destFile);
-            total++;
-            countMsg = "1 file";
-          }
-        }
-
-        results.push({ label: s.label, msg: countMsg });
-        setInstallSteps([...results]);
-        setTotalFiles(total);
-        await sleep(50);
-      }
-
-      setMissing(missingItems);
-      setCurrentStepIdx(-1);
-      setFetchingHash(true);
-      const nextHash = await fetchNpmHash(pkg.version);
-      if (cancelled) return;
-
-      setHash(nextHash);
-      setFetchingHash(false);
-      if (!isAllowedInstallPath(cwd, plan.metaDir)) {
-        setStep("done");
-        setTimeout(() => exit(), 100);
-        return;
-      }
-
-      writeMeta(plan.metaDir, {
-        version:      pkg.version,
-        installedAt:  new Date().toISOString(),
-        source:       "AshenDulsanka/agent-arche",
-        sourceType:   "npm",
-        scope,
-        platform,
-        hash:         nextHash ?? null,
-      });
-      setStep("done");
-      setTimeout(() => exit(), 100);
-    };
-
-    runInstall();
-    return () => { cancelled = true; };
-  }, [pkg.version, plan, platform, step, exit, scope]);
-
-  return h(
-    Box,
-    { paddingX: 1, paddingY: compact ? 0 : 1, flexDirection: "column" },
-    h(
-      Frame,
-      null,
-      h(Header, { version: pkg.version, force, cwd, step, compact, showSteps: !force }),
-
-      aborted
-        ? h(Section, { eyebrow: COPY.cancelled.eyebrow, title: COPY.cancelled.title },
-            h(Text, { color: "gray" }, COPY.cancelled.message)
-          )
-        : null,
-
-      !aborted && force && updateChecking
-        ? h(Section, { eyebrow: "UPDATE", title: COPY.install.updateChecking },
-            h(Box, { marginTop: 0 },
-              h(Spinner, { type: "dots" }),
-              h(Text, { color: "gray" }, "  npm registry")
-            )
-          )
-        : null,
-
-      !aborted && !force && step === "scope"
-        ? h(ScopeStep, {
-            value: scope,
-            compact,
-            onChange: setScope,
-            onSubmit: (value: string) => {
-              if (!isInstallScope(value)) {
-                return;
-              }
-
-              setScope(value);
-              preparePlan(value);
-            },
-          })
-        : null,
-
-      !aborted && step === "existing"
-        ? h(ExistingInstallView, { platform, existing, compact })
-        : null,
-
-      !aborted && step === "up-to-date" && latestVersion
-        ? h(UpToDateView, { platform, existing, latestVersion, compact })
-        : null,
-
-      !aborted && step === "update-missing"
-        ? h(UpdateMissingView, { compact })
-        : null,
-
-      !aborted && step === "confirm" && preview && plan
-        ? h(InstallPreview, {
-            scope,
-            platform,
-            plan,
-            preview,
-            force,
-            compact,
-            onConfirm: (value: boolean) => {
-              if (value) { setStep("install"); return; }
-              abortInstall();
-            },
-          })
-        : null,
-
-      !aborted && step === "install" && plan
-        ? h(ProgressView, { plan, installSteps, currentStepIdx, fetchingHash, totalFiles, compact })
-        : null,
-
-      !aborted && step === "done" && plan
-        ? h(SuccessView, { platform, plan, totalFiles, hash, missing, force, compact })
-        : null,
-
-      h(KeyHints, { hints: getFooterHints(step) })
-    )
+  const options = Object.fromEntries(
+    Object.entries(SKILL_GROUPS).map(([group, skills]) => [
+      group,
+      skills.map((skill) => ({ ...skill })),
+    ]),
   );
+  const answer = await groupMultiselect<string>({
+    message: `Which skills should this project install? Recommended for ${INSTALL_SCOPE_META[scope].label} are checked.`,
+    options,
+    initialValues: [...defaults],
+    required: true,
+    selectableGroups: true,
+    groupSpacing: 1,
+  });
+
+  return stopOnCancel(answer) ? null : normalizeSkills(answer);
+}
+
+function sameSkills(left: readonly string[], right: readonly string[]): boolean {
+  return [...left].sort().join("\n") === [...right].sort().join("\n");
+}
+
+async function resolveUpdate(cwd: string): Promise<{ scope: InstallScope; existing: InstallMeta } | null> {
+  const status = spinner();
+  status.start("Checking the installed version");
+  const detected = detectInstalledPlatform(cwd);
+
+  if (!detected) {
+    status.stop("No installation found");
+    log.info("Run npx agent-arche install first.");
+    outro("No files were changed.");
+    return null;
+  }
+
+  const latestVersion = await fetchNpmLatestVersion();
+  if (latestVersion && detected.meta.version === latestVersion) {
+    status.stop(`Already up to date (v${latestVersion})`);
+    outro("Nothing to update.");
+    return null;
+  }
+
+  status.stop(
+    latestVersion
+      ? `Updating v${detected.meta.version} → v${latestVersion}`
+      : `Updating v${detected.meta.version}`,
+  );
+  return { scope: detected.meta.scope, existing: detected.meta };
+}
+
+async function installPlan(
+  cwd: string,
+  plan: InstallPlan,
+  scope: InstallScope,
+  version: string,
+): Promise<{ results: InstallStepResult[]; totalFiles: number; hash: string | null; missing: string[] }> {
+  const results: InstallStepResult[] = [];
+  const missing: string[] = [];
+  let totalFiles = 0;
+  const progress = spinner();
+
+  progress.start("Installing Agent Arche");
+
+  for (const step of plan.steps) {
+    progress.message(`Installing ${step.label}`);
+
+    if (!step.src || !fs.existsSync(step.src)) {
+      missing.push(step.label);
+      continue;
+    }
+
+    if ("destDir" in step && step.destDir) {
+      if (!isAllowedInstallPath(cwd, step.destDir)) {
+        results.push({ label: step.label, msg: "blocked (unsafe path)" });
+        continue;
+      }
+
+      const migrated = step.legacyMemoryDirs
+        ? migrateLegacyMemoryVault(cwd, step.destDir, step.legacyMemoryDirs)
+        : null;
+
+      if (migrated) {
+        totalFiles += migrated.count;
+        results.push({ label: step.label, msg: `migrated from ${migrated.from}` });
+      } else if (step.skipIfExists && fs.existsSync(step.destDir)) {
+        results.push({ label: step.label, msg: "kept existing files" });
+      } else {
+        const count = copyDir(step.src, step.destDir, step.transform);
+        totalFiles += count;
+        results.push({ label: step.label, msg: `${count} file${count === 1 ? "" : "s"}` });
+      }
+      continue;
+    }
+
+    if ("destFile" in step && step.destFile) {
+      if (!isAllowedInstallPath(cwd, step.destFile)) {
+        results.push({ label: step.label, msg: "blocked (unsafe path)" });
+        continue;
+      }
+
+      if (step.skipIfExists && fs.existsSync(step.destFile)) {
+        results.push({ label: step.label, msg: "kept existing file" });
+      } else {
+        copyFile(step.src, step.destFile);
+        totalFiles += 1;
+        results.push({ label: step.label, msg: "1 file" });
+      }
+    }
+  }
+
+  progress.message("Verifying package integrity");
+  const hash = await fetchNpmHash(version);
+
+  if (isAllowedInstallPath(cwd, plan.metaDir)) {
+    writeMeta(plan.metaDir, {
+      version,
+      installedAt: new Date().toISOString(),
+      source: "AshenDulsanka/agent-arche",
+      sourceType: "npm",
+      scope,
+      platform,
+      hash,
+      selectedSkills: [...plan.selectedSkills],
+    });
+  }
+
+  progress.stop(`${totalFiles} file${totalFiles === 1 ? "" : "s"} installed`);
+  return { results, totalFiles, hash, missing };
+}
+
+export async function runApp({
+  force = false,
+  yes = false,
+  scope: requestedScope,
+  selectedSkills: requestedSkills,
+}: AppOptions = {}): Promise<number> {
+  const cwd = process.cwd();
+  const pkg = readPackageJson();
+
+  intro(`${pc.bgCyan(pc.black(" agent-arche "))} ${pc.dim(`v${pkg.version}`)}`);
+
+  let scope = requestedScope;
+  let selectedSkills = requestedSkills ? [...requestedSkills] : undefined;
+  if (force) {
+    const update = await resolveUpdate(cwd);
+    if (!update) return 0;
+    scope = update.scope;
+    selectedSkills = update.existing.selectedSkills;
+  } else {
+    scope = await chooseScope(scope) ?? undefined;
+    if (!scope) return 0;
+  }
+
+  selectedSkills = await chooseSkills(scope, selectedSkills, yes) ?? undefined;
+  if (!selectedSkills || selectedSkills.length === 0) return 0;
+
+  if (scope === "orchestration") {
+    log.warn("Full orchestration uses substantially more tokens because every subagent performs separate model and tool work.");
+  }
+
+  const plan = getCodexPlan(cwd, scope, selectedSkills);
+  const existing = readMeta(plan.metaDir);
+  if (
+    existing
+    && existing.platform === platform
+    && existing.scope === scope
+    && sameSkills(existing.selectedSkills, plan.selectedSkills)
+    && !force
+  ) {
+    showExisting(existing);
+    return 0;
+  }
+
+  note(formatPlan(plan), `Install in ${relativeTarget(path.dirname(cwd), cwd)}`);
+  note(plan.selectedSkills.join(", "), "Selected skills");
+
+  if (!yes) {
+    const approved = await confirm({
+      message: force ? "Update these files?" : "Install these files?",
+      initialValue: true,
+    });
+    if (stopOnCancel(approved) || !approved) {
+      if (!isCancel(approved)) cancel("No files were changed.");
+      return 0;
+    }
+  }
+
+  const result = await installPlan(cwd, plan, scope, pkg.version);
+  if (result.results.length > 0) note(formatResults(result.results), "Installed");
+  if (result.missing.length > 0) log.warn(`Skipped missing sources: ${result.missing.join(", ")}`);
+  if (!result.hash) log.warn("Package integrity could not be fetched (offline or unpublished).");
+
+  const nextSteps = plan.nextSteps.map((step, index) => `${index + 1}. ${step}`).join("\n");
+  note(nextSteps, "Next steps");
+  outro(force ? "Agent Arche updated." : "Agent Arche is ready.");
+  return 0;
 }

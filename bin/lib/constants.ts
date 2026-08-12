@@ -1,117 +1,99 @@
 export const META_FILE = "agent-arche.json";
 
-export const PLATFORM_META = {
-  codex: {
-    name: "Codex",
-    short: "Codex",
-    accent: "cyan",
-    destination: ".agents/skills/ with optional .codex/ hooks and memory/",
-    capabilities: [
-      "Shared Codex skills with progressive disclosure",
-      "Optional safety hooks, runtime config, and repo-local memory",
-    ],
-    note: "Built for MCP-enabled Codex sessions.",
-  },
-} as const;
-
 export const INSTALL_SCOPE_META = {
-  "skills-memory": {
-    label: "Skills + hooks + memory (Recommended)",
-    accent: "magenta",
-    summary: "Install shared skills, safety hooks, runtime config, and root memory.",
-    details: [
-      "No custom-agent, instruction, rule, or root AGENTS.md templates",
-      "Hooks remind the assistant to update memory before finishing",
-    ],
-  },
   skills: {
     label: "Skills only",
-    accent: "cyan",
-    summary: "Install only shared skills into .agents/skills/.",
+    summary: "Selected skills only. Lowest runtime overhead.",
     details: [
-      "No hooks, runtime config, or memory",
-      "Great for lightweight skill updates",
+      "No hooks, context compiler, memory, or subagents",
+      "Best when the project already has its own agent setup",
+    ],
+  },
+  "skills-hooks": {
+    label: "Skills + hooks",
+    summary: "Selected skills, lean safety hooks, and deterministic context tools.",
+    details: [
+      "No project memory and no automatic subagent orchestration",
+      "Good for established projects that want lightweight guardrails",
+    ],
+  },
+  "skills-memory": {
+    label: "Skills + hooks + memory (Recommended)",
+    summary: "Adds indexed durable memory without reading the full vault.",
+    details: [
+      "Context compiler retrieves only task-relevant memory cards",
+      "Routine work does not create memory notes",
+    ],
+  },
+  orchestration: {
+    label: "Full orchestration (High usage)",
+    summary: "Orchestrator and specialized subagents. Costs substantially more usage.",
+    details: [
+      "Includes selected skills, hooks, indexed memory, and custom Codex agents",
+      "Each subagent performs separate model and tool work, increasing token usage",
     ],
   },
 } as const;
 
-export const STEP_ORDER = ["scope", "preview", "install", "done"] as const;
+export const SKILL_GROUPS = {
+  "Core engineering": [
+    { value: "implement", label: "Implement", hint: "code changes end to end" },
+    { value: "diagnosing-bugs", label: "Diagnosing bugs", hint: "root-cause workflow" },
+    { value: "tdd", label: "TDD", hint: "behavior-first tests" },
+    { value: "code-review", label: "Code review", hint: "correctness and spec gate" },
+    { value: "karpathy-guidelines", label: "Karpathy guidelines", hint: "surgical coding guardrails" },
+  ],
+  "Security and backend": [
+    { value: "security-review", label: "Security review", hint: "trust-boundary changes" },
+    { value: "postgres-patterns", label: "PostgreSQL patterns", hint: "Postgres-specific work" },
+  ],
+  "Frontend and growth": [
+    { value: "design", label: "Design", hint: "UI, UX, motion, and audits" },
+    { value: "seo", label: "SEO", hint: "crawlability and search performance" },
+  ],
+  "Planning and architecture": [
+    { value: "project-startup", label: "Project startup", hint: "new or unconfigured projects only" },
+    { value: "to-spec", label: "Conversation to spec", hint: "synthesize an approved spec" },
+    { value: "to-tickets", label: "Spec to tickets", hint: "split work into vertical tickets" },
+    { value: "grill-with-docs", label: "Grill with docs", hint: "pressure-test plans" },
+    { value: "codebase-design", label: "Codebase design", hint: "deep modules and seams" },
+    { value: "improve-codebase-architecture", label: "Architecture review", hint: "find high-leverage improvements" },
+  ],
+  "Delivery and communication": [
+    { value: "git", label: "Git", hint: "branches, commits, and PRs" },
+    { value: "handoff", label: "Handoff", hint: "compact continuation context" },
+    { value: "caveman", label: "Caveman", hint: "explicit terse response mode" },
+  ],
+} as const;
 
-export type Platform = keyof typeof PLATFORM_META;
+const CORE_DEFAULT_SKILLS = [
+  "implement",
+  "diagnosing-bugs",
+  "tdd",
+  "code-review",
+  "karpathy-guidelines",
+  "security-review",
+  "git",
+  "handoff",
+] as const;
+
+export const DEFAULT_SKILLS_BY_SCOPE = {
+  skills: [...CORE_DEFAULT_SKILLS],
+  "skills-hooks": [...CORE_DEFAULT_SKILLS],
+  "skills-memory": [...CORE_DEFAULT_SKILLS, "project-startup"],
+  orchestration: [
+    ...CORE_DEFAULT_SKILLS,
+    "project-startup",
+    "to-spec",
+    "to-tickets",
+    "grill-with-docs",
+    "codebase-design",
+    "improve-codebase-architecture",
+  ],
+} as const satisfies Record<InstallScope, readonly string[]>;
+
+export const ORCHESTRATION_SKILL = "orchestrate";
+export const SELECTABLE_SKILLS = Object.values(SKILL_GROUPS).flatMap((group) => group.map((skill) => skill.value));
+
+export type Platform = "codex";
 export type InstallScope = keyof typeof INSTALL_SCOPE_META;
-export type Step = (typeof STEP_ORDER)[number];
-
-export const STEP_LABELS = {
-  scope: "Scope",
-  preview: "Preview",
-  install: "Install",
-  done: "Done",
-} as const;
-
-export const PRIMARY_COMMANDS = {
-  codex: "codex",
-} as const;
-
-export const COPY = {
-  app: {
-    name: "agent-arche",
-    tagline: "Codex skills, hooks, and project memory for terminal-first teams.",
-  },
-  scope: {
-    eyebrow: "Install mode",
-    title: "Choose what you want to install.",
-  },
-  preview: {
-    eyebrow: "Preview",
-    includes: "What this setup includes",
-    targets: "Install targets",
-    missingWarning: "Missing sources will be skipped",
-    confirmHints: "Enter/Y confirm  N cancel",
-  },
-  existing: {
-    eyebrow: "Detected",
-    nextAction: "npx agent-arche update",
-    noFilesChanged: "No files were changed.",
-    latestTitle: "agent-arche is already on the latest version for this project.",
-    latestMessage: "No update is required.",
-    missingTitle: "No existing agent-arche installation was detected.",
-    missingMessage: "Run npx agent-arche install to set up Codex first.",
-  },
-  install: {
-    eyebrow: "Installing",
-    title: "Applying the package set to your repository.",
-    completed: "Completed",
-    hashFetching: "Fetching integrity hash from npm...",
-    updateChecking: "Checking for a newer version on npm...",
-  },
-  success: {
-    eyebrow: "Ready",
-    integrity: "Integrity",
-    integrityCommand: "npm view agent-arche dist.integrity",
-    integrityOnline: "Fetched from npm registry",
-    integrityOffline: "Unavailable offline / unpublished",
-    nextSteps: "Next steps",
-    skippedNote: "Skipped because source files were not found",
-  },
-  cancelled: {
-    eyebrow: "Cancelled",
-    title: "Installation cancelled before any files were changed.",
-    message: "You can run the command again whenever you're ready.",
-  },
-  labels: {
-    installScope: "Install scope",
-    platform: "Platform",
-    destination: "Destination",
-    installUnits: "Install units",
-    metadata: "Metadata",
-    filesWritten: "Files written",
-    primaryCommand: "Primary next command",
-    integrity: "Integrity",
-    installedVersion: "Installed version",
-    npmLatestVersion: "NPM latest",
-    installedAt: "Installed at",
-    nextAction: "Next action",
-    completedTargets: "Completed targets",
-    filesCopied: "Files copied so far",
-  },
-};

@@ -1,0 +1,80 @@
+# Architecture
+
+Agent Arche separates deterministic context preparation from model judgment.
+
+```mermaid
+flowchart TB
+    CLI[Installer] --> META[.codex/agent-arche.json]
+    CLI --> SKILLS[Selected skills only]
+    CLI --> HOOKS[Optional lean hooks]
+    CLI --> MEMORY[Optional durable memory]
+    CLI --> AGENTS[Optional custom agents]
+
+    REQUEST[User request] --> SESSION[Primary Codex thread]
+    HOOKS --> SESSION
+    SESSION --> COMPILER[Deterministic context compiler]
+    MEMORY --> COMPILER
+    COMPILER --> PACK[Budgeted context pack]
+    PACK --> SESSION
+    SKILLS --> SESSION
+    SESSION -->|full scope and divisible task| AGENTS
+    AGENTS --> RESULTS[Bounded evidence summaries]
+    RESULTS --> SESSION
+```
+
+## Design boundaries
+
+- Installation is selective. Uninstalled skill descriptions cannot consume routing context.
+- SessionStart remains fixed-size and does not preload skill bodies.
+- Context filtering, ranking, aggregation, and breadcrumb harvesting happen in Node before model input.
+- Model judgment handles interpretation, implementation, review, and final synthesis.
+- Memory history grows on disk without growing startup context.
+- Multi-agent work is opt-in, capped, and used only for independent or context-noisy work.
+
+## Scope composition
+
+```text
+skills
+  selected skills + canonical metadata
+
+skills-hooks
+  skills + config + SessionStart + PreToolUse + context compiler
+
+skills-memory
+  skills-hooks + durable memory vault
+
+orchestration
+  skills-memory + orchestrate skill + project-scoped custom agents
+```
+
+Metadata always uses `.codex/agent-arche.json`. Skills remain in `.agents/skills/`, the Codex-compatible shared skill location.
+
+## Skill selection profiles
+
+The installer uses scope-aware recommendations only as checkbox defaults:
+
+- Skills-only and Skills + hooks start with the focused engineering core.
+- Memory also checks `project-startup`, which the user can deselect for an established project.
+- Full orchestration also checks planning and architecture skills used by complex delegated work.
+- Frontend, SEO, and PostgreSQL skills remain unchecked until the user selects them because scope alone does not reveal the project stack.
+
+Every checkbox remains editable. Explicit `--select-skills` input replaces the profile, while `--yes` accepts it. Full orchestration adds its non-selectable `orchestrate` routing skill after selection.
+
+Each skill includes `agents/openai.yaml` for UI presentation. That optional file stays short and does not replace the `SKILL.md` name and description used for progressive-disclosure routing.
+
+## Context budgets
+
+The compiler defaults to an estimated 1,200-token retrieval budget, at most six results, and a maximum configurable budget of 8,000 tokens. Ranking favors exact task phrases, file/path matches, titles, metadata, and explicit path hints. The agent may read primary source after retrieval when the task requires deeper evidence.
+
+The compiler is a retrieval aid, not a truth oracle. Source code, tests, current configuration, and live behavior remain authoritative.
+
+## Token and quality controls
+
+- Only installed skill names, descriptions, and paths enter initial skill discovery.
+- Skill bodies stay below 500 lines; longer detail is routed into conditional references.
+- Long references expose an early contents map so the agent can load the right section.
+- Deterministic indexing, ranking, filtering, and reduction run outside model context.
+- Session history, reviews, archives, and `_MOC.md` remain cold by default.
+- Full orchestration is explicit, capped, and reserved for work that divides cleanly.
+
+These controls follow the [official skill progressive-disclosure guidance](https://learn.chatgpt.com/docs/build-skills), [Codex subagent guidance](https://learn.chatgpt.com/docs/agent-configuration/subagents), and [OpenAI lean-prompt guidance](https://developers.openai.com/api/docs/guides/latest-model).

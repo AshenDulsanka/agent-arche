@@ -1,0 +1,4 @@
+interface:
+  display_name: "Full Orchestration"
+  short_description: "Route divisible work through specialized subagents"
+  default_prompt: "Use $orchestrate to delegate this divisible task to the smallest useful agent team."

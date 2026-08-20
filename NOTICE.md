@@ -12,5 +12,8 @@ Agent Arche is an original integration that adapts ideas and, in some skill pack
 | Karpathy-style coding guardrails and PostgreSQL patterns | [Akindu23/my-agent-skills](https://github.com/Akindu23/my-agent-skills) |
 | CLI prompt and color libraries | [Clack](https://github.com/bombshell-dev/clack), [picocolors](https://github.com/alexeyraspopov/picocolors) |
 | Codex hook, custom-agent, and subagent configuration behavior | [Official OpenAI Codex documentation](https://learn.chatgpt.com/docs/agent-configuration/subagents) |
+| Bundled `shopify-admin`, `shopify-liquid`, `shopify-custom-data`, `shopify-use-shopify-cli`, and `shopify-dev` skills | [Shopify AI Toolkit](https://github.com/Shopify/shopify-ai-toolkit), v1.7.0 snapshot at `51a7d6cbed88fec14658f4e2d243dcdab128cf77`, copyright Shopify Inc., MIT License in `licenses/SHOPIFY_AI_TOOLKIT_LICENSE`; unsupported cross-agent `compatibility` and `hooks` frontmatter removed for Codex validation |
 
 The installed versions are intentionally adapted for selective installation, bounded context retrieval, and opt-in orchestration; they should not be treated as verbatim upstream distributions. See each linked repository for its current license and original authorship. Agent Arche itself is distributed under the repository's MIT license.
+
+The five Shopify skills listed above preserve the cited snapshot's instructions, scripts, assets, and telemetry notices; only unsupported cross-agent frontmatter was removed. Their scripts may send usage telemetry to Shopify as disclosed inside each skill; set `OPT_OUT_INSTRUMENTATION=true` to opt out.

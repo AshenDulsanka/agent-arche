@@ -21,6 +21,9 @@ Route work to the narrowest agent:
 - `implementation_worker`: one bounded implementation slice.
 - `reviewer`: correctness, security, regression, and test review.
 - `test_runner`: focused validation and reduced failure evidence.
+- `klaviyo_specialist`: Klaviyo account, flow, profile, event, catalog, template, Customer Agent, and recommendation evidence when installed.
+- `shopify_specialist`: Shopify API, theme, catalog, tracking, and webhook evidence when installed.
+- `django_integration_specialist`: Django integration endpoints, persistence, jobs, reconciliation, and tests when installed.
 
 Start with no more than three concurrent subagents. Prefer parallel read-heavy work. Sequence exploration before implementation and implementation before final review when outputs depend on each other.
 

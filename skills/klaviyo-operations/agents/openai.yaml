@@ -1,0 +1,4 @@
+interface:
+  display_name: "Klaviyo Operations"
+  short_description: "Evidence-first Klaviyo support and diagnostics"
+  default_prompt: "Use $klaviyo-operations to trace this Klaviyo issue and identify the first broken boundary."

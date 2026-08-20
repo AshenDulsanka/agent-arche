@@ -1,0 +1,4 @@
+interface:
+  display_name: "Klaviyo Product Recommendations"
+  short_description: "Trace product feed and recommendation failures"
+  default_prompt: "Use $klaviyo-product-recommendations to diagnose why these customers received the wrong products."

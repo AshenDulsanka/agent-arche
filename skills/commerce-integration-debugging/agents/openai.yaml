@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commerce Integration Debugging"
+  short_description: "Trace Shopify, Klaviyo, and Django end to end"
+  default_prompt: "Use $commerce-integration-debugging to find where this customer journey breaks across the stack."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Klaviyo Customer Agent"
+  short_description: "Build and debug shopper-facing Klaviyo skills"
+  default_prompt: "Use $klaviyo-customer-agent to test why this shopper request is routing incorrectly."

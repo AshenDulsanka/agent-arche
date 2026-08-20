@@ -1,0 +1,4 @@
+interface:
+  display_name: "Django Commerce Backend"
+  short_description: "Safe Shopify and Klaviyo backend integrations"
+  default_prompt: "Use $django-commerce-backend to implement this Shopify or Klaviyo integration safely in Django."

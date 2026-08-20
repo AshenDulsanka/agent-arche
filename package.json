@@ -1,6 +1,6 @@
 {
   "name": "agent-arche",
-  "version": "1.3.9",
+  "version": "1.3.10",
   "description": "Selective Codex skills, lean hooks, indexed memory, and optional multi-agent orchestration",
   "keywords": [
     "codex",
@@ -8,7 +8,11 @@
     "hooks",
     "memory",
     "orchestration",
-    "subagents"
+    "subagents",
+    "shopify",
+    "klaviyo",
+    "django",
+    "commerce"
   ],
   "homepage": "https://github.com/AshenDulsanka/agent-arche#readme",
   "repository": {
@@ -37,7 +41,9 @@
     "skills/",
     "memory/",
     "orchestration/",
+    "commerce/",
     "docs/",
+    "licenses/",
     "NOTICE.md",
     "dist/"
   ],

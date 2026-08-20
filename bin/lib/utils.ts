@@ -5,9 +5,11 @@ import { fileURLToPath } from "url";
 import {
   INSTALL_SCOPE_META,
   META_FILE,
-  SELECTABLE_SKILLS,
+  SETUP_PROFILE_META,
+  selectableSkillsForProfile,
   type InstallScope,
   type Platform,
+  type SetupProfile,
 } from "./constants.js";
 import type {
   ContentTransform,
@@ -148,15 +150,20 @@ export function readMeta(dir: string): InstallMeta | null {
     const scope: InstallScope = rawScope && rawScope in INSTALL_SCOPE_META
       ? rawScope as InstallScope
       : "skills-memory";
+    const rawProfile = data.profile as string | undefined;
+    const profile: SetupProfile = rawProfile && rawProfile in SETUP_PROFILE_META
+      ? rawProfile as SetupProfile
+      : "general";
     const selectedSkills = Array.isArray(data.selectedSkills)
       ? data.selectedSkills.filter((skill): skill is string => typeof skill === "string")
-      : [...SELECTABLE_SKILLS];
+      : selectableSkillsForProfile(profile);
     return {
       version: data.version,
       installedAt: typeof data.installedAt === "string" ? data.installedAt : "Unknown",
       source: typeof data.source === "string" ? data.source : "Unknown",
       sourceType: typeof data.sourceType === "string" ? data.sourceType : "Unknown",
       scope,
+      profile,
       platform: "codex",
       hash: typeof data.hash === "string" ? data.hash : null,
       selectedSkills,

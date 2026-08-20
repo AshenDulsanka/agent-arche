@@ -1,5 +1,18 @@
 export const META_FILE = "agent-arche.json";
 
+export const SETUP_PROFILE_META = {
+  general: {
+    label: "General Engineering",
+    summary: "The current technology-agnostic engineering setup.",
+  },
+  commerce: {
+    label: "Commerce Stack",
+    summary: "Shopify + Klaviyo + Django skills, integrations, and specialists.",
+  },
+} as const;
+
+export type SetupProfile = keyof typeof SETUP_PROFILE_META;
+
 export const INSTALL_SCOPE_META = {
   skills: {
     label: "Skills only",
@@ -35,7 +48,7 @@ export const INSTALL_SCOPE_META = {
   },
 } as const;
 
-export const SKILL_GROUPS = {
+const GENERAL_SKILL_GROUPS = {
   "Core engineering": [
     { value: "implement", label: "Implement", hint: "code changes end to end" },
     { value: "diagnosing-bugs", label: "Diagnosing bugs", hint: "root-cause workflow" },
@@ -65,6 +78,28 @@ export const SKILL_GROUPS = {
     { value: "caveman", label: "Caveman", hint: "explicit terse response mode" },
   ],
 } as const;
+
+const COMMERCE_SKILL_GROUPS = {
+  ...GENERAL_SKILL_GROUPS,
+  "Klaviyo and commerce operations": [
+    { value: "klaviyo-operations", label: "Klaviyo operations", hint: "flows, profiles, events, and account diagnostics" },
+    { value: "klaviyo-product-recommendations", label: "Klaviyo product recommendations", hint: "email, feed, catalog, and NBP troubleshooting" },
+    { value: "klaviyo-customer-agent", label: "Klaviyo Customer Agent", hint: "skills, tools, guidance, and shopper support" },
+    { value: "commerce-integration-debugging", label: "Commerce integration debugging", hint: "trace Shopify, Klaviyo, and Django end to end" },
+    { value: "django-commerce-backend", label: "Django commerce backend", hint: "safe APIs, webhooks, jobs, and persistence" },
+  ],
+  "Shopify AI Toolkit (Official)": [
+    { value: "shopify-admin", label: "Shopify Admin GraphQL", hint: "official Shopify API skill" },
+    { value: "shopify-liquid", label: "Shopify Liquid", hint: "official Shopify theme skill" },
+    { value: "shopify-custom-data", label: "Shopify custom data", hint: "official metafields and metaobjects skill" },
+    { value: "shopify-use-shopify-cli", label: "Shopify CLI", hint: "official Shopify CLI workflow skill" },
+    { value: "shopify-dev", label: "Shopify developer docs", hint: "official cross-API documentation skill" },
+  ],
+} as const;
+
+export function skillGroupsForProfile(profile: SetupProfile) {
+  return profile === "commerce" ? COMMERCE_SKILL_GROUPS : GENERAL_SKILL_GROUPS;
+}
 
 export const PROJECT_TYPE_META = {
   "full-stack": {
@@ -119,6 +154,22 @@ const PROJECT_STAGE_RECOMMENDATIONS = {
   greenfield: ["project-startup"],
 } as const satisfies Record<ProjectStage, readonly string[]>;
 
+const PROFILE_RECOMMENDATIONS = {
+  general: [],
+  commerce: [
+    "klaviyo-operations",
+    "klaviyo-product-recommendations",
+    "klaviyo-customer-agent",
+    "commerce-integration-debugging",
+    "django-commerce-backend",
+    "shopify-admin",
+    "shopify-liquid",
+    "shopify-custom-data",
+    "shopify-use-shopify-cli",
+    "shopify-dev",
+  ],
+} as const satisfies Record<SetupProfile, readonly string[]>;
+
 const SCOPE_RECOMMENDATIONS = {
   skills: [],
   "skills-hooks": [],
@@ -133,12 +184,14 @@ const SCOPE_RECOMMENDATIONS = {
 } as const satisfies Record<InstallScope, readonly string[]>;
 
 export function recommendedSkills(
+  profile: SetupProfile,
   scope: InstallScope,
   projectType: ProjectType,
   projectStage: ProjectStage,
 ): string[] {
   return [...new Set([
     ...CORE_RECOMMENDED_SKILLS,
+    ...PROFILE_RECOMMENDATIONS[profile],
     ...PROJECT_TYPE_RECOMMENDATIONS[projectType],
     ...PROJECT_STAGE_RECOMMENDATIONS[projectStage],
     ...SCOPE_RECOMMENDATIONS[scope],
@@ -146,7 +199,9 @@ export function recommendedSkills(
 }
 
 export const ORCHESTRATION_SKILL = "orchestrate";
-export const SELECTABLE_SKILLS = Object.values(SKILL_GROUPS).flatMap((group) => group.map((skill) => skill.value));
+export function selectableSkillsForProfile(profile: SetupProfile): string[] {
+  return Object.values(skillGroupsForProfile(profile)).flatMap((group) => group.map((skill) => skill.value));
+}
 
 export type Platform = "codex";
 export type InstallScope = keyof typeof INSTALL_SCOPE_META;

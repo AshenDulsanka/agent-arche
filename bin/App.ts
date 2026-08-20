@@ -17,13 +17,15 @@ import {
   ORCHESTRATION_SKILL,
   PROJECT_STAGE_META,
   PROJECT_TYPE_META,
-  SELECTABLE_SKILLS,
-  SKILL_GROUPS,
+  SETUP_PROFILE_META,
   recommendedSkills,
+  selectableSkillsForProfile,
+  skillGroupsForProfile,
   type InstallScope,
   type Platform,
   type ProjectStage,
   type ProjectType,
+  type SetupProfile,
 } from "./lib/constants.js";
 import { getCodexPlan } from "./lib/plans.js";
 import { skillMultiselect, skillSelectorCancel } from "./lib/skill-selector.js";
@@ -48,6 +50,7 @@ export interface AppOptions {
   force?: boolean;
   yes?: boolean;
   scope?: InstallScope;
+  profile?: SetupProfile;
   projectType?: ProjectType;
   projectStage?: ProjectStage;
   selectedSkills?: readonly string[];
@@ -87,9 +90,25 @@ function formatResults(results: InstallStepResult[]): string {
 }
 
 function showExisting(existing: InstallMeta): void {
-  log.warn(`Agent Arche v${existing.version} is already installed with this scope.`);
+  log.warn(`Agent Arche v${existing.version} is already installed with this profile and scope.`);
   note("Run npx agent-arche update to replace the installed files.", "Existing installation");
   outro("No files were changed.");
+}
+
+async function chooseProfile(initialProfile?: SetupProfile): Promise<SetupProfile | null> {
+  if (initialProfile) return initialProfile;
+
+  const answer = await select<SetupProfile>({
+    message: "Which setup profile do you want?",
+    initialValue: "general",
+    options: Object.entries(SETUP_PROFILE_META).map(([value, meta]) => ({
+      value: value as SetupProfile,
+      label: meta.label,
+      hint: meta.summary,
+    })),
+  });
+
+  return stopOnCancel(answer) ? null : answer;
 }
 
 async function chooseScope(initialScope?: InstallScope): Promise<InstallScope | null> {
@@ -136,22 +155,24 @@ async function chooseProjectStage(initialStage?: ProjectStage): Promise<ProjectS
   return stopOnCancel(answer) ? null : answer;
 }
 
-function normalizeSkills(skills: readonly string[]): string[] {
-  if (skills.includes("*")) return [...SELECTABLE_SKILLS];
-  const allowed = new Set<string>(SELECTABLE_SKILLS);
+function normalizeSkills(profile: SetupProfile, skills: readonly string[]): string[] {
+  const selectableSkills = selectableSkillsForProfile(profile);
+  if (skills.includes("*")) return selectableSkills;
+  const allowed = new Set<string>(selectableSkills);
   return [...new Set(skills.filter((skill) => allowed.has(skill)))];
 }
 
 async function chooseSkills(
+  profile: SetupProfile,
   scope: InstallScope,
   projectType: ProjectType,
   projectStage: ProjectStage,
   initialSkills?: readonly string[],
   yes = false,
 ): Promise<string[] | null> {
-  const defaults = recommendedSkills(scope, projectType, projectStage);
+  const defaults = recommendedSkills(profile, scope, projectType, projectStage);
   if (initialSkills) {
-    const normalized = normalizeSkills(initialSkills);
+    const normalized = normalizeSkills(profile, initialSkills);
     const unknown = initialSkills.filter((skill) => (
       skill !== "*"
       && !(scope === "orchestration" && skill === ORCHESTRATION_SKILL)
@@ -164,7 +185,7 @@ async function chooseSkills(
 
   const answer = await skillMultiselect({
     message: `Select skills for ${INSTALL_SCOPE_META[scope].label}`,
-    items: Object.entries(SKILL_GROUPS).flatMap(([group, skills]) => (
+    items: Object.entries(skillGroupsForProfile(profile)).flatMap(([group, skills]) => (
       skills.map((skill) => ({ ...skill, group }))
     )),
     initialSelected: defaults,
@@ -176,14 +197,14 @@ async function chooseSkills(
     cancel("No files were changed.");
     return null;
   }
-  return normalizeSkills(answer as string[]);
+  return normalizeSkills(profile, answer as string[]);
 }
 
 function sameSkills(left: readonly string[], right: readonly string[]): boolean {
   return [...left].sort().join("\n") === [...right].sort().join("\n");
 }
 
-async function resolveUpdate(cwd: string): Promise<{ scope: InstallScope; existing: InstallMeta } | null> {
+async function resolveUpdate(cwd: string): Promise<{ profile: SetupProfile; scope: InstallScope; existing: InstallMeta } | null> {
   const status = spinner();
   status.start("Checking the installed version");
   const detected = detectInstalledPlatform(cwd);
@@ -207,12 +228,13 @@ async function resolveUpdate(cwd: string): Promise<{ scope: InstallScope; existi
       ? `Updating v${detected.meta.version} → v${latestVersion}`
       : `Updating v${detected.meta.version}`,
   );
-  return { scope: detected.meta.scope, existing: detected.meta };
+  return { profile: detected.meta.profile, scope: detected.meta.scope, existing: detected.meta };
 }
 
 async function installPlan(
   cwd: string,
   plan: InstallPlan,
+  profile: SetupProfile,
   scope: InstallScope,
   version: string,
 ): Promise<{ results: InstallStepResult[]; totalFiles: number; hash: string | null; missing: string[] }> {
@@ -280,6 +302,7 @@ async function installPlan(
       source: "AshenDulsanka/agent-arche",
       sourceType: "npm",
       scope,
+      profile,
       platform,
       hash,
       selectedSkills: [...plan.selectedSkills],
@@ -294,6 +317,7 @@ export async function runApp({
   force = false,
   yes = false,
   scope: requestedScope,
+  profile: requestedProfile,
   projectType: requestedProjectType,
   projectStage: requestedProjectStage,
   selectedSkills: requestedSkills,
@@ -304,6 +328,7 @@ export async function runApp({
   intro(`${pc.bgCyan(pc.black(" agent-arche "))} ${pc.dim(`v${pkg.version}`)}`);
 
   let scope = requestedScope;
+  let profile = requestedProfile;
   let projectType = requestedProjectType;
   let projectStage = requestedProjectStage;
   let selectedSkills = requestedSkills ? [...requestedSkills] : undefined;
@@ -311,8 +336,11 @@ export async function runApp({
     const update = await resolveUpdate(cwd);
     if (!update) return 0;
     scope = update.scope;
+    profile = update.profile;
     selectedSkills = update.existing.selectedSkills;
   } else {
+    profile = await chooseProfile(profile) ?? undefined;
+    if (!profile) return 0;
     scope = await chooseScope(scope) ?? undefined;
     if (!scope) return 0;
     if (!selectedSkills) {
@@ -325,19 +353,25 @@ export async function runApp({
 
   projectType ??= "general";
   projectStage ??= "established";
-  selectedSkills = await chooseSkills(scope, projectType, projectStage, selectedSkills, yes) ?? undefined;
+  profile ??= "general";
+  selectedSkills = await chooseSkills(profile, scope, projectType, projectStage, selectedSkills, yes) ?? undefined;
   if (!selectedSkills || selectedSkills.length === 0) return 0;
 
   if (scope === "orchestration") {
     log.warn("Full orchestration uses substantially more tokens because every subagent performs separate model and tool work.");
   }
 
-  const plan = getCodexPlan(cwd, scope, selectedSkills);
+  if (profile === "commerce" && selectedSkills.some((skill) => skill.startsWith("shopify-"))) {
+    log.warn("Official Shopify skill scripts send usage telemetry to Shopify. Set OPT_OUT_INSTRUMENTATION=true to opt out.");
+  }
+
+  const plan = getCodexPlan(cwd, profile, scope, selectedSkills);
   const existing = readMeta(plan.metaDir);
   if (
     existing
     && existing.platform === platform
     && existing.scope === scope
+    && existing.profile === profile
     && sameSkills(existing.selectedSkills, plan.selectedSkills)
     && !force
   ) {
@@ -347,6 +381,7 @@ export async function runApp({
 
   note(formatPlan(plan), `Install in ${relativeTarget(path.dirname(cwd), cwd)}`);
   note(plan.selectedSkills.join(", "), "Selected skills");
+  note(SETUP_PROFILE_META[profile].label, "Setup profile");
 
   if (!yes) {
     const approved = await confirm({
@@ -359,7 +394,7 @@ export async function runApp({
     }
   }
 
-  const result = await installPlan(cwd, plan, scope, pkg.version);
+  const result = await installPlan(cwd, plan, profile, scope, pkg.version);
   if (result.results.length > 0) note(formatResults(result.results), "Installed");
   if (result.missing.length > 0) log.warn(`Skipped missing sources: ${result.missing.join(", ")}`);
   if (!result.hash) log.warn("Package integrity could not be fetched (offline or unpublished).");

@@ -1,4 +1,4 @@
-import type { InstallScope, Platform } from "./constants.js";
+import type { InstallScope, Platform, SetupProfile } from "./constants.js";
 
 export type ContentTransform = (content: string, srcPath: string) => string;
 
@@ -37,6 +37,7 @@ export interface InstallMeta {
   source: string;
   sourceType: string;
   scope: InstallScope;
+  profile: SetupProfile;
   platform: Platform;
   hash: string | null;
   selectedSkills: string[];

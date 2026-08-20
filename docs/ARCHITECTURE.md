@@ -5,6 +5,7 @@ Agent Arche separates deterministic context preparation from model judgment.
 ```mermaid
 flowchart TB
     CLI[Installer] --> META[.codex/agent-arche.json]
+    CLI --> PROFILE[General Engineering or Commerce Stack]
     CLI --> SKILLS[Selected skills only]
     CLI --> HOOKS[Optional lean hooks]
     CLI --> MEMORY[Optional durable memory]
@@ -51,22 +52,22 @@ Metadata always uses `.codex/agent-arche.json`. Skills remain in `.agents/skills
 
 ## Skill selection profiles
 
-The installer combines three inputs into checkbox defaults:
+The installer combines four inputs into checkbox defaults:
 
 ```text
-installation scope + project type + project stage -> recommended skills
+setup profile + installation scope + project type + project stage -> recommended skills
 ```
 
-- Skills-only and Skills + hooks start with the focused engineering core.
-- Memory also checks `project-startup`, which the user can deselect for an established project.
+- Every scope starts with the focused engineering core.
+- Commerce Stack adds its Klaviyo, Shopify, Django, and cross-system workflows.
 - Full orchestration also checks planning and architecture skills used by complex delegated work.
 - Project type selects the relevant frontend/backend domain workflows.
 - Project stage adds `project-startup` only for greenfield projects.
 - The user can still select or deselect every recommendation before installation.
 
-Every checkbox remains editable. Explicit `--select-skills` input replaces the profile, while `--yes` accepts it. Full orchestration adds its non-selectable `orchestrate` routing skill after selection.
+Every checkbox remains editable. Explicit `--select-skills` input replaces the recommendations for the selected setup profile, while `--yes` accepts them. Full orchestration adds its non-selectable `orchestrate` routing skill after selection.
 
-Each skill includes `agents/openai.yaml` for UI presentation. That optional file stays short and does not replace the `SKILL.md` name and description used for progressive-disclosure routing.
+Agent Arche-authored skills include `agents/openai.yaml` for UI presentation. That optional file stays short and does not replace the `SKILL.md` name and description used for progressive-disclosure routing. Vendored official skills retain their upstream structure.
 
 ## Context budgets
 

@@ -8,7 +8,12 @@ A selective Codex engineering harness: install only the skills a project needs, 
 npx agent-arche install
 ```
 
-The interactive CLI first selects an installation scope, then asks for the project type and stage. Those answers determine which grouped skills are initially checked; the user can still select or deselect anything before installation.
+The interactive CLI first selects a setup profile, then an installation scope, project type, and project stage. Those answers determine which grouped skills are initially checked; the user can still select or deselect anything before installation.
+
+| Setup profile | Purpose |
+|---|---|
+| General Engineering | The existing technology-agnostic engineering harness |
+| Commerce Stack | Shopify + Klaviyo + Django skills, integrations, and orchestration specialists |
 
 | Scope | Installs | Runtime posture |
 |---|---|---|
@@ -19,25 +24,27 @@ The interactive CLI first selects an installation scope, then asks for the proje
 
 > **Usage warning:** Full orchestration costs substantially more usage than a comparable single-agent run. Every subagent performs separate model and tool work. Choose it only when independent workstreams, noisy exploration, tests, or review benefit from delegation.
 
-The installation metadata always lives at `.codex/agent-arche.json`, including Skills-only installs.
+The installation metadata always lives at `.codex/agent-arche.json`, including Skills-only installs. **Commerce Stack Skills-only does not install or configure MCP servers.**
 
 ### Non-interactive examples
 
 ```bash
-npx agent-arche --skills-only --select-skills=implement,git --yes
-npx agent-arche --skills-hooks --project-type=backend --project-stage=established --yes
-npx agent-arche --skills-hooks --select-skills=implement,design,code-review --yes
-npx agent-arche --skills-memory --all-skills --yes
-npx agent-arche --orchestration --select-skills=implement,security-review --yes
+npx agent-arche --profile=general --skills-only --select-skills=implement,git --yes
+npx agent-arche --profile=commerce --skills-hooks --project-type=full-stack --project-stage=established --yes
+npx agent-arche --profile=general --skills-hooks --project-type=backend --project-stage=established --yes
+npx agent-arche --profile=general --skills-hooks --select-skills=implement,design,code-review --yes
+npx agent-arche --profile=commerce --skills-memory --all-skills --yes
+npx agent-arche --profile=general --orchestration --select-skills=implement,security-review --yes
 ```
 
-The skill step opens with recommendations computed from the installation scope, project type, and project stage. Users can deselect any recommendation or select additional frontend, backend, planning, architecture, and delivery skills before installation. `--yes` accepts the computed recommendations when no explicit skill selection is supplied.
+The skill step opens with recommendations computed from the setup profile, installation scope, project type, and project stage. Users can deselect any recommendation or select additional skills before installation. `--yes` accepts the computed recommendations when no explicit skill selection is supplied.
 
 The selector keeps a fixed-height, cursor-following viewport. Use `↑`/`↓` to move, `←`/`→` to collapse or expand groups, `Space` to toggle a skill or group, `Enter` to confirm, and `Esc` to cancel.
 
 | Input | Recommendation effect |
 |---|---|
 | Every project | Core implementation, diagnosis, testing, review, security, Git, and handoff skills |
+| Commerce Stack | Adds Klaviyo operations and recommendation workflows, Django commerce integration, end-to-end debugging, and selected official Shopify skills |
 | Full-stack | Adds frontend design, SEO, and PostgreSQL workflows |
 | Backend | Adds PostgreSQL workflows; leaves frontend skills unchecked |
 | Frontend | Adds design and SEO workflows; leaves backend-specific skills unchecked |
@@ -46,7 +53,7 @@ The selector keeps a fixed-height, cursor-following viewport. Use `↑`/`↓` to
 | Established | Leaves `project-startup` unchecked |
 | Full orchestration | Adds planning and architecture workflows used by delegated work |
 
-These are checkbox defaults, not locked bundles. Use `--project-type` and `--project-stage` for non-interactive profile selection, or `--select-skills` to override recommendations with an exact set.
+These are checkbox defaults, not locked bundles. Use `--profile`, `--project-type`, and `--project-stage` for non-interactive selection, or `--select-skills` to override recommendations with an exact set.
 
 Update the files managed by the recorded scope and skill selection with:
 
@@ -60,7 +67,8 @@ Legacy metadata under `.agents/` is still detected; the next update writes canon
 
 ```mermaid
 flowchart LR
-    A[User request] --> B{Installed scope}
+    A[User request] --> P{Setup profile}
+    P --> B{Installed scope}
     B -->|Skills| C[Matching selected skill]
     B -->|Hooks| D[Lean SessionStart policy]
     B -->|Memory| E[Context compiler]
@@ -92,12 +100,26 @@ The harness follows progressive disclosure:
 | Frontend and growth | `design`, `seo` |
 | Planning and architecture | `project-startup`, `to-spec`, `to-tickets`, `grill-with-docs`, `codebase-design`, `improve-codebase-architecture` |
 | Delivery and communication | `git`, `handoff`, `caveman` |
+| Klaviyo and commerce operations (Commerce Stack) | `klaviyo-operations`, `klaviyo-product-recommendations`, `klaviyo-customer-agent`, `commerce-integration-debugging`, `django-commerce-backend` |
+| Shopify AI Toolkit, official (Commerce Stack) | `shopify-admin`, `shopify-liquid`, `shopify-custom-data`, `shopify-use-shopify-cli`, `shopify-dev` |
 
 `project-startup` is optional. Install it only for a new or unconfigured project. Established projects can omit it entirely.
 
 Full orchestration automatically installs the `orchestrate` routing skill in addition to the user selection.
 
-Every shipped skill includes `agents/openai.yaml` for consistent desktop UI labels and explicit invocation prompts. Codex routing still depends on the concise `name` and `description` in `SKILL.md`; the optional UI metadata is not a replacement for those trigger fields.
+Every Agent Arche-authored skill includes `agents/openai.yaml` for consistent desktop UI labels and explicit invocation prompts. The vendored official Shopify skills retain their upstream package structure. Codex routing still depends on the concise `name` and `description` in `SKILL.md`; optional UI metadata is not a replacement for those trigger fields.
+
+The official Shopify skill scripts disclose usage telemetry to Shopify. Set `OPT_OUT_INSTRUMENTATION=true` to opt out. See [Commerce Stack](docs/COMMERCE_STACK.md) and [NOTICE](NOTICE.md) for sources and the vendored snapshot.
+
+## Commerce Stack MCPs
+
+The three Commerce Stack scopes that include `.codex/config.toml` configure:
+
+- Klaviyo's official remote MCP at `https://mcp.klaviyo.com/mcp`, read-only by default and requiring OAuth login;
+- Shopify's official `@shopify/dev-mcp` for current developer docs, schemas, and validation;
+- Context7 for current Django documentation lookup.
+
+Django does not currently publish an official MCP server. Agent Arche does not install a community package that exposes a project's models, admin, or API automatically. That requires a separate project-specific security decision.
 
 ## Lean hooks
 
@@ -146,6 +168,12 @@ Full orchestration installs project-scoped agents under `.codex/agents/`:
 - `reviewer`
 - `test_runner`
 
+Commerce Stack also installs:
+
+- `klaviyo_specialist`
+- `shopify_specialist`
+- `django_integration_specialist`
+
 The orchestrator starts with at most three concurrent subagents, favors parallel read-heavy work, prevents overlapping write ownership, and requires evidence summaries rather than raw logs. Simple tasks remain single-agent.
 
 See [Orchestration](docs/ORCHESTRATION.md).
@@ -155,7 +183,7 @@ See [Orchestration](docs/ORCHESTRATION.md).
 | Path | Purpose |
 |---|---|
 | `.agents/skills/` | Only selected skill packages |
-| `.codex/agent-arche.json` | Canonical installed scope and skill selection |
+| `.codex/agent-arche.json` | Canonical installed profile, scope, and skill selection |
 | `.codex/config.toml` | Runtime settings for hook-enabled scopes |
 | `.codex/hooks.json`, `.codex/hooks/` | Lean lifecycle hooks |
 | `.codex/context/` | Deterministic context index/query compiler |
@@ -184,6 +212,7 @@ Agent Arche adapts and combines ideas from several open-source projects. The ins
 - [Akindu23/my-agent-skills](https://github.com/Akindu23/my-agent-skills) — Karpathy-style coding guardrails and PostgreSQL patterns.
 - [Clack](https://github.com/bombshell-dev/clack) and [picocolors](https://github.com/alexeyraspopov/picocolors) — CLI prompt and terminal-color libraries.
 - [Official OpenAI Codex documentation](https://learn.chatgpt.com/docs/agent-configuration/subagents) — custom-agent configuration and subagent usage boundaries.
+- [Shopify AI Toolkit](https://github.com/Shopify/shopify-ai-toolkit) — official vendored Shopify skills and Dev MCP configuration.
 
 See upstream repositories and this package's dependency lockfile for their licenses. Agent Arche itself is MIT licensed.
 

@@ -2,6 +2,8 @@ approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 web_search = "live"
 project_doc_fallback_filenames = ["AGENTS.md"]
+model_auto_compact_token_limit = 120000
+model_auto_compact_token_limit_scope = "total"
 
 [features]
 hooks = true

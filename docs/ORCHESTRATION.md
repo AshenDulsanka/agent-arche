@@ -1,6 +1,8 @@
 # Full orchestration
 
-Full orchestration is a high-usage option for complex work that benefits from specialized, isolated agent threads.
+Full orchestration is a Codex-only, high-usage option for complex work that benefits from specialized, isolated agent threads.
+
+> Claude Code installs use the lighter **usage-optimized subagents** scope instead; see the README.
 
 > Every subagent performs separate model and tool work. This normally consumes more tokens than a comparable single-agent run.
 

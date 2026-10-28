@@ -1,6 +1,9 @@
 import type { InstallScope, Platform, SetupProfile } from "./constants.js";
 
+// Applied to Markdown files only; other files are copied byte-for-byte.
 export type ContentTransform = (content: string, srcPath: string) => string;
+// Receives the path relative to the step source, with forward slashes.
+export type PathFilter = (relPath: string) => boolean;
 
 interface BasePlanStep {
   label: string;
@@ -12,6 +15,7 @@ export interface DirPlanStep extends BasePlanStep {
   destDir: string;
   destFile?: never;
   transform?: ContentTransform | null;
+  exclude?: PathFilter;
   legacyMemoryDirs?: readonly string[];
 }
 
@@ -19,6 +23,9 @@ export interface FilePlanStep extends BasePlanStep {
   destFile: string;
   destDir?: never;
   transform?: never;
+  exclude?: never;
+  // Deep-merge JSON into an existing destination instead of replacing it.
+  mergeJson?: boolean;
 }
 
 export type PlanStep = DirPlanStep | FilePlanStep;
@@ -44,7 +51,6 @@ export interface InstallMeta {
 }
 
 export interface DetectedInstall {
-  platform: Platform;
   meta: InstallMeta;
   metaDir: string;
 }

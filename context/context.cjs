@@ -33,7 +33,7 @@ function parseArgs(argv) {
 function findRoot(start) {
   let current = path.resolve(start);
   while (true) {
-    if (fs.existsSync(path.join(current, '.git')) || fs.existsSync(path.join(current, '.codex'))) return current;
+    if (['.git', '.codex', '.claude'].some((marker) => fs.existsSync(path.join(current, marker)))) return current;
     const parent = path.dirname(current);
     if (parent === current) return path.resolve(start);
     current = parent;

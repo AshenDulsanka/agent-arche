@@ -44,11 +44,16 @@ skills-hooks
 skills-memory
   skills-hooks + durable memory vault
 
-orchestration
+subagents (Claude Code only)
+  skills-memory + read-only usage-optimized subagents
+
+orchestration (Codex only)
   skills-memory + orchestrate skill + project-scoped custom agents
 ```
 
-Metadata always uses `.codex/agent-arche.json`. Skills remain in `.agents/skills/`, the Codex-compatible shared skill location.
+Codex metadata uses `.codex/agent-arche.json`, and skills remain in `.agents/skills/`, the Codex-compatible shared skill location.
+
+Claude Code installs under `.claude/`: `settings.json` replaces `config.toml` and `hooks.json`, and Commerce MCP servers go to `.mcp.json`. Skills come from the same source and are rewritten at install time (paths, `AGENTS.md` references, `disable-model-invocation` for explicit-only workflows). Claude delegates to subagents natively, so instead of an orchestrator it gets read-only subagents on cheaper models. They exist to keep noisy output out of the main context, not to parallelize implementation.
 
 ## Skill selection profiles
 

@@ -9,7 +9,8 @@ Commerce Stack is the Shopify + Klaviyo + Django setup profile. It changes skill
 | Skills only | Yes | No | No |
 | Skills + hooks | Yes | Yes | No |
 | Skills + hooks + memory | Yes | Yes | No |
-| Full orchestration | Yes | Yes | Yes |
+| Usage-optimized subagents (Claude Code) | Yes | Yes (`.mcp.json`) | `klaviyo-specialist`, `shopify-specialist` (read-only) |
+| Full orchestration (Codex) | Yes | Yes (`config.toml`) | All three specialists |
 
 ## MCP sources and posture
 
@@ -22,7 +23,7 @@ Agent Arche uses Klaviyo's official remote MCP:
 url = "https://mcp.klaviyo.com/mcp?read-only=true&core-tools-only=true"
 ```
 
-Authenticate with `codex mcp login klaviyo`. The account must meet Klaviyo's current role requirements. The installed URL disables write tools and limits the initial tool set. Review the account and requested permissions during OAuth.
+Authenticate with `codex mcp login klaviyo` on Codex, or `/mcp` on Claude Code (the same servers are written to `.mcp.json`). The account must meet Klaviyo's current role requirements. The installed URL disables write tools and limits the initial tool set. Review the account and requested permissions during OAuth.
 
 If a required read-only catalog, event, profile, flow, or template tool is not in the core set, remove only `core-tools-only=true` after reviewing the expanded tools. Keep `read-only=true` until a specific write is approved.
 

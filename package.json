@@ -1,8 +1,10 @@
 {
   "name": "agent-arche",
-  "version": "1.3.10",
-  "description": "Selective Codex skills, lean hooks, indexed memory, and optional multi-agent orchestration",
+  "version": "1.4.0",
+  "description": "Selective Claude Code and Codex skills, lean hooks, indexed memory, and optional multi-agent orchestration",
   "keywords": [
+    "claude",
+    "claude-code",
     "codex",
     "skills",
     "hooks",
@@ -37,10 +39,11 @@
     "prepack": "npm run check && npm run clean && npm run build:dist"
   },
   "files": [
+    "claude/",
     "codex/",
+    "context/",
     "skills/",
     "memory/",
-    "orchestration/",
     "commerce/",
     "docs/",
     "licenses/",

@@ -2,37 +2,43 @@
 
 import { runApp } from "./App.js";
 import { readPackageJson } from "./lib/utils.js";
-import type { InstallScope, ProjectStage, ProjectType, SetupProfile } from "./lib/constants.js";
+import type { InstallScope, Platform, ProjectStage, ProjectType, SetupProfile } from "./lib/constants.js";
 
 function showHelp(): void {
   console.log(`
-agent-arche - Selective Codex skills, context, memory, and orchestration
+agent-arche - Selective Claude Code and Codex skills, context, memory, and orchestration
 
 Usage
   npx agent-arche [install] [options]
   npx agent-arche update [options]
 
 Options
+  --platform=<agent>      claude or codex
   --profile=<profile>     general or commerce
   --skills-only          Selected skills only
   --skills-hooks         Selected skills plus hooks and context tools
   --skills-memory        Selected skills, hooks, context tools, and memory
-  --orchestration        Full multi-agent orchestration (high usage)
+  --subagents            Claude Code: memory scope plus usage-optimized subagents
+  --orchestration        Codex: full multi-agent orchestration (high usage)
   --project-type=<type>  full-stack, backend, frontend, or general
   --project-stage=<type> established or greenfield
   --select-skills=a,b    Install an explicit comma-separated skill set
   --all-skills           Install every skill available to the selected profile
+  --no-init              Claude Code: skip generating CLAUDE.md on first install
   -y, --yes              Accept the selected scope's recommended skills
   -v, --version          Print the installed CLI version
   -h, --help             Show this help
 
 Examples
   npx agent-arche
-  npx agent-arche --profile=commerce --skills-only
-  npx agent-arche --profile=general --skills-hooks --project-type=backend --project-stage=established
-  npx agent-arche --profile=general --skills-hooks --select-skills=implement,design,git
-  npx agent-arche --profile=commerce --orchestration
+  npx agent-arche --platform=claude --profile=general --skills-memory --yes
+  npx agent-arche --platform=codex --profile=commerce --skills-only
+  npx agent-arche --platform=claude --profile=general --skills-hooks --project-type=backend --project-stage=established
+  npx agent-arche --platform=codex --profile=general --skills-hooks --select-skills=implement,design,git
+  npx agent-arche --platform=claude --profile=commerce --subagents --all-skills --yes
+  npx agent-arche --platform=codex --profile=commerce --orchestration
   npx agent-arche update
+  npx agent-arche update --platform=claude
 
 Source
   https://github.com/AshenDulsanka/agent-arche
@@ -52,17 +58,20 @@ const knownFlags = new Set([
   "--skills-hooks",
   "--skills-memory",
   "--orchestration",
+  "--subagents",
   "--all-skills",
+  "--no-init",
 ]);
 const unknownFlag = args.find((arg) => (
   arg.startsWith("-")
   && !knownFlags.has(arg)
   && !arg.startsWith("--select-skills=")
+  && !arg.startsWith("--platform=")
   && !arg.startsWith("--profile=")
   && !arg.startsWith("--project-type=")
   && !arg.startsWith("--project-stage=")
 ));
-const scopeFlags = ["--skills-only", "--skills-hooks", "--skills-memory", "--orchestration"]
+const scopeFlags = ["--skills-only", "--skills-hooks", "--skills-memory", "--orchestration", "--subagents"]
   .filter((flag) => args.includes(flag));
 
 function requestedScope(): InstallScope | undefined {
@@ -70,7 +79,15 @@ function requestedScope(): InstallScope | undefined {
   if (args.includes("--skills-hooks")) return "skills-hooks";
   if (args.includes("--skills-memory")) return "skills-memory";
   if (args.includes("--orchestration")) return "orchestration";
+  if (args.includes("--subagents")) return "subagents";
   return undefined;
+}
+
+function requestedPlatform(): Platform | undefined {
+  const value = args.find((arg) => arg.startsWith("--platform="))?.slice("--platform=".length);
+  if (!value) return undefined;
+  if (["claude", "codex"].includes(value)) return value as Platform;
+  throw new Error(`Unknown platform: ${value}`);
 }
 
 function requestedProfile(): SetupProfile | undefined {
@@ -120,11 +137,13 @@ if (args.includes("--version") || args.includes("-v")) {
   Promise.resolve().then(() => runApp({
     force: command === "update",
     yes: args.includes("--yes") || args.includes("-y"),
+    platform: requestedPlatform(),
     scope: requestedScope(),
     profile: requestedProfile(),
     projectType: requestedProjectType(),
     projectStage: requestedProjectStage(),
     selectedSkills: requestedSkills(),
+    init: !args.includes("--no-init"),
   })).then(
     (code) => {
       process.exitCode = code;

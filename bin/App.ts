@@ -15,10 +15,13 @@ import pc from "picocolors";
 import {
   INSTALL_SCOPE_META,
   ORCHESTRATION_SKILL,
+  PLATFORM_META,
+  PLATFORM_SCOPES,
   PROJECT_STAGE_META,
   PROJECT_TYPE_META,
   SETUP_PROFILE_META,
   recommendedSkills,
+  scopeSupported,
   selectableSkillsForProfile,
   skillGroupsForProfile,
   type InstallScope,
@@ -27,16 +30,18 @@ import {
   type ProjectType,
   type SetupProfile,
 } from "./lib/constants.js";
-import { getCodexPlan } from "./lib/plans.js";
+import { claudeCliAvailable, claudeMdExists, runClaudeInit } from "./lib/claude-init.js";
+import { getPlan } from "./lib/plans.js";
 import { skillMultiselect, skillSelectorCancel } from "./lib/skill-selector.js";
 import type { InstallMeta, InstallPlan, InstallStepResult } from "./lib/types.js";
 import {
   copyDir,
   copyFile,
-  detectInstalledPlatform,
+  detectInstalls,
   fetchNpmHash,
   fetchNpmLatestVersion,
   isAllowedInstallPath,
+  mergeJsonFile,
   migrateLegacyMemoryVault,
   readMeta,
   readPackageJson,
@@ -44,11 +49,12 @@ import {
   writeMeta,
 } from "./lib/utils.js";
 
-const platform: Platform = "codex";
-
 export interface AppOptions {
   force?: boolean;
+  // Claude Code only: generate CLAUDE.md on first install when it is missing.
+  init?: boolean;
   yes?: boolean;
+  platform?: Platform;
   scope?: InstallScope;
   profile?: SetupProfile;
   projectType?: ProjectType;
@@ -95,6 +101,26 @@ function showExisting(existing: InstallMeta): void {
   outro("No files were changed.");
 }
 
+async function choosePlatform(
+  initialPlatform?: Platform,
+  available: readonly Platform[] = Object.keys(PLATFORM_META) as Platform[],
+): Promise<Platform | null> {
+  if (initialPlatform) return initialPlatform;
+  if (available.length === 1) return available[0] ?? null;
+
+  const answer = await select<Platform>({
+    message: "Which coding agent are you setting up?",
+    initialValue: available[0],
+    options: available.map((value) => ({
+      value,
+      label: PLATFORM_META[value].label,
+      hint: PLATFORM_META[value].summary,
+    })),
+  });
+
+  return stopOnCancel(answer) ? null : answer;
+}
+
 async function chooseProfile(initialProfile?: SetupProfile): Promise<SetupProfile | null> {
   if (initialProfile) return initialProfile;
 
@@ -111,16 +137,20 @@ async function chooseProfile(initialProfile?: SetupProfile): Promise<SetupProfil
   return stopOnCancel(answer) ? null : answer;
 }
 
-async function chooseScope(initialScope?: InstallScope): Promise<InstallScope | null> {
-  if (initialScope) return initialScope;
+async function chooseScope(platform: Platform, initialScope?: InstallScope): Promise<InstallScope | null> {
+  if (initialScope) {
+    if (scopeSupported(platform, initialScope)) return initialScope;
+    const supported = PLATFORM_SCOPES[platform].map((scope) => INSTALL_SCOPE_META[scope].label).join(", ");
+    throw new Error(`${INSTALL_SCOPE_META[initialScope].label} is not available for ${PLATFORM_META[platform].label}. Choose one of: ${supported}.`);
+  }
 
   const answer = await select<InstallScope>({
     message: "What do you want to install?",
     initialValue: "skills-memory",
-    options: Object.entries(INSTALL_SCOPE_META).map(([value, meta]) => ({
-      value: value as InstallScope,
-      label: meta.label,
-      hint: meta.summary,
+    options: PLATFORM_SCOPES[platform].map((value) => ({
+      value,
+      label: INSTALL_SCOPE_META[value].label,
+      hint: INSTALL_SCOPE_META[value].summary,
     })),
   });
 
@@ -204,18 +234,30 @@ function sameSkills(left: readonly string[], right: readonly string[]): boolean 
   return [...left].sort().join("\n") === [...right].sort().join("\n");
 }
 
-async function resolveUpdate(cwd: string): Promise<{ profile: SetupProfile; scope: InstallScope; existing: InstallMeta } | null> {
-  const status = spinner();
-  status.start("Checking the installed version");
-  const detected = detectInstalledPlatform(cwd);
+async function resolveUpdate(cwd: string, requestedPlatform?: Platform, yes = false): Promise<InstallMeta | null> {
+  const installs = detectInstalls(cwd);
+  const platforms = installs.map((install) => install.meta.platform);
 
-  if (!detected) {
-    status.stop("No installation found");
-    log.info("Run npx agent-arche install first.");
+  if (requestedPlatform && !platforms.includes(requestedPlatform)) {
+    log.info(`No ${PLATFORM_META[requestedPlatform].label} installation found. Run npx agent-arche install first.`);
     outro("No files were changed.");
     return null;
   }
+  if (installs.length === 0) {
+    log.info("No installation found. Run npx agent-arche install first.");
+    outro("No files were changed.");
+    return null;
+  }
+  if (!requestedPlatform && installs.length > 1 && yes) {
+    throw new Error("Both Claude Code and Codex installs were found; pass --platform=claude or --platform=codex.");
+  }
 
+  const platform = await choosePlatform(requestedPlatform, platforms);
+  const detected = installs.find((install) => install.meta.platform === platform);
+  if (!detected) return null;
+
+  const status = spinner();
+  status.start("Checking the installed version");
   const latestVersion = await fetchNpmLatestVersion();
   if (latestVersion && detected.meta.version === latestVersion) {
     status.stop(`Already up to date (v${latestVersion})`);
@@ -228,12 +270,13 @@ async function resolveUpdate(cwd: string): Promise<{ profile: SetupProfile; scop
       ? `Updating v${detected.meta.version} → v${latestVersion}`
       : `Updating v${detected.meta.version}`,
   );
-  return { profile: detected.meta.profile, scope: detected.meta.scope, existing: detected.meta };
+  return detected.meta;
 }
 
 async function installPlan(
   cwd: string,
   plan: InstallPlan,
+  platform: Platform,
   profile: SetupProfile,
   scope: InstallScope,
   version: string,
@@ -269,7 +312,7 @@ async function installPlan(
       } else if (step.skipIfExists && fs.existsSync(step.destDir)) {
         results.push({ label: step.label, msg: "kept existing files" });
       } else {
-        const count = copyDir(step.src, step.destDir, step.transform);
+        const count = copyDir(step.src, step.destDir, step.transform, step.exclude);
         totalFiles += count;
         results.push({ label: step.label, msg: `${count} file${count === 1 ? "" : "s"}` });
       }
@@ -284,6 +327,14 @@ async function installPlan(
 
       if (step.skipIfExists && fs.existsSync(step.destFile)) {
         results.push({ label: step.label, msg: "kept existing file" });
+      } else if (step.mergeJson) {
+        const existed = fs.existsSync(step.destFile);
+        if (mergeJsonFile(step.src, step.destFile)) {
+          totalFiles += 1;
+          results.push({ label: step.label, msg: existed ? "merged into existing file" : "1 file" });
+        } else {
+          results.push({ label: step.label, msg: "kept existing file (invalid JSON, merge manually)" });
+        }
       } else {
         copyFile(step.src, step.destFile);
         totalFiles += 1;
@@ -313,35 +364,67 @@ async function installPlan(
   return { results, totalFiles, hash, missing };
 }
 
+async function generateClaudeMd(cwd: string, yes: boolean): Promise<boolean> {
+  if (!claudeCliAvailable()) {
+    log.info("Claude Code CLI not found on PATH, so CLAUDE.md was not generated.");
+    return false;
+  }
+
+  if (!yes) {
+    const approved = await confirm({
+      message: "Generate CLAUDE.md from this project now? (runs Claude Code on Sonnet and uses your Claude usage)",
+      initialValue: true,
+    });
+    if (isCancel(approved) || !approved) return false;
+  }
+
+  const progress = spinner();
+  progress.start("Generating CLAUDE.md with Claude Code (this can take a few minutes)");
+  const result = await runClaudeInit(cwd);
+  if (result.ok) {
+    progress.stop("CLAUDE.md created. Review it before committing.");
+    return true;
+  }
+  progress.stop("CLAUDE.md was not generated");
+  if (result.detail) log.warn(result.detail);
+  return false;
+}
+
 export async function runApp({
   force = false,
   yes = false,
+  platform: requestedPlatform,
   scope: requestedScope,
   profile: requestedProfile,
   projectType: requestedProjectType,
   projectStage: requestedProjectStage,
   selectedSkills: requestedSkills,
+  init = true,
 }: AppOptions = {}): Promise<number> {
   const cwd = process.cwd();
   const pkg = readPackageJson();
 
   intro(`${pc.bgCyan(pc.black(" agent-arche "))} ${pc.dim(`v${pkg.version}`)}`);
 
+  let platform: Platform | undefined = requestedPlatform;
   let scope = requestedScope;
   let profile = requestedProfile;
   let projectType = requestedProjectType;
   let projectStage = requestedProjectStage;
   let selectedSkills = requestedSkills ? [...requestedSkills] : undefined;
   if (force) {
-    const update = await resolveUpdate(cwd);
-    if (!update) return 0;
-    scope = update.scope;
-    profile = update.profile;
-    selectedSkills = update.existing.selectedSkills;
+    const existing = await resolveUpdate(cwd, platform, yes);
+    if (!existing) return 0;
+    platform = existing.platform;
+    scope = existing.scope;
+    profile = existing.profile;
+    selectedSkills = existing.selectedSkills;
   } else {
+    platform = await choosePlatform(platform) ?? undefined;
+    if (!platform) return 0;
     profile = await chooseProfile(profile) ?? undefined;
     if (!profile) return 0;
-    scope = await chooseScope(scope) ?? undefined;
+    scope = await chooseScope(platform, scope) ?? undefined;
     if (!scope) return 0;
     if (!selectedSkills) {
       projectType = await chooseProjectType(projectType) ?? undefined;
@@ -365,7 +448,7 @@ export async function runApp({
     log.warn("Official Shopify skill scripts send usage telemetry to Shopify. Set OPT_OUT_INSTRUMENTATION=true to opt out.");
   }
 
-  const plan = getCodexPlan(cwd, profile, scope, selectedSkills);
+  const plan = getPlan(platform, cwd, profile, scope, selectedSkills);
   const existing = readMeta(plan.metaDir);
   if (
     existing
@@ -381,7 +464,7 @@ export async function runApp({
 
   note(formatPlan(plan), `Install in ${relativeTarget(path.dirname(cwd), cwd)}`);
   note(plan.selectedSkills.join(", "), "Selected skills");
-  note(SETUP_PROFILE_META[profile].label, "Setup profile");
+  note(`${PLATFORM_META[platform].label} · ${SETUP_PROFILE_META[profile].label}`, "Setup");
 
   if (!yes) {
     const approved = await confirm({
@@ -394,12 +477,18 @@ export async function runApp({
     }
   }
 
-  const result = await installPlan(cwd, plan, profile, scope, pkg.version);
+  const result = await installPlan(cwd, plan, platform, profile, scope, pkg.version);
   if (result.results.length > 0) note(formatResults(result.results), "Installed");
   if (result.missing.length > 0) log.warn(`Skipped missing sources: ${result.missing.join(", ")}`);
   if (!result.hash) log.warn("Package integrity could not be fetched (offline or unpublished).");
 
-  const nextSteps = plan.nextSteps.map((step, index) => `${index + 1}. ${step}`).join("\n");
+  const steps = [...plan.nextSteps];
+  if (platform === "claude" && !existing && !claudeMdExists(cwd)) {
+    const created = init && await generateClaudeMd(cwd, yes);
+    if (!created) steps.unshift("Run /init in Claude Code to create CLAUDE.md");
+  }
+
+  const nextSteps = steps.map((step, index) => `${index + 1}. ${step}`).join("\n");
   note(nextSteps, "Next steps");
   outro(force ? "Agent Arche updated." : "Agent Arche is ready.");
   return 0;

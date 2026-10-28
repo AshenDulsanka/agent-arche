@@ -1,5 +1,18 @@
 export const META_FILE = "agent-arche.json";
 
+export const PLATFORM_META = {
+  claude: {
+    label: "Claude Code",
+    summary: "Installs into .claude/ with token-lean settings and optional usage-optimized subagents.",
+  },
+  codex: {
+    label: "Codex",
+    summary: "Installs into .codex/ and .agents/skills/.",
+  },
+} as const;
+
+export type Platform = keyof typeof PLATFORM_META;
+
 export const SETUP_PROFILE_META = {
   general: {
     label: "General Engineering",
@@ -42,11 +55,37 @@ export const INSTALL_SCOPE_META = {
     label: "Full orchestration (High usage)",
     summary: "Orchestrator and specialized subagents. Costs substantially more usage.",
     details: [
-      "Includes selected skills, hooks, indexed memory, and custom Codex agents",
+      "Includes selected skills, hooks, indexed memory, and custom agents",
       "Each subagent performs separate model and tool work, increasing token usage",
     ],
   },
+  subagents: {
+    label: "Skills + hooks + memory + usage-optimized subagents",
+    summary: "Adds cheap read-only subagents that keep noisy search, test, and MCP output out of the main context.",
+    details: [
+      "Exploration and test runs use a smaller model; implementation stays in the main thread",
+      "Claude delegates only when it saves main-context tokens",
+    ],
+  },
 } as const;
+
+export type InstallScope = keyof typeof INSTALL_SCOPE_META;
+
+// Codex coordinates through an orchestrator agent; Claude Code delegates natively,
+// so it gets lean subagents instead of a full orchestration layer.
+export const PLATFORM_SCOPES = {
+  claude: ["skills", "skills-hooks", "skills-memory", "subagents"],
+  codex: ["skills", "skills-hooks", "skills-memory", "orchestration"],
+} as const satisfies Record<Platform, readonly InstallScope[]>;
+
+export function scopeSupported(platform: Platform, scope: InstallScope): boolean {
+  return (PLATFORM_SCOPES[platform] as readonly InstallScope[]).includes(scope);
+}
+
+// Scopes that install the indexed memory vault.
+export function scopeHasMemory(scope: InstallScope): boolean {
+  return scope === "skills-memory" || scope === "orchestration" || scope === "subagents";
+}
 
 const GENERAL_SKILL_GROUPS = {
   "Core engineering": [
@@ -174,6 +213,7 @@ const SCOPE_RECOMMENDATIONS = {
   skills: [],
   "skills-hooks": [],
   "skills-memory": [],
+  subagents: [],
   orchestration: [
     "to-spec",
     "to-tickets",
@@ -199,11 +239,20 @@ export function recommendedSkills(
 }
 
 export const ORCHESTRATION_SKILL = "orchestrate";
+
+// Explicit-request workflows. On Claude Code these load only via /<name>, so their
+// descriptions never occupy the model's skill-routing context.
+export const CLAUDE_USER_INVOKED_SKILLS: ReadonlySet<string> = new Set([
+  "caveman",
+  "handoff",
+  "project-startup",
+  "grill-with-docs",
+  "improve-codebase-architecture",
+]);
+
 export function selectableSkillsForProfile(profile: SetupProfile): string[] {
   return Object.values(skillGroupsForProfile(profile)).flatMap((group) => group.map((skill) => skill.value));
 }
 
-export type Platform = "codex";
-export type InstallScope = keyof typeof INSTALL_SCOPE_META;
 export type ProjectType = keyof typeof PROJECT_TYPE_META;
 export type ProjectStage = keyof typeof PROJECT_STAGE_META;

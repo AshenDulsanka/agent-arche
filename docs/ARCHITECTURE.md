@@ -53,7 +53,7 @@ orchestration (Codex only)
 
 Codex metadata uses `.codex/agent-arche.json`, and skills remain in `.agents/skills/`, the Codex-compatible shared skill location.
 
-Claude Code installs under `.claude/`: `settings.json` replaces `config.toml` and `hooks.json`, and Commerce MCP servers go to `.mcp.json`. Skills come from the same source and are rewritten at install time (paths, `AGENTS.md` references, `disable-model-invocation` for explicit-only workflows). Claude delegates to subagents natively, so instead of an orchestrator it gets read-only subagents on cheaper models. They exist to keep noisy output out of the main context, not to parallelize implementation.
+Claude Code installs under `.claude/`: `settings.json` replaces `config.toml` and `hooks.json`, and Commerce MCP servers go to `.mcp.json`. Skills come from `claude/skills/`, a Claude-native copy of `codex/skills/`: Claude paths and tool names, `${CLAUDE_SKILL_DIR}` for bundled scripts, and Claude Code frontmatter (`disable-model-invocation`, `argument-hint`, read-only `allowed-tools`). A skill change must be made in both folders. Claude delegates to subagents natively, so instead of an orchestrator it gets read-only subagents on cheaper models. They exist to keep noisy output out of the main context, not to parallelize implementation.
 
 ## Skill selection profiles
 

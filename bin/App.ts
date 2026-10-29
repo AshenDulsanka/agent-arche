@@ -13,13 +13,16 @@ import {
 } from "@clack/prompts";
 import pc from "picocolors";
 import {
+  CLAUDE_SKILL_DIRS,
   INSTALL_SCOPE_META,
   ORCHESTRATION_SKILL,
   PLATFORM_META,
   PLATFORM_SCOPES,
   PROJECT_STAGE_META,
   PROJECT_TYPE_META,
+  RENAMED_SKILLS,
   SETUP_PROFILE_META,
+  migrateSkillNames,
   recommendedSkills,
   scopeSupported,
   selectableSkillsForProfile,
@@ -189,7 +192,22 @@ function normalizeSkills(profile: SetupProfile, skills: readonly string[]): stri
   const selectableSkills = selectableSkillsForProfile(profile);
   if (skills.includes("*")) return selectableSkills;
   const allowed = new Set<string>(selectableSkills);
-  return [...new Set(skills.filter((skill) => allowed.has(skill)))];
+  return migrateSkillNames(skills).filter((skill) => allowed.has(skill));
+}
+
+// Deletes managed skill folders left under a former name once the skill is installed under its current one.
+function removeRenamedSkills(cwd: string, platform: Platform, installed: readonly string[]): string[] {
+  const skillsDir = platform === "claude" ? path.join(cwd, ".claude", "skills") : path.join(cwd, ".agents", "skills");
+  const staleDirs = Object.entries(RENAMED_SKILLS)
+    .filter(([, newName]) => installed.includes(newName))
+    .map(([oldName]) => oldName);
+  if (platform === "claude") staleDirs.push(...Object.keys(CLAUDE_SKILL_DIRS).filter((skill) => installed.includes(skill)));
+  return staleDirs
+    .filter((dir) => fs.existsSync(path.join(skillsDir, dir)))
+    .map((dir) => {
+      fs.rmSync(path.join(skillsDir, dir), { recursive: true, force: true });
+      return dir;
+    });
 }
 
 async function chooseSkills(
@@ -206,7 +224,7 @@ async function chooseSkills(
     const unknown = initialSkills.filter((skill) => (
       skill !== "*"
       && !(scope === "orchestration" && skill === ORCHESTRATION_SKILL)
-      && !normalized.includes(skill)
+      && !normalized.includes(RENAMED_SKILLS[skill] ?? skill)
     ));
     if (unknown.length > 0) throw new Error(`Unknown skill selection: ${unknown.join(", ")}`);
     return normalized;
@@ -481,6 +499,9 @@ export async function runApp({
   if (result.results.length > 0) note(formatResults(result.results), "Installed");
   if (result.missing.length > 0) log.warn(`Skipped missing sources: ${result.missing.join(", ")}`);
   if (!result.hash) log.warn("Package integrity could not be fetched (offline or unpublished).");
+
+  const removed = removeRenamedSkills(cwd, platform, plan.selectedSkills);
+  if (removed.length > 0) log.info(`Removed skills installed under their former names: ${removed.join(", ")}`);
 
   const steps = [...plan.nextSteps];
   if (platform === "claude" && !existing && !claudeMdExists(cwd)) {

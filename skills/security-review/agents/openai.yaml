@@ -1,4 +1,0 @@
-interface:
-  display_name: "Security Review"
-  short_description: "Threat-model and review security-sensitive changes"
-  default_prompt: "Use $security-review to inspect this security-sensitive change for concrete risks."

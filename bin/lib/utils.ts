@@ -6,6 +6,7 @@ import {
   INSTALL_SCOPE_META,
   META_FILE,
   SETUP_PROFILE_META,
+  migrateSkillNames,
   selectableSkillsForProfile,
   type InstallScope,
   type Platform,
@@ -216,7 +217,7 @@ export function readMeta(dir: string): InstallMeta | null {
       ? rawProfile as SetupProfile
       : "general";
     const selectedSkills = Array.isArray(data.selectedSkills)
-      ? data.selectedSkills.filter((skill): skill is string => typeof skill === "string")
+      ? migrateSkillNames(data.selectedSkills.filter((skill): skill is string => typeof skill === "string"))
       : selectableSkillsForProfile(profile);
     return {
       version: data.version,

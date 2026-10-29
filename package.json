@@ -1,6 +1,6 @@
 {
   "name": "agent-arche",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Selective Claude Code and Codex skills, lean hooks, indexed memory, and optional multi-agent orchestration",
   "keywords": [
     "claude",
@@ -42,7 +42,6 @@
     "claude/",
     "codex/",
     "context/",
-    "skills/",
     "memory/",
     "commerce/",
     "docs/",

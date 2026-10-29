@@ -1,11 +1,10 @@
 import path from "path";
 import { PACKAGE_ROOT } from "./utils.js";
 import {
-  CLAUDE_USER_INVOKED_SKILLS,
   ORCHESTRATION_SKILL,
   PLATFORM_SCOPES,
   scopeHasMemory,
-  selectableSkillsForProfile,
+  skillDirName,
   type InstallScope,
   type Platform,
   type SetupProfile,
@@ -13,9 +12,11 @@ import {
 import type { ContentTransform, DirPlanStep, InstallPlan } from "./types.js";
 
 // Package source layout. Shared assets live at the root; platform-specific
-// assets live under claude/ and codex/, and profile overlays under commerce/<platform>/.
+// assets (including each platform's skills) live under claude/ and codex/, and
+// profile overlays under commerce/<platform>/.
 const SOURCE = {
-  skills: path.join(PACKAGE_ROOT, "skills"),
+  claudeSkills: path.join(PACKAGE_ROOT, "claude", "skills"),
+  codexSkills: path.join(PACKAGE_ROOT, "codex", "skills"),
   memory: path.join(PACKAGE_ROOT, "memory"),
   context: path.join(PACKAGE_ROOT, "context"),
   claude: path.join(PACKAGE_ROOT, "claude"),
@@ -52,35 +53,19 @@ export function getPlan(
 }
 
 // ─── Claude Code ──────────────────────────────────────────────────────────────
-// Skills are authored once; Claude installs rewrite the few platform-specific
-// references instead of maintaining a second copy.
+// Skills ship as Claude-native copies under claude/skills/. The shared memory and
+// context files are written for Codex and get their few platform paths rewritten.
 const CLAUDE_REWRITES: ReadonlyArray<[RegExp, string]> = [
   [/\.codex\/context\//g, ".claude/context/"],
   [/\.codex\/agent-arche\.json/g, ".claude/agent-arche.json"],
   [/`\.codex\/`/g, "`.claude/`"],
   [/`AGENTS\.md`/g, "`CLAUDE.md`"],
   [/`orchestration`/g, "`subagents`"],
-  [/Codex (`?)SKILL\.md/g, "coding-agent $1SKILL.md"],
 ];
-
-const skillInvocation = new RegExp(`\\$(${selectableSkillsForProfile("commerce").join("|")})\\b`, "g");
 
 const toClaudeMarkdown: ContentTransform = (content) => (
   CLAUDE_REWRITES.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), content)
-    .replace(skillInvocation, "/$1")
 );
-
-function claudeSkillTransform(skill: string): ContentTransform {
-  if (!CLAUDE_USER_INVOKED_SKILLS.has(skill)) return toClaudeMarkdown;
-  return (content, srcPath) => {
-    const text = toClaudeMarkdown(content, srcPath);
-    if (path.basename(srcPath) !== "SKILL.md") return text;
-    return text.replace(/^(---\r?\n[\s\S]*?)(\r?\n---)/, "$1\ndisable-model-invocation: true$2");
-  };
-}
-
-// Codex-only UI metadata never reaches a Claude install.
-const excludeCodexMetadata = (relPath: string): boolean => relPath === "agents/openai.yaml";
 
 const CLAUDE_NEXT_STEPS = {
   skills: [
@@ -122,13 +107,14 @@ export function getClaudePlan(
   const dest = path.join(cwd, ".claude");
   const selectedSkills = [...requestedSkills];
 
-  const steps: InstallPlan["steps"] = selectedSkills.map((skill) => ({
-    label: `.claude/skills/${skill}/`,
-    src: path.join(SOURCE.skills, skill),
-    destDir: path.join(dest, "skills", skill),
-    transform: claudeSkillTransform(skill),
-    exclude: excludeCodexMetadata,
-  }));
+  const steps: InstallPlan["steps"] = selectedSkills.map((skill) => {
+    const dir = skillDirName("claude", skill);
+    return {
+      label: `.claude/skills/${dir}/`,
+      src: path.join(SOURCE.claudeSkills, dir),
+      destDir: path.join(dest, "skills", dir),
+    };
+  });
 
   if (scope !== "skills") {
     steps.unshift(
@@ -212,7 +198,7 @@ function codexConfigSource(profile: SetupProfile, scope: CodexScope): string {
 function codexSkillSource(skill: string): string {
   return skill === ORCHESTRATION_SKILL
     ? path.join(SOURCE.codexOrchestration, "skills", skill)
-    : path.join(SOURCE.skills, skill);
+    : path.join(SOURCE.codexSkills, skill);
 }
 
 export function getCodexPlan(

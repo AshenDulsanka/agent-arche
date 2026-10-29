@@ -96,7 +96,7 @@ const GENERAL_SKILL_GROUPS = {
     { value: "karpathy-guidelines", label: "Karpathy guidelines", hint: "surgical coding guardrails" },
   ],
   "Security and backend": [
-    { value: "security-review", label: "Security review", hint: "trust-boundary changes" },
+    { value: "security-audit", label: "Security audit", hint: "trust-boundary changes" },
     { value: "postgres-patterns", label: "PostgreSQL patterns", hint: "Postgres-specific work" },
   ],
   "Frontend and growth": [
@@ -176,7 +176,7 @@ const CORE_RECOMMENDED_SKILLS = [
   "tdd",
   "code-review",
   "karpathy-guidelines",
-  "security-review",
+  "security-audit",
   "git",
   "handoff",
 ] as const;
@@ -238,17 +238,26 @@ export function recommendedSkills(
   ])];
 }
 
-export const ORCHESTRATION_SKILL = "orchestrate";
+// Former skill names. security-review shadowed Claude Code's bundled /security-review,
+// so installs recorded under it migrate to the new name.
+export const RENAMED_SKILLS: Readonly<Record<string, string>> = {
+  "security-review": "security-audit",
+};
 
-// Explicit-request workflows. On Claude Code these load only via /<name>, so their
-// descriptions never occupy the model's skill-routing context.
-export const CLAUDE_USER_INVOKED_SKILLS: ReadonlySet<string> = new Set([
-  "caveman",
-  "handoff",
-  "project-startup",
-  "grill-with-docs",
-  "improve-codebase-architecture",
-]);
+// Claude Code bundles /code-review, so the Claude copy installs under a different folder.
+export const CLAUDE_SKILL_DIRS: Readonly<Record<string, string>> = {
+  "code-review": "diff-review",
+};
+
+export function skillDirName(platform: Platform, skill: string): string {
+  return platform === "claude" ? CLAUDE_SKILL_DIRS[skill] ?? skill : skill;
+}
+
+export function migrateSkillNames(skills: readonly string[]): string[] {
+  return [...new Set(skills.map((skill) => RENAMED_SKILLS[skill] ?? skill))];
+}
+
+export const ORCHESTRATION_SKILL = "orchestrate";
 
 export function selectableSkillsForProfile(profile: SetupProfile): string[] {
   return Object.values(skillGroupsForProfile(profile)).flatMap((group) => group.map((skill) => skill.value));

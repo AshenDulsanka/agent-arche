@@ -37,7 +37,7 @@ npx agent-arche --platform=claude --profile=commerce --subagents --all-skills --
 npx agent-arche --platform=codex --profile=general --skills-only --select-skills=implement,git --yes
 npx agent-arche --platform=codex --profile=commerce --skills-hooks --project-type=full-stack --project-stage=established --yes
 npx agent-arche --platform=codex --profile=general --skills-hooks --select-skills=implement,design,code-review --yes
-npx agent-arche --platform=codex --profile=general --orchestration --select-skills=implement,security-review --yes
+npx agent-arche --platform=codex --profile=general --orchestration --select-skills=implement,security-audit --yes
 ```
 
 The skill step opens with recommendations computed from the setup profile, installation scope, project type, and project stage. Users can deselect any recommendation or select additional skills before installation. `--yes` accepts the computed recommendations when no explicit skill selection is supplied.
@@ -86,7 +86,8 @@ Token and context controls:
 
 - **CLAUDE.md, generated on first install.** Claude Code installs use `CLAUDE.md` as the project instruction file, not `AGENTS.md`. On the first install into a project without a `CLAUDE.md`, the installer runs Claude Code headless on Sonnet to write one, a short `/init` that is told to stay under 60 lines because the file loads every session. It may only read the project and write `CLAUDE.md`, and it carries over durable rules from an existing `AGENTS.md`. It asks first (`--yes` accepts). Skip it with `--no-init`, and it falls back to a "Run /init" next step when the `claude` CLI is not on PATH. An existing `CLAUDE.md` is never touched.
 - **Rewritten at install time.** Skills are authored once. A Claude install rewrites `.codex/…` paths and `AGENTS.md` references to `CLAUDE.md`, and leaves out Codex-only `agents/openai.yaml` metadata.
-- **User-invoked skills stay out of routing context.** `caveman`, `handoff`, `project-startup`, `grill-with-docs`, and `improve-codebase-architecture` set `disable-model-invocation`. Their descriptions never enter the model's context; run them with `/<name>`.
+- **User-invoked skills stay out of routing context.** `caveman`, `handoff`, `project-startup`, `grill-with-docs`, `improve-codebase-architecture`, and `to-spec` set `disable-model-invocation`. Their descriptions never enter the model's context; run them with `/<name>`.
+- **Claude-native skill copies.** Claude skills live in `claude/skills/` with Claude Code frontmatter: `argument-hint` for slash-command arguments, and `allowed-tools` that pre-approve only read-only commands (such as `git diff` in reviews). No skill pins a `model`, so every skill runs on the model you chose with `/model`.
 - **Conditional SessionStart.** The hook emits only lines that apply to the checkout (for example, the memory rules only when memory is installed), so it adds roughly 100 tokens. It never repeats `CLAUDE.md`, which Claude Code already loads.
 - **Absolute compaction point and smaller tool output.** Current Claude models have a 1M-token window, so a percentage threshold would still let a session grow to hundreds of thousands of tokens. `CLAUDE_CODE_AUTO_COMPACT_WINDOW=250000` compacts at a fixed 250k tokens on any model. That leaves room for large repositories while keeping late-session turns far cheaper than letting a 1M-window session grow toward its limit. On 200k-window models the model's own limit applies first. `BASH_MAX_OUTPUT_LENGTH` and `MAX_MCP_OUTPUT_TOKENS` limit how much a single command or MCP result can return.
 - **Usage-optimized subagents** (fourth scope only). All are read-only and return summaries, never raw output. Their descriptions tell Claude to delegate only when that saves main-context tokens, not for a lookup that takes a few tool calls.
@@ -134,8 +135,8 @@ The harness follows progressive disclosure:
 
 | Group | Skills |
 |---|---|
-| Core engineering | `implement`, `diagnosing-bugs`, `tdd`, `code-review`, `karpathy-guidelines` |
-| Security and backend | `security-review`, `postgres-patterns` |
+| Core engineering | `implement`, `diagnosing-bugs`, `tdd`, `code-review` (installed as `diff-review` on Claude Code, which bundles its own `/code-review`), `karpathy-guidelines` |
+| Security and backend | `security-audit`, `postgres-patterns` |
 | Frontend and growth | `design`, `seo` |
 | Planning and architecture | `project-startup`, `to-spec`, `to-tickets`, `grill-with-docs`, `codebase-design`, `improve-codebase-architecture` |
 | Delivery and communication | `git`, `handoff`, `caveman` |
@@ -234,11 +235,10 @@ Durable project instructions belong in applicable `AGENTS.md` files. `.codex/ins
 ## Repository layout
 
 ```text
-skills/            shared skill packages (one source for both platforms)
 memory/            shared memory vault template
 context/           shared deterministic context compiler
-claude/            Claude Code: settings.json, hooks/, agents/ (usage-optimized subagents)
-codex/             Codex: config.toml, hooks.json, hooks/
+claude/            Claude Code: skills/, settings.json, hooks/, agents/ (usage-optimized subagents)
+codex/             Codex: skills/ (with agents/openai.yaml), config.toml, hooks.json, hooks/
   orchestration/   Codex full orchestration: config.toml, agents/, skills/orchestrate/
 commerce/          Commerce Stack overlays
   claude/          mcp.json, agents/
